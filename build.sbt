@@ -26,6 +26,9 @@ lazy val core = (project in file("core"))
   .settings(
     name := "sarden-core",
     libraryDependencies ++= Seq(
+      "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
+      "org.scalatest" %% "scalatest" % Versions.scalaTest % Test,
+      "org.scalatest" %% "scalatest-flatspec" % Versions.scalaTest % Test,
     ),
   )
 
@@ -43,9 +46,9 @@ lazy val web = (project in file("web"))
   .settings(
     name := "sarden-web",
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-core" % "1.11.8",
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % "1.11.8",
-      "com.softwaremill.ox" %% "core" % "0.5.1"
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % Versions.tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % Versions.tapir,
+      "com.softwaremill.ox" %% "core" % Versions.ox,
     ),
   ).dependsOn(core)
 

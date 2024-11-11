@@ -18,31 +18,35 @@ lazy val baseSettings = Seq(
     "-Yexplicit-nulls",
     // TODO: Werror on CI
     // TODO: Check some real world projects for more lint flags
-  )
+  ),
 )
 
 lazy val core = (project in file("core"))
-  .settings(baseSettings*)
+  .settings(baseSettings *)
   .settings(
     name := "sarden-core",
     libraryDependencies ++= Seq(
+      "com.github.f4b6a3" % "ulid-creator" % Versions.ulid,
+      "com.lihaoyi" %% "upickle" % Versions.upickle,
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
+      "org.flywaydb" % "flyway-core" % Versions.flyway,
+      "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
       "org.scalatest" %% "scalatest" % Versions.scalaTest % Test,
       "org.scalatest" %% "scalatest-flatspec" % Versions.scalaTest % Test,
     ),
   )
 
 lazy val cli = (project in file("cli"))
-  .settings(baseSettings*)
+  .settings(baseSettings *)
   .settings(
     name := "sarden-cli",
     libraryDependencies ++= Seq(
-
     ),
-  ).dependsOn(core)
+  )
+  .dependsOn(core)
 
 lazy val web = (project in file("web"))
-  .settings(baseSettings*)
+  .settings(baseSettings *)
   .settings(
     name := "sarden-web",
     libraryDependencies ++= Seq(
@@ -50,7 +54,8 @@ lazy val web = (project in file("web"))
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % Versions.tapir,
       "com.softwaremill.ox" %% "core" % Versions.ox,
     ),
-  ).dependsOn(core)
+  )
+  .dependsOn(core)
 
 lazy val root = (project in file("."))
   .aggregate(core, cli, web)

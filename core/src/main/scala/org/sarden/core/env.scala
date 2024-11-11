@@ -1,7 +1,7 @@
 package org.sarden.core
 
+import izumi.reflect.Tag
 import izumi.reflect.macrortti.LightTypeTag
-import izumi.reflect.{*, given}
 
 trait Env[+R]:
   def get[A: Tag](using Contains[R, A]): A
@@ -14,14 +14,14 @@ trait LowPriorityContains:
 
 object Contains extends LowPriorityContains:
   given containsRec[A, R, R0](using
-      contains: Contains[R, A]
+      contains: Contains[R, A],
   ): Contains[R0 & R, A] =
     new Contains[R0 & R, A] {}
 
 case class EnvBuilder[+R](map: Map[LightTypeTag, Any]):
   def add[A](instance: A)(using tag: Tag[A]): EnvBuilder[A & R] =
     EnvBuilder(
-      map + (tag.tag -> instance)
+      map + (tag.tag -> instance),
     )
 
   def build: Env[R] =

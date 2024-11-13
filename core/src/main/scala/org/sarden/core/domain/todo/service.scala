@@ -1,17 +1,19 @@
 package org.sarden.core.domain.todo
 
+import org.sarden.core.domain.todo.internal.TodoRepo
+
 trait TodoService:
   def deliverPendingNotifications(): Unit
-  def createTodo(todo: CreateTodo): TodoId
-  def listTodos(): Vector[Todo]
+  def createTodo(todo: CreateTodo): Todo
+  def getActiveTodos(): Vector[Todo]
 
-class LiveTodoService() extends TodoService:
+class LiveTodoService(repo: TodoRepo) extends TodoService:
 
   override def deliverPendingNotifications(): Unit =
     ???
 
-  override def createTodo(todo: CreateTodo): TodoId =
-    ???
+  override def createTodo(todo: CreateTodo): Todo =
+    repo.createTodo(todo)
 
-  override def listTodos(): Vector[Todo] =
-    ???
+  override def getActiveTodos(): Vector[Todo] =
+    repo.getActiveTodos()

@@ -10,7 +10,17 @@ import upickle.default.{ReadWriter, readwriter}
 
 opaque type TodoId = Ulid
 
+object TodoId:
+  inline def apply(raw: Ulid): TodoId = raw
+
+extension (id: TodoId) def unwrap: Ulid = id
+
 opaque type TodoName = String
+
+object TodoName:
+  inline def apply(raw: String): TodoName = raw
+
+extension (name: TodoName) def unwrap: String = name
 
 case class Todo(
     id: TodoId,
@@ -23,6 +33,7 @@ case class Todo(
 case class CreateTodo(
     name: TodoName,
     schedule: Schedule,
+    notifyBefore: FiniteDuration,
 )
 
 given ReadWriter[LocalTime] = readwriter[ujson.Value].bimap[LocalTime](

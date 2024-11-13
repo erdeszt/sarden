@@ -4,6 +4,7 @@ object Versions {
   val ox = "0.5.1"
   val scalaTest = "3.2.19"
   val sqlite = "3.47.0.0"
+  val sql2o = "1.8.0"
   val tapir = "1.11.8"
   val ulid = "5.2.3"
   val upickle = "4.0.2"

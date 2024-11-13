@@ -2,3 +2,5 @@
 .idea
 .metals
 target
+
+*.db

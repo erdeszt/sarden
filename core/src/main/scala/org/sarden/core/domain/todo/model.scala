@@ -13,12 +13,22 @@ opaque type TodoId = Ulid
 object TodoId:
   inline def apply(raw: Ulid): TodoId = raw
 
+  given ReadWriter[TodoId] =
+    upickle.default
+      .readwriter[String]
+      .bimap(value => value.toString, json => Ulid.from(json))
+
 extension (id: TodoId) def unwrap: Ulid = id
 
 opaque type TodoName = String
 
 object TodoName:
   inline def apply(raw: String): TodoName = raw
+
+  given ReadWriter[TodoName] =
+    upickle.default
+      .readwriter[String]
+      .bimap(value => value, json => json)
 
 extension (name: TodoName) def unwrap: String = name
 
@@ -34,10 +44,14 @@ case class CreateTodo(
     name: TodoName,
     schedule: Schedule,
     notifyBefore: FiniteDuration,
-)
+) derives ReadWriter
 
 given ReadWriter[LocalTime] = readwriter[ujson.Value].bimap[LocalTime](
-  value => ujson.Obj(("hour", value.getHour), ("minute", value.getMinute)),
+  value =>
+    ujson.Obj(
+      ("hour", ujson.Num(value.getHour.toDouble)),
+      ("minute", ujson.Num(value.getMinute.toDouble)),
+    ),
   json => LocalTime.of(json("hour").num.toInt, json("minute").num.toInt),
 )
 
@@ -72,8 +86,8 @@ given ReadWriter[FiniteDuration] =
   readwriter[ujson.Value].bimap[FiniteDuration](
     value =>
       ujson.Obj(
-        ("length", value.length),
-        ("unit", TimeUnitPickle.write(value.unit)),
+        ("length", ujson.Num(value.length.toDouble)),
+        ("unit", ujson.Str(TimeUnitPickle.write(value.unit))),
       ),
     json =>
       TimeUnitPickle.read(json("unit").str) match

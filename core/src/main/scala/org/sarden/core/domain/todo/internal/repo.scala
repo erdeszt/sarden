@@ -1,5 +1,6 @@
 package org.sarden.core.domain.todo.internal
 
+import java.sql.DriverManager
 import java.time.{Instant, OffsetDateTime}
 
 import scala.concurrent.duration.FiniteDuration
@@ -7,7 +8,7 @@ import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
 import com.github.f4b6a3.ulid.Ulid
-import org.sql2o.Sql2o
+import com.lucidchart.relate.*
 
 import org.sarden.core.domain.todo.*
 import org.sarden.core.{Clock, IdGenerator}
@@ -22,45 +23,48 @@ private[internal] case class TodoDTO(
 )
 
 // TODO: Transaction in types
+// TODO: Better handling of connections
+// TODO: Replace `relate` with `scalikeJdbc`
 private[todo] trait TodoRepo:
-  def getActiveTodos(): Vector[Todo]
+  def getActiveTodos(): List[Todo]
   def createTodo(todo: CreateTodo): Todo
   def updateLastRun(id: TodoId, lastRun: OffsetDateTime): Unit
 
-class LiveTodoRepo(sql2o: Sql2o, clock: Clock, idGenerator: IdGenerator)
+class LiveTodoRepo(dbUrl: String, clock: Clock, idGenerator: IdGenerator)
     extends TodoRepo:
-  override def getActiveTodos(): Vector[Todo] =
-    Using(sql2o.open())(
-      _.createQuery("SELECT * FROM todo").executeAndFetch(classOf[TodoDTO]),
-    ).get.asScala.map { dto =>
+  given RowParser[Todo] = new RowParser[Todo] {
+    def parse(row: SqlRow): Todo = {
       Todo(
-        TodoId(Ulid.from(dto.id)),
-        TodoName(dto.name),
-        upickle.default.read[Schedule](dto.schedule),
-        upickle.default.read[FiniteDuration](dto.notifyBefore),
-        dto.lastRun.map(lastRun =>
-          OffsetDateTime.from(Instant.ofEpochSecond(lastRun)),
-        ),
+        TodoId(Ulid.from(row.string("id"))),
+        TodoName(row.string("name")),
+        upickle.default.read[Schedule](row.string("schedule")),
+        upickle.default.read[FiniteDuration](row.string("notify_before")),
+        row.longOption("last_run").map { lastRun =>
+          OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
+        },
       )
-    }.toVector
+    }
+  }
+  override def getActiveTodos(): List[Todo] =
+    Using(DriverManager.getConnection(dbUrl)) { implicit connection =>
+      sql"SELECT * FROM todo".asList[Todo]()
+    }.get
 
   override def createTodo(todo: CreateTodo): Todo =
     val id = idGenerator.next()
     val now = clock.currentDateTime()
 
-    Using(sql2o.open())(
-      _.createQuery(
-        """INSERT INTO todo
-        |(id, name, schedule, notify_before, last_run, created_at)
-        |VALUES
-        |(:id, :name, :schedule, :notify_before, NULL, :created_at)""".stripMargin,
-      ).addParameter("id", id.toString)
-        .addParameter("name", todo.name)
-        .addParameter("schedule", upickle.default.write(todo.schedule))
-        .addParameter("notify_before", upickle.default.write(todo.notifyBefore))
-        .addParameter("created_at", now.toInstant.getEpochSecond)
-        .executeUpdate(),
-    ).get
+    Using(DriverManager.getConnection(dbUrl)) { implicit connection =>
+      sql"""INSERT INTO todo
+           (id, name, schedule, notify_before, last_run, created_at)
+           VALUES
+           ( ${id.toString}
+           , ${todo.name.unwrap}
+           , ${upickle.default.write(todo.schedule)}
+           , ${upickle.default.write(todo.notifyBefore)}
+           , NULL
+           , ${now.toInstant.getEpochSecond})""".execute()
+    }.get
 
     Todo(
       TodoId(id),

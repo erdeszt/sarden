@@ -31,7 +31,7 @@ lazy val core = (project in file("core"))
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "org.flywaydb" % "flyway-core" % Versions.flyway,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
-      "org.sql2o" % "sql2o" % Versions.sql2o,
+      "com.lucidchart" %% "relate" % Versions.relate,
       "org.scalatest" %% "scalatest" % Versions.scalaTest % Test,
       "org.scalatest" %% "scalatest-flatspec" % Versions.scalaTest % Test,
     ),
@@ -51,7 +51,10 @@ lazy val web = (project in file("web"))
   .settings(
     name := "sarden-web",
     libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-classic" % Versions.logback,
+      "com.lihaoyi" %% "scalatags" % Versions.scalaTags,
       "com.softwaremill.sttp.tapir" %% "tapir-core" % Versions.tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-upickle" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % Versions.tapir,
       "com.softwaremill.ox" %% "core" % Versions.ox,
     ),

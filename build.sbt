@@ -31,7 +31,7 @@ lazy val core = (project in file("core"))
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "org.flywaydb" % "flyway-core" % Versions.flyway,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
-      "com.lucidchart" %% "relate" % Versions.relate,
+      "org.scalikejdbc" %% "scalikejdbc" % Versions.scalikeJdbc,
       "org.scalatest" %% "scalatest" % Versions.scalaTest % Test,
       "org.scalatest" %% "scalatest-flatspec" % Versions.scalaTest % Test,
     ),

@@ -1,6 +1,6 @@
 package org.sarden.core.domain.todo
 
-import java.time.{DayOfWeek, LocalTime, OffsetDateTime}
+import java.time.{DayOfWeek, Instant, LocalTime, OffsetDateTime}
 import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.{FiniteDuration, TimeUnit}
@@ -38,13 +38,18 @@ case class Todo(
     schedule: Schedule,
     notifyBefore: FiniteDuration,
     lastRun: Option[OffsetDateTime],
-)
+) derives ReadWriter
 
 case class CreateTodo(
     name: TodoName,
     schedule: Schedule,
     notifyBefore: FiniteDuration,
 ) derives ReadWriter
+
+given ReadWriter[OffsetDateTime] = readwriter[Long].bimap(
+  value => value.toInstant.getEpochSecond,
+  json => OffsetDateTime.from(Instant.ofEpochSecond(json)),
+)
 
 given ReadWriter[LocalTime] = readwriter[ujson.Value].bimap[LocalTime](
   value =>

@@ -1,11 +1,14 @@
 package org.sarden.web
 
+import java.nio.charset.StandardCharsets
 import java.time.{LocalTime, ZoneId}
 import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
 
-import scalikejdbc.{AutoSession, ConnectionPool, DBSession}
+import scalatags.Text
+import scalatags.Text.all.*
+import scalikejdbc.ConnectionPool
 import sttp.tapir.*
 import sttp.tapir.json.upickle.*
 import sttp.tapir.server.netty.sync.NettySyncServer
@@ -14,15 +17,31 @@ import org.sarden.core.*
 import org.sarden.core.domain.todo.*
 import org.sarden.core.domain.todo.internal.LiveTodoRepo
 
-// TODO: Html + json output
+val demoHtml: Text.TypedTag[String] = html(body(h1("Hello")))
+
+def htmlRendererCodec[T: Schema](
+    renderer: T => Text.TypedTag[String],
+): Codec[String, T, CodecFormat.TextHtml] =
+  Codec.anyString(CodecFormat.TextHtml())(_ => ???)(value =>
+    renderer(value).render,
+  )
+
+def htmlRenderer[T: Schema](
+    renderer: T => Text.TypedTag[String],
+): EndpointIO.Body[String, T] =
+  EndpointIO.Body(
+    RawBodyType.StringBody(StandardCharsets.UTF_8),
+    htmlRendererCodec(renderer),
+    EndpointIO.Info.empty,
+  )
+
 val todosEndpoint = endpoint.get
   .in("todos")
   .out(
-    jsonBody[List[Todo]],
-//    oneOfBody(
-//      jsonBody[List[Todo]],
-//      htmlRenderer[List[Todo]],
-//    ),
+    oneOfBody(
+      jsonBody[List[Todo]],
+      htmlRenderer[List[Todo]](_ => demoHtml),
+    ),
   )
 
 given Schema[Schedule] = Schema.derived
@@ -43,7 +62,6 @@ object Main:
     Class.forName("org.sqlite.JDBC")
     val dbUrl = "jdbc:sqlite:dev.db"
     ConnectionPool.singleton(dbUrl, "", "")
-    given session: DBSession = AutoSession
     val migrator = LiveMigrator(dbUrl)
     val idGenerator = LiveIdGenerator()
     val clock = LiveClock(ZoneId.of("UTC"))

@@ -3,7 +3,7 @@ package org.sarden.core.domain.todo
 import java.time.{DayOfWeek, Instant, LocalTime, OffsetDateTime}
 import java.util.concurrent.TimeUnit
 
-import scala.concurrent.duration.{FiniteDuration, TimeUnit}
+import scala.concurrent.duration.FiniteDuration
 
 import com.github.f4b6a3.ulid.Ulid
 import upickle.default.{ReadWriter, readwriter}

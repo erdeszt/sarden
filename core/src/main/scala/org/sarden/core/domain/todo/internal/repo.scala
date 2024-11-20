@@ -30,30 +30,32 @@ private[todo] trait TodoRepo:
   def createTodo(todo: CreateTodo): Todo
   def updateLastRun(id: TodoId, lastRun: OffsetDateTime): Unit
 
-class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator)(using DBSession)
-    extends TodoRepo:
+class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator) extends TodoRepo:
 
   override def getActiveTodos(): List[Todo] =
-    sql"SELECT * FROM todo"
-      .map { row =>
-        Todo(
-          TodoId(Ulid.from(row.string("id"))),
-          TodoName(row.string("name")),
-          upickle.default.read[Schedule](row.string("schedule")),
-          upickle.default.read[FiniteDuration](row.string("notify_before")),
-          row.longOpt("last_run").map { lastRun =>
-            OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
-          },
-        )
-      }
-      .list
-      .apply()
+    DB.autoCommit { implicit session =>
+      sql"SELECT * FROM todo"
+        .map { row =>
+          Todo(
+            TodoId(Ulid.from(row.string("id"))),
+            TodoName(row.string("name")),
+            upickle.default.read[Schedule](row.string("schedule")),
+            upickle.default.read[FiniteDuration](row.string("notify_before")),
+            row.longOpt("last_run").map { lastRun =>
+              OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
+            },
+          )
+        }
+        .list
+        .apply()
+    }
 
   override def createTodo(todo: CreateTodo): Todo =
     val id = idGenerator.next()
     val now = clock.currentDateTime()
 
-    sql"""INSERT INTO todo
+    DB.autoCommit { implicit session =>
+      sql"""INSERT INTO todo
            (id, name, schedule, notify_before, last_run, created_at)
            VALUES
            ( ${id.toString}
@@ -62,6 +64,7 @@ class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator)(using DBSession)
            , ${upickle.default.write(todo.notifyBefore)}
            , NULL
            , ${now.toInstant.getEpochSecond})""".update.apply()
+    }
 
     Todo(
       TodoId(id),

@@ -2,7 +2,6 @@ package org.sarden.web
 
 import java.nio.charset.StandardCharsets
 import java.time.{LocalTime, ZoneId}
-import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.*
 import scala.io.Source
@@ -29,7 +28,7 @@ def htmlViewCodec[T: Schema](
     throw new Exception("HTML input body is not supported"),
   )(value => renderer(value).render)
 
-def htmlRenderer[T: Schema](
+def htmlView[T: Schema](
     renderer: T => Text.TypedTag[String],
 ): EndpointIO.Body[String, T] =
   EndpointIO.Body(
@@ -43,7 +42,7 @@ val todosEndpoint = endpoint.get
   .out(
     oneOfBody(
       jsonBody[List[Todo]],
-      htmlRenderer[List[Todo]](views.todoList),
+      htmlView[List[Todo]](views.todoList),
     ),
   )
 
@@ -81,18 +80,8 @@ object Main:
     val todoRepo = LiveTodoRepo(clock, idGenerator)
     val todoService = LiveTodoService(todoRepo)
 
-    val x = CreateTodo(
-      TodoName("test"),
-      Schedule.EverySecondFridayOfTheMonth(LocalTime.of(15, 0)),
-      FiniteDuration(24, TimeUnit.HOURS),
-    )
-
-    println(s"\n\n${upickle.default.write(x)}\n")
-
     migrator.migrate()
 
-    // TODO: Manage server lifetime/resource with ox
-    // See: https://github.com/softwaremill/tapir/blob/master/examples/src/main/scala/sttp/tapir/examples/helloWorldNettySyncServer.scala#L31
     val server = NettySyncServer()
       .port(8080)
       .addEndpoint(

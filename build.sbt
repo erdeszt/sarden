@@ -37,15 +37,6 @@ lazy val core = (project in file("core"))
     ),
   )
 
-lazy val cli = (project in file("cli"))
-  .settings(baseSettings *)
-  .settings(
-    name := "sarden-cli",
-    libraryDependencies ++= Seq(
-    ),
-  )
-  .dependsOn(core)
-
 lazy val web = (project in file("web"))
   .settings(baseSettings *)
   .settings(
@@ -62,7 +53,7 @@ lazy val web = (project in file("web"))
   .dependsOn(core)
 
 lazy val root = (project in file("."))
-  .aggregate(core, cli, web)
+  .aggregate(core, web)
   .settings(
     name := "sarden",
   )

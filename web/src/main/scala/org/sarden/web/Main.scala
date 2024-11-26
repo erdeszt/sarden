@@ -8,6 +8,7 @@ import scala.io.Source
 import scala.language.postfixOps
 import scala.util.Using
 
+import com.github.f4b6a3.ulid.Ulid
 import ox.*
 import scalatags.Text
 import scalatags.Text.all.*
@@ -58,6 +59,11 @@ val createTodoEndpoint = endpoint.post
   .in(jsonBody[CreateTodo])
   .out(jsonBody[Todo])
 
+// TODO: Ulid id type
+val deleteTodoEndpoint = endpoint.delete
+  .in("todos" / path[String]("id"))
+  .out(htmlView[Unit](_ => scalatags.Text.all.div()))
+
 val cssAssetsEndpoint = endpoint.get
   .in("assets" / "css" / path[String]("name"))
   .out(sttp.tapir.header(Header.contentType(MediaType.TextCss)))
@@ -90,6 +96,11 @@ object Main:
       .addEndpoint(
         createTodoEndpoint.handleSuccess(createTodo =>
           todoService.createTodo(createTodo),
+        ),
+      )
+      .addEndpoint(
+        deleteTodoEndpoint.handleSuccess(id =>
+          todoService.deleteTodo(TodoId(Ulid.from(id))),
         ),
       )
       .addEndpoint(

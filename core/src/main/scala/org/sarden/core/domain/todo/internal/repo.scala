@@ -29,6 +29,7 @@ private[todo] trait TodoRepo:
   def getActiveTodos(): List[Todo]
   def createTodo(todo: CreateTodo): Todo
   def updateLastRun(id: TodoId, lastRun: OffsetDateTime): Unit
+  def deleteTodo(id: TodoId): Unit
 
 class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator) extends TodoRepo:
 
@@ -58,7 +59,7 @@ class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator) extends TodoRepo:
       sql"""INSERT INTO todo
            (id, name, schedule, notify_before, last_run, created_at)
            VALUES
-           ( ${id.toString}
+           ( ${id}
            , ${todo.name.unwrap}
            , ${upickle.default.write(todo.schedule)}
            , ${upickle.default.write(todo.notifyBefore)}
@@ -76,3 +77,9 @@ class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator) extends TodoRepo:
 
   override def updateLastRun(id: TodoId, lastRun: OffsetDateTime): Unit =
     ???
+
+  override def deleteTodo(id: TodoId): Unit =
+    DB.autoCommit { implicit session =>
+      sql"DELETE FROM todo WHERE id = ${id.unwrap}".update.apply()
+    }
+    ()

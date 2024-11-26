@@ -6,6 +6,7 @@ trait TodoService:
   def deliverPendingNotifications(): Unit
   def createTodo(todo: CreateTodo): Todo
   def getActiveTodos(): List[Todo]
+  def deleteTodo(id: TodoId): Unit
 
 class LiveTodoService(repo: TodoRepo) extends TodoService:
 
@@ -17,3 +18,6 @@ class LiveTodoService(repo: TodoRepo) extends TodoService:
 
   override def getActiveTodos(): List[Todo] =
     repo.getActiveTodos()
+
+  override def deleteTodo(id: TodoId): Unit =
+    repo.deleteTodo(id)

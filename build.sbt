@@ -16,6 +16,7 @@ lazy val baseSettings = Seq(
     "-Wvalue-discard",
     "-Wsafe-init",
     "-Yexplicit-nulls",
+    "-Xkind-projector:underscores",
     // TODO: Werror on CI
     // TODO: Check some real world projects for more lint flags
   ),
@@ -30,6 +31,7 @@ lazy val core = (project in file("core"))
       "com.lihaoyi" %% "upickle" % Versions.upickle,
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "org.flywaydb" % "flyway-core" % Versions.flyway,
+      "org.opensearch.client" % "opensearch-java" % Versions.openSearch,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
       "org.scalikejdbc" %% "scalikejdbc" % Versions.scalikeJdbc,
       "org.scalatest" %% "scalatest" % Versions.scalaTest % Test,

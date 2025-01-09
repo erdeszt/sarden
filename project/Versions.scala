@@ -1,6 +1,6 @@
 object Versions {
   val flyway = "10.21.0"
-  val openSearch = "2.18.0"
+  val openSearch = "2.17.0"
   val izumiReflect = "2.3.10"
   val logback = "1.5.12"
   val ox = "0.5.1"

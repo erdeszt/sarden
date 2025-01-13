@@ -17,8 +17,6 @@ lazy val baseSettings = Seq(
     "-Wsafe-init",
     "-Yexplicit-nulls",
     "-Xkind-projector:underscores",
-    // TODO: Werror on CI
-    // TODO: Check some real world projects for more lint flags
   ),
 )
 

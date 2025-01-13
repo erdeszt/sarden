@@ -6,7 +6,6 @@ import org.sqlite.SQLiteDataSource
 trait Migrator:
   def migrate(): Unit
 
-// TODO: Use DataSource instead of String
 class LiveMigrator(dbUrl: String) extends Migrator:
   override def migrate(): Unit =
     SQLiteDataSource()

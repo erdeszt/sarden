@@ -22,9 +22,6 @@ private[internal] case class TodoDTO(
     createdAt: Long,
 )
 
-// TODO: Transaction in types
-// TODO: Better handling of connections
-// TODO: Replace `relate` with `scalikeJdbc`,
 private[todo] trait TodoRepo:
   def getActiveTodos(): List[Todo]
   def createTodo(todo: CreateTodo): Todo

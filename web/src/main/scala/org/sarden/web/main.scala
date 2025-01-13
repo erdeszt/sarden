@@ -50,7 +50,6 @@ val todosEndpoint = endpoint.get
     ),
   )
 
-// TODO: Fix schemas for newtypes and automate derivation
 given Schema[Schedule] = Schema.derived
 given Schema[FiniteDuration] = Schema.anyObject
 given Schema[TodoId] = Schema.string
@@ -83,7 +82,6 @@ val getWeatherMeasurementsEndpoint = endpoint.get
   .in(query[Option[SensorId]]("sensor_id"))
   .out(jsonBody[List[WeatherMeasurement]])
 
-// TODO: Ulid id type
 val deleteTodoEndpoint = endpoint.delete
   .in("todos" / path[String]("id"))
   .out(htmlView[Unit](_ => scalatags.Text.all.div()))
@@ -98,7 +96,6 @@ val jsAssetsEndpoint = endpoint.get
   .out(sttp.tapir.header(Header.contentType(MediaType.TextJavascript)))
   .out(stringBody(StandardCharsets.UTF_8))
 
-// TODO: Load app config
 object Main:
   def main(args: Array[String]): Unit =
     Class.forName("org.sqlite.JDBC")

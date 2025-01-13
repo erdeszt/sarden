@@ -33,7 +33,6 @@ class LiveWeatherRepo extends WeatherRepo:
 
     ()
 
-  // TODO: Handle filters
   override def getMeasurements(
       filters: GetMeasurementsFilters,
   ): List[WeatherMeasurement] =

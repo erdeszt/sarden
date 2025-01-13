@@ -12,7 +12,6 @@ case class WeatherMeasurement(
     source: SensorId,
 ) derives ReadWriter
 
-// TODO: Use zio newtypes
 opaque type Temperature = Double
 
 object Temperature:

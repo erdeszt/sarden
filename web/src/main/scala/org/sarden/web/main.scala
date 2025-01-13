@@ -1,7 +1,7 @@
 package org.sarden.web
 
 import java.nio.charset.StandardCharsets
-import java.time.{LocalTime, ZoneId}
+import java.time.{Instant, LocalTime, ZoneId}
 
 import scala.concurrent.duration.*
 import scala.io.Source
@@ -17,10 +17,13 @@ import sttp.model.{Header, MediaType}
 import sttp.tapir.*
 import sttp.tapir.json.upickle.*
 import sttp.tapir.server.netty.sync.NettySyncServer
+import upickle.default.ReadWriter
 
 import org.sarden.core.*
 import org.sarden.core.domain.todo.*
 import org.sarden.core.domain.todo.internal.LiveTodoRepo
+import org.sarden.core.domain.weather.*
+import org.sarden.core.domain.weather.internal.LiveWeatherRepo
 
 def htmlViewCodec[T: Schema](
     renderer: T => Text.TypedTag[String],
@@ -47,17 +50,38 @@ val todosEndpoint = endpoint.get
     ),
   )
 
+// TODO: Fix schemas for newtypes and automate derivation
 given Schema[Schedule] = Schema.derived
 given Schema[FiniteDuration] = Schema.anyObject
 given Schema[TodoId] = Schema.string
 given Schema[TodoName] = Schema.string
 given Schema[CreateTodo] = Schema.derived
 given Schema[Todo] = Schema.derived
+given Schema[Temperature] = Schema.anyObject
+given Schema[SensorId] = Schema.anyObject
+given Schema[WeatherMeasurement] = Schema.derived
+given Schema[EmptyResponse] = Schema.derived
+given Codec[String, SensorId, CodecFormat.TextPlain] =
+  Codec.string.map(Mapping.from(SensorId(_))(_.unwrap))
+
+case class EmptyResponse() derives ReadWriter
 
 val createTodoEndpoint = endpoint.post
   .in("todos")
   .in(jsonBody[CreateTodo])
   .out(jsonBody[Todo])
+
+val addWeatherMeasurementEndpoint = endpoint.post
+  .in("weather")
+  .in(jsonBody[Vector[WeatherMeasurement]])
+  .out(jsonBody[EmptyResponse])
+
+val getWeatherMeasurementsEndpoint = endpoint.get
+  .in("weather")
+  .in(query[Option[Instant]]("from"))
+  .in(query[Option[Instant]]("to"))
+  .in(query[Option[SensorId]]("sensor_id"))
+  .out(jsonBody[List[WeatherMeasurement]])
 
 // TODO: Ulid id type
 val deleteTodoEndpoint = endpoint.delete
@@ -85,6 +109,8 @@ object Main:
     val clock = LiveClock(ZoneId.of("UTC"))
     val todoRepo = LiveTodoRepo(clock, idGenerator)
     val todoService = LiveTodoService(todoRepo)
+    val weatherRepo = LiveWeatherRepo()
+    val weatherService = LiveWeatherService(weatherRepo)
 
     migrator.migrate()
 
@@ -115,6 +141,18 @@ object Main:
           Using(Source.fromURL(getClass.getResource(s"/assets/js/${name}")))(
             _.mkString(""),
           ).get
+        },
+      )
+      .addEndpoint(
+        addWeatherMeasurementEndpoint.handleSuccess { measurements =>
+          weatherService.addMeasurements(measurements)
+          EmptyResponse()
+        },
+      )
+      .addEndpoint(
+        getWeatherMeasurementsEndpoint.handleSuccess { (from, to, source) =>
+          weatherService
+            .getMeasurements(GetMeasurementsFilters(from, to, source))
         },
       )
 

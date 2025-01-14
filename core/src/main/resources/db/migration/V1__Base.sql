@@ -10,5 +10,5 @@ CREATE TABLE todo (
 CREATE TABLE weather_measurement (
   collected_at INTEGER NOT NULL,
   temperature DOUBLE NOT NULL,
-  source TEXT NOT NULL,
+  source TEXT NOT NULL
 );

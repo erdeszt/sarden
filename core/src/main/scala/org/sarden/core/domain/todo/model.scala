@@ -13,6 +13,8 @@ opaque type TodoId = Ulid
 object TodoId:
   inline def apply(raw: Ulid): TodoId = raw
 
+  given CanEqual[TodoId, TodoId] = CanEqual.derived
+
   given ReadWriter[TodoId] =
     upickle.default
       .readwriter[String]
@@ -24,6 +26,8 @@ opaque type TodoName = String
 
 object TodoName:
   inline def apply(raw: String): TodoName = raw
+
+  given CanEqual[TodoName, TodoName] = CanEqual.derived
 
   given ReadWriter[TodoName] =
     upickle.default
@@ -100,7 +104,7 @@ given ReadWriter[FiniteDuration] =
         case Right(unit) => FiniteDuration(json("length").num.toInt, unit),
   )
 
-enum Schedule derives ReadWriter:
+enum Schedule derives ReadWriter, CanEqual:
   case EverySecondFridayOfTheMonth(timeOfDay: LocalTime)
 
   private given CanEqual[DayOfWeek, DayOfWeek] =

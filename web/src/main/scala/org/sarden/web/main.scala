@@ -21,9 +21,7 @@ import upickle.default.ReadWriter
 
 import org.sarden.core.*
 import org.sarden.core.domain.todo.*
-import org.sarden.core.domain.todo.internal.LiveTodoRepo
 import org.sarden.core.domain.weather.*
-import org.sarden.core.domain.weather.internal.LiveWeatherRepo
 
 def htmlViewCodec[T: Schema](
     renderer: T => Text.TypedTag[String],
@@ -101,29 +99,27 @@ object Main:
     Class.forName("org.sqlite.JDBC")
     val dbUrl = "jdbc:sqlite:dev.db"
     ConnectionPool.singleton(dbUrl, "", "")
-    val migrator = LiveMigrator(dbUrl)
-    val idGenerator = LiveIdGenerator()
-    val clock = LiveClock(ZoneId.of("UTC"))
-    val todoRepo = LiveTodoRepo(clock, idGenerator)
-    val todoService = LiveTodoService(todoRepo)
-    val weatherRepo = LiveWeatherRepo()
-    val weatherService = LiveWeatherService(weatherRepo)
+    val coreConfig = CoreConfig(
+      ZoneId.of("UTC"),
+      dbUrl,
+    )
+    val services = wireLive(coreConfig)
 
-    migrator.migrate()
+    services.migrator.migrate()
 
     val server = NettySyncServer()
       .port(8080)
       .addEndpoint(
-        todosEndpoint.handleSuccess(_ => todoService.getActiveTodos()),
+        todosEndpoint.handleSuccess(_ => services.todo.getActiveTodos()),
       )
       .addEndpoint(
         createTodoEndpoint.handleSuccess(createTodo =>
-          todoService.createTodo(createTodo),
+          services.todo.createTodo(createTodo),
         ),
       )
       .addEndpoint(
         deleteTodoEndpoint.handleSuccess(id =>
-          todoService.deleteTodo(TodoId(Ulid.from(id))),
+          services.todo.deleteTodo(TodoId(Ulid.from(id))),
         ),
       )
       .addEndpoint(
@@ -142,13 +138,13 @@ object Main:
       )
       .addEndpoint(
         addWeatherMeasurementEndpoint.handleSuccess { measurements =>
-          weatherService.addMeasurements(measurements)
+          services.weather.addMeasurements(measurements)
           EmptyResponse()
         },
       )
       .addEndpoint(
         getWeatherMeasurementsEndpoint.handleSuccess { (from, to, source) =>
-          weatherService
+          services.weather
             .getMeasurements(GetMeasurementsFilters(from, to, source))
         },
       )

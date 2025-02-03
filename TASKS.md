@@ -14,6 +14,11 @@
   * Tests
 
 ## Tech debt:
+* ZIO + Doobie(or zio sql)
+  * Setup proper connection pooling
+  * Setup proper logging
+  * Setup proper error handling
+    * Define domain errors vs system errors
 * Setup CI with Werror enabled
 * Check if LiveMigrator handles error correctly
 * Transactions in types

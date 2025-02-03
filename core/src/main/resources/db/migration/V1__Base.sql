@@ -12,3 +12,9 @@ CREATE TABLE weather_measurement (
   temperature DOUBLE NOT NULL,
   source TEXT NOT NULL
 );
+
+CREATE TABLE plant (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    created_at INTEGER NOT NULL
+)

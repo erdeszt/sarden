@@ -1,5 +1,6 @@
 package org.sarden.core
 
+import org.sarden.core.domain.plant.internal.LivePlantRepo
 import org.sarden.core.domain.plant.{LivePlantService, PlantService}
 import org.sarden.core.domain.todo.internal.LiveTodoRepo
 import org.sarden.core.domain.todo.{LiveTodoService, TodoService}
@@ -20,7 +21,8 @@ def wireLive(config: CoreConfig): CoreServices =
   val todoService = LiveTodoService(todoRepo)
   val weatherRepo = LiveWeatherRepo()
   val weatherService = LiveWeatherService(weatherRepo)
-  val plantService = LivePlantService()
+  val plantRepo = LivePlantRepo()
+  val plantService = LivePlantService(plantRepo)
   val migrator = LiveMigrator(config.dbUrl)
 
   CoreServices(

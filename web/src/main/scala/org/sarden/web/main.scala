@@ -20,6 +20,13 @@ import sttp.tapir.server.netty.sync.NettySyncServer
 import upickle.default.ReadWriter
 
 import org.sarden.core.*
+import org.sarden.core.domain.plant.{
+  Plant,
+  PlantDetails,
+  PlantId,
+  PlantName,
+  SearchPlantFilters,
+}
 import org.sarden.core.domain.todo.*
 import org.sarden.core.domain.weather.*
 
@@ -54,6 +61,10 @@ given Schema[TodoId] = Schema.string
 given Schema[TodoName] = Schema.string
 given Schema[CreateTodo] = Schema.derived
 given Schema[Todo] = Schema.derived
+given Schema[PlantId] = Schema.string
+given Schema[PlantName] = Schema.string
+given Schema[PlantDetails] = Schema.derived
+given Schema[Plant] = Schema.derived
 given Schema[Temperature] = Schema.anyObject
 given Schema[SensorId] = Schema.anyObject
 given Schema[WeatherMeasurement] = Schema.derived
@@ -83,6 +94,10 @@ val getWeatherMeasurementsEndpoint = endpoint.get
 val deleteTodoEndpoint = endpoint.delete
   .in("todos" / path[String]("id"))
   .out(htmlView[Unit](_ => scalatags.Text.all.div()))
+
+val viewPlantsEndpoint = endpoint.get
+  .in("plants")
+  .out(htmlView[Vector[Plant]](views.viewPlants))
 
 val cssAssetsEndpoint = endpoint.get
   .in("assets" / "css" / path[String]("name"))
@@ -121,6 +136,11 @@ object Main:
         deleteTodoEndpoint.handleSuccess(id =>
           services.todo.deleteTodo(TodoId(Ulid.from(id))),
         ),
+      )
+      .addEndpoint(
+        viewPlantsEndpoint.handleSuccess { (_: Unit) =>
+          services.plant.searchPlants(SearchPlantFilters(None))
+        },
       )
       .addEndpoint(
         cssAssetsEndpoint.handleSuccess { name =>

@@ -1,14 +1,16 @@
 package org.sarden.core.domain.plant
 
+import com.github.f4b6a3.ulid.Ulid
+
 opaque type PlantName = String
 
 object PlantName:
   def apply(raw: String): PlantName = raw
 
-opaque type PlantId = String
+opaque type PlantId = Ulid
 
 object PlantId:
-  def apply(raw: String): PlantId = raw
+  def apply(raw: Ulid): PlantId = raw
 
 case class PlantDetails(
 )
@@ -21,5 +23,4 @@ case class Plant(
 
 case class SearchPlantFilters(
     name: Option[PlantName],
-    details: PlantDetails,
 )

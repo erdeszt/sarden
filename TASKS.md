@@ -24,3 +24,4 @@
 * Load app config from env
 * Ulid type in tapir layer
 * Use host/user/pass instead of dbUrl for migrator
+* Use Vector instead of List

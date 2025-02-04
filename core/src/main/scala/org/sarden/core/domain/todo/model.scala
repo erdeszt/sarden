@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
 import com.github.f4b6a3.ulid.Ulid
+import doobie.{Get, Put, Read, Write}
 import upickle.default.{ReadWriter, readwriter}
 
 opaque type TodoId = Ulid
@@ -14,6 +15,8 @@ object TodoId:
   inline def apply(raw: Ulid): TodoId = raw
 
   given CanEqual[TodoId, TodoId] = CanEqual.derived
+  given get: Get[TodoId] = Get[String].map(raw => Ulid.from(raw))
+  given put: Put[TodoId] = Put[String].contramap(_.unwrap.toString)
 
   given ReadWriter[TodoId] =
     upickle.default
@@ -28,6 +31,8 @@ object TodoName:
   inline def apply(raw: String): TodoName = raw
 
   given CanEqual[TodoName, TodoName] = CanEqual.derived
+  given get: Get[TodoName] = Get[String].map(raw => raw)
+  given put: Put[TodoName] = Put[String].contramap(raw => raw)
 
   given ReadWriter[TodoName] =
     upickle.default
@@ -42,7 +47,15 @@ case class Todo(
     schedule: TodoSchedule,
     notifyBefore: FiniteDuration,
     lastRun: Option[OffsetDateTime],
-) derives ReadWriter
+) derives ReadWriter,
+      Read,
+      Write
+
+given getFiniteDuration: Get[FiniteDuration] = ???
+given putFiniteDuration: Put[FiniteDuration] = ???
+
+given getOffsetDateTime: Get[OffsetDateTime] = ???
+given putOffsetDateTime: Put[OffsetDateTime] = ???
 
 case class CreateTodo(
     name: TodoName,
@@ -122,3 +135,7 @@ enum TodoSchedule derives ReadWriter, CanEqual:
         lastRun.getMonthValue < now.getMonthValue &&
         timeOfDay.getHour <= now.getHour &&
         timeOfDay.getMinute <= now.getMinute
+
+object TodoSchedule:
+  given get: Get[TodoSchedule] = ???
+  given put: Put[TodoSchedule] = ???

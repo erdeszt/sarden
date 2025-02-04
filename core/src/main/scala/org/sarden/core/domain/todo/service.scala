@@ -26,10 +26,10 @@ class LiveTodoService(repo: TodoRepo, db: Database) extends TodoService:
     ???
 
   override def createTodo(todo: CreateTodo): UIO[Todo] =
-    repo.createTodo(todo)
+    db.transactionOrDie(repo.createTodo(todo))
 
   override def getActiveTodos(): UIO[Vector[Todo]] =
-    repo.getActiveTodos()
+    db.transactionOrDie(repo.getActiveTodos())
 
   override def deleteTodo(id: TodoId): UIO[Unit] =
-    repo.deleteTodo(id)
+    db.transactionOrDie(repo.deleteTodo(id))

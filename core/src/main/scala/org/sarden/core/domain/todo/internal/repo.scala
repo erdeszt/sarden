@@ -6,6 +6,9 @@ import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.*
 
 import com.github.f4b6a3.ulid.Ulid
+import doobie.implicits.given
+import io.github.gaelrenoux.tranzactio.*
+import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.IdGenerator
@@ -23,36 +26,19 @@ private[internal] case class TodoDTO(
 )
 
 private[todo] trait TodoRepo:
-  def getActiveTodos(): UIO[Vector[Todo]]
-  def createTodo(todo: CreateTodo): UIO[Todo]
-  def updateLastRun(id: TodoId, lastRun: OffsetDateTime): UIO[Unit]
-  def deleteTodo(id: TodoId): UIO[Unit]
+  def getActiveTodos(): URIO[Connection, Vector[Todo]]
+  def createTodo(todo: CreateTodo): URIO[Connection, Todo]
+  def updateLastRun(id: TodoId, lastRun: OffsetDateTime): URIO[Connection, Unit]
+  def deleteTodo(id: TodoId): URIO[Connection, Unit]
 
 class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
-  override def getActiveTodos(): UIO[Vector[Todo]] =
-    ZIO.attemptBlocking {
-      ???
-//      DB.autoCommit { implicit session =>
-//        sql"SELECT * FROM todo"
-//          .map { row =>
-//            Todo(
-//              TodoId(Ulid.from(row.string("id"))),
-//              TodoName(row.string("name")),
-//              upickle.default.read[TodoSchedule](row.string("schedule")),
-//              upickle.default.read[FiniteDuration](row.string("notify_before")),
-//              row.longOpt("last_run").map { lastRun =>
-//                OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
-//              },
-//            )
-//          }
-//          .list
-//          .apply()
-//          .toVector
-//      }
+  override def getActiveTodos(): URIO[Connection, Vector[Todo]] =
+    tzio {
+      sql"SELECT * FROM todo".query[Todo].to[Vector]
     }.orDie
 
-  override def createTodo(todo: CreateTodo): UIO[Todo] =
+  override def createTodo(todo: CreateTodo): URIO[Connection, Todo] =
     for
       id <- idGenerator.next()
       now <- zio.Clock.currentDateTime
@@ -78,16 +64,13 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
       None,
     )
 
-  override def updateLastRun(id: TodoId, lastRun: OffsetDateTime): UIO[Unit] =
+  override def updateLastRun(
+      id: TodoId,
+      lastRun: OffsetDateTime,
+  ): URIO[Connection, Unit] =
     ZIO.attempt(???).orDie
 
-  override def deleteTodo(id: TodoId): UIO[Unit] =
-    ZIO
-      .attemptBlocking {
-//        DB.autoCommit { implicit session =>
-//          sql"DELETE FROM todo WHERE id = ${id.unwrap}".update.apply()
-//        }
-        ???
-      }
-      .orDie
-      .unit
+  override def deleteTodo(id: TodoId): URIO[Connection, Unit] =
+    tzio {
+      sql"DELET FROM todo WHERE id = ${id}".update.run
+    }.orDie.unit

@@ -3,8 +3,6 @@ package org.sarden.web.endpoints
 import scala.concurrent.duration.FiniteDuration
 
 import com.github.f4b6a3.ulid.Ulid
-import sttp.capabilities.WebSockets
-import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.Schema
 import sttp.tapir.json.upickle.*
 import sttp.tapir.ztapir.*

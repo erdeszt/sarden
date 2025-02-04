@@ -8,7 +8,7 @@ import org.flywaydb.core.Flyway
 import zio.*
 import zio.test.*
 
-import org.sarden.core.{CoreConfig, CoreServices}
+import org.sarden.core.CoreConfig
 
 object LiveTodoServiceTest extends ZIOSpecDefault:
 

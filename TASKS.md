@@ -28,9 +28,10 @@
 * Check if LiveMigrator handles error correctly
 * Transactions in types
 * Better handling of connections/transactions
-* Switch to zio-newtypes instead of opaque types(better ergonomics)
+* Switch to neotype instead of opaque types(better ergonomics)
     * Fix newtype schemas
     * Autoderive more
+    * Fix unsafe mapping to ulid
 * Load app config from env
 * Ulid type in tapir layer
 * Use host/user/pass instead of dbUrl for migrator

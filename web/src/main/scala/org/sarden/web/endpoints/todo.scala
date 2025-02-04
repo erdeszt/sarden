@@ -11,7 +11,7 @@ import sttp.tapir.server.ServerEndpoint
 import org.sarden.core.domain.todo.*
 import org.sarden.web.*
 
-given Schema[Schedule] = Schema.derived
+given Schema[TodoSchedule] = Schema.derived
 given Schema[FiniteDuration] = Schema.anyObject
 given Schema[TodoId] = Schema.string
 given Schema[TodoName] = Schema.string

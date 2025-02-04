@@ -1,23 +1,25 @@
 package org.sarden.core.domain.todo
 
+import zio.*
+
 import org.sarden.core.domain.todo.internal.TodoRepo
 
 trait TodoService:
-  def deliverPendingNotifications(): Unit
-  def createTodo(todo: CreateTodo): Todo
-  def getActiveTodos(): List[Todo]
-  def deleteTodo(id: TodoId): Unit
+  def deliverPendingNotifications(): UIO[Unit]
+  def createTodo(todo: CreateTodo): UIO[Todo]
+  def getActiveTodos(): UIO[List[Todo]]
+  def deleteTodo(id: TodoId): UIO[Unit]
 
 class LiveTodoService(repo: TodoRepo) extends TodoService:
 
-  override def deliverPendingNotifications(): Unit =
+  override def deliverPendingNotifications(): UIO[Unit] =
     ???
 
-  override def createTodo(todo: CreateTodo): Todo =
+  override def createTodo(todo: CreateTodo): UIO[Todo] =
     repo.createTodo(todo)
 
-  override def getActiveTodos(): List[Todo] =
+  override def getActiveTodos(): UIO[List[Todo]] =
     repo.getActiveTodos()
 
-  override def deleteTodo(id: TodoId): Unit =
+  override def deleteTodo(id: TodoId): UIO[Unit] =
     repo.deleteTodo(id)

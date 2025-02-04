@@ -17,7 +17,7 @@ val viewPlantsEndpoint = endpoint.get
   .in("plants")
   .out(htmlView[Vector[Plant]](views.viewPlants))
 
-def plantEndpoitns(service: PlantService): List[ServerEndpoint[Any, Identity]] =
+def plantEndpoints(service: PlantService): List[ServerEndpoint[Any, Identity]] =
   List(
     viewPlantsEndpoint.handleSuccess { (_: Unit) =>
       service.searchPlants(SearchPlantFilters(None))

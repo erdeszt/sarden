@@ -28,12 +28,14 @@ lazy val core = (project in file("core"))
       "com.github.f4b6a3" % "ulid-creator" % Versions.ulid,
       "com.lihaoyi" %% "upickle" % Versions.upickle,
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
+      "dev.zio" %% "zio" % Versions.zio,
+      "dev.zio" %% "zio-json" % Versions.zioJson,
+      "dev.zio" %% "zio-test" % Versions.zio % Test,
+      "dev.zio" %% "zio-test-sbt" % Versions.zio % Test,
       "org.flywaydb" % "flyway-core" % Versions.flyway,
       "org.opensearch.client" % "opensearch-java" % Versions.openSearch,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
       "org.scalikejdbc" %% "scalikejdbc" % Versions.scalikeJdbc,
-      "org.scalatest" %% "scalatest" % Versions.scalaTest % Test,
-      "org.scalatest" %% "scalatest-flatspec" % Versions.scalaTest % Test,
     ),
   )
 

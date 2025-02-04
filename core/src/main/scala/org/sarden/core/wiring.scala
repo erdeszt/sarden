@@ -15,9 +15,8 @@ case class CoreServices(
 )
 
 def wireLive(config: CoreConfig): CoreServices =
-  val clock = LiveClock(config.zoneId)
   val idGenerator = LiveIdGenerator()
-  val todoRepo = LiveTodoRepo(clock, idGenerator)
+  val todoRepo = LiveTodoRepo(idGenerator)
   val todoService = LiveTodoService(todoRepo)
   val weatherRepo = LiveWeatherRepo()
   val weatherService = LiveWeatherService(weatherRepo)

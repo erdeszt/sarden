@@ -12,4 +12,6 @@ object Versions {
   val tapir = "1.11.9"
   val ulid = "5.2.3"
   val upickle = "3.3.1"
+  val zio = "2.1.14"
+  val zioJson = "0.7.14"
 }

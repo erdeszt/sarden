@@ -19,6 +19,8 @@
   * Setup proper logging
   * Setup proper error handling
     * Define domain errors vs system errors
+  * Setup base test for zio service tests
+  * Figure out `should not compile` in zio-test and remove scalatest
 * Setup CI with Werror enabled
 * Check if LiveMigrator handles error correctly
 * Transactions in types

@@ -29,7 +29,7 @@ object Main:
       .addEndpoint(endpoints.cssAssetsServerEndpoint)
       .addEndpoint(endpoints.jsAssetsServerEndpoint)
       .addEndpoints(endpoints.todoEndpoints(services.todo))
-      .addEndpoints(endpoints.plantEndpoitns(services.plant))
+      .addEndpoints(endpoints.plantEndpoints(services.plant))
       .addEndpoints(endpoints.weatherEndpoints(services.weather))
 
     supervised {

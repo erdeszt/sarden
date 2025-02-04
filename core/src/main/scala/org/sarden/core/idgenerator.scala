@@ -1,10 +1,11 @@
 package org.sarden.core
 
 import com.github.f4b6a3.ulid.{Ulid, UlidCreator}
+import zio.*
 
 trait IdGenerator:
-  def next(): Ulid
+  def next(): UIO[Ulid]
 
 class LiveIdGenerator extends IdGenerator:
-  override def next(): Ulid =
-    UlidCreator.getMonotonicUlid()
+  override def next(): UIO[Ulid] =
+    ZIO.attempt(UlidCreator.getMonotonicUlid()).orDie

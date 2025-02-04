@@ -39,14 +39,14 @@ extension (name: TodoName) def unwrap: String = name
 case class Todo(
     id: TodoId,
     name: TodoName,
-    schedule: Schedule,
+    schedule: TodoSchedule,
     notifyBefore: FiniteDuration,
     lastRun: Option[OffsetDateTime],
 ) derives ReadWriter
 
 case class CreateTodo(
     name: TodoName,
-    schedule: Schedule,
+    schedule: TodoSchedule,
     notifyBefore: FiniteDuration,
 ) derives ReadWriter
 
@@ -104,7 +104,7 @@ given ReadWriter[FiniteDuration] =
         case Right(unit) => FiniteDuration(json("length").num.toInt, unit),
   )
 
-enum Schedule derives ReadWriter, CanEqual:
+enum TodoSchedule derives ReadWriter, CanEqual:
   case EverySecondFridayOfTheMonth(timeOfDay: LocalTime)
 
   private given CanEqual[DayOfWeek, DayOfWeek] =

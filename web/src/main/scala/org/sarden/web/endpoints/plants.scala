@@ -1,8 +1,7 @@
 package org.sarden.web.endpoints
 
-import sttp.shared.Identity
-import sttp.tapir.*
-import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.Schema
+import sttp.tapir.ztapir.*
 
 import org.sarden.core.domain.plant.*
 import org.sarden.core.domain.plant.Plant
@@ -17,9 +16,9 @@ val viewPlantsEndpoint = endpoint.get
   .in("plants")
   .out(htmlView[Vector[Plant]](views.viewPlants))
 
-def plantEndpoints(service: PlantService): List[ServerEndpoint[Any, Identity]] =
+def plantEndpoints(service: PlantService): List[ZServerEndpoint[Any, Any]] =
   List(
-    viewPlantsEndpoint.handleSuccess { (_: Unit) =>
+    viewPlantsEndpoint.zServerLogic[Any] { (_: Unit) =>
       service.searchPlants(SearchPlantFilters(None))
     },
   )

@@ -4,40 +4,38 @@ import java.time.ZoneId
 
 import scala.language.postfixOps
 
-import ox.*
 import scalikejdbc.ConnectionPool
-import sttp.tapir.*
-import sttp.tapir.server.netty.sync.NettySyncServer
+import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import zio.*
+import zio.http.{Response as ZioHttpResponse, Routes, Server}
 
 import org.sarden.core.*
 
-object Main:
-  def main(args: Array[String]): Unit =
-    Class.forName("org.sqlite.JDBC")
+object Main extends ZIOAppDefault:
+
+  override def run: ZIO[Any & ZIOAppArgs & Scope, Any, Any] =
     val dbUrl = "jdbc:sqlite:dev.db"
-    ConnectionPool.singleton(dbUrl, "", "")
     val coreConfig = CoreConfig(
       ZoneId.of("UTC"),
       dbUrl,
     )
-    val services = wireLive(coreConfig)
-
-    services.migrator.migrate()
-
-    val server = NettySyncServer()
-      .port(8080)
-      .addEndpoint(endpoints.cssAssetsServerEndpoint)
-      .addEndpoint(endpoints.jsAssetsServerEndpoint)
-      .addEndpoints(endpoints.todoEndpoints(services.todo))
-      .addEndpoints(endpoints.plantEndpoints(services.plant))
-      .addEndpoints(endpoints.weatherEndpoints(services.weather))
-
-    supervised {
-      val serverBinding = useInScope(server.start())(_.stop())
-
-      println(
-        s"Server is running on: ${serverBinding.hostName}:${serverBinding.port}",
+    for
+      _ <- ZIO.attemptBlocking {
+        Class.forName("org.sqlite.JDBC")
+        ConnectionPool.singleton(dbUrl, "", "")
+      }
+      services = wireLive(coreConfig)
+      _ <- services.migrator.migrate()
+      routes: Routes[Any, ZioHttpResponse] = ZioHttpInterpreter().toHttp(
+        List(
+          endpoints.cssAssetsServerEndpoint,
+          endpoints.jsAssetsServerEndpoint,
+        ) ++ endpoints.todoEndpoints(services.todo) ++ endpoints
+          .weatherEndpoints(services.weather) ++ endpoints.plantEndpoints(
+          services.plant,
+        ),
       )
-
-      never
-    }
+      exitCode <- Server
+        .serve(routes)
+        .provide(ZLayer.succeed(Server.Config.default.port(8080)), Server.live)
+    yield exitCode

@@ -47,9 +47,10 @@ lazy val web = (project in file("web"))
       "ch.qos.logback" % "logback-classic" % Versions.logback,
       "com.lihaoyi" %% "scalatags" % Versions.scalaTags,
       "com.softwaremill.sttp.tapir" %% "tapir-core" % Versions.tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-zio" % Versions.tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-json-upickle" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % Versions.tapir,
-      "com.softwaremill.ox" %% "core" % Versions.ox,
     ),
   )
   .dependsOn(core)

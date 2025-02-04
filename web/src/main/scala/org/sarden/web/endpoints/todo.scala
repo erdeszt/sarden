@@ -3,10 +3,11 @@ package org.sarden.web.endpoints
 import scala.concurrent.duration.FiniteDuration
 
 import com.github.f4b6a3.ulid.Ulid
-import sttp.shared.Identity
-import sttp.tapir.*
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.Schema
 import sttp.tapir.json.upickle.*
-import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.ztapir.*
 
 import org.sarden.core.domain.todo.*
 import org.sarden.web.*
@@ -38,13 +39,13 @@ val deleteTodoEndpoint = endpoint.delete
 
 def todoEndpoints(
     service: TodoService,
-): List[ServerEndpoint[Any, Identity]] =
+): List[ZServerEndpoint[Any, ZioStreams & WebSockets]] =
   List(
-    todosEndpoint.handleSuccess(_ => service.getActiveTodos()),
-    createTodoEndpoint.handleSuccess(createTodo =>
+    todosEndpoint.zServerLogic(_ => service.getActiveTodos()),
+    createTodoEndpoint.zServerLogic(createTodo =>
       service.createTodo(createTodo),
     ),
-    deleteTodoEndpoint.handleSuccess(id =>
+    deleteTodoEndpoint.zServerLogic(id =>
       service.deleteTodo(TodoId(Ulid.from(id))),
     ),
   )

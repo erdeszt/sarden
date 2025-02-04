@@ -2,10 +2,11 @@ package org.sarden.web.endpoints
 
 import java.time.Instant
 
-import sttp.shared.Identity
-import sttp.tapir.*
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.json.upickle.*
-import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.ztapir.*
+import sttp.tapir.{Codec, CodecFormat, Mapping, Schema}
 import upickle.default.ReadWriter
 
 import org.sarden.core.domain.weather.*
@@ -34,13 +35,12 @@ val getWeatherMeasurementsEndpoint = endpoint.get
 
 def weatherEndpoints(
     service: WeatherService,
-): List[ServerEndpoint[Any, Identity]] =
+): List[ZServerEndpoint[Any, ZioStreams & WebSockets]] =
   List(
-    addWeatherMeasurementEndpoint.handleSuccess { measurements =>
-      service.addMeasurements(measurements)
-      EmptyResponse()
+    addWeatherMeasurementEndpoint.zServerLogic { measurements =>
+      service.addMeasurements(measurements).as(EmptyResponse())
     },
-    getWeatherMeasurementsEndpoint.handleSuccess { (from, to, source) =>
+    getWeatherMeasurementsEndpoint.zServerLogic { (from, to, source) =>
       service.getMeasurements(GetMeasurementsFilters(from, to, source))
     },
   )

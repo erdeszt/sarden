@@ -2,7 +2,6 @@ package org.sarden.core.domain.weather.internal
 
 import java.time.Instant
 
-import scalikejdbc.*
 import zio.*
 
 import org.sarden.core.domain.weather.*
@@ -20,21 +19,22 @@ class LiveWeatherRepo extends WeatherRepo:
   ): UIO[Unit] =
     ZIO
       .attemptBlocking {
-        DB.autoCommit { implicit session =>
-          sql"""INSERT INTO weather_measurement
-           (collected_at, temperature, sensor_id)
-           VALUES (?, ?, ?)"""
-            .batch(
-              measurements.map(measurement =>
-                (
-                  measurement.collectedAt.getEpochSecond,
-                  measurement.temperature,
-                  measurement.source.unwrap,
-                ),
-              ),
-            )
-            .apply()
-        }
+        ???
+//        DB.autoCommit { implicit session =>
+//          sql"""INSERT INTO weather_measurement
+//           (collected_at, temperature, sensor_id)
+//           VALUES (?, ?, ?)"""
+//            .batch(
+//              measurements.map(measurement =>
+//                (
+//                  measurement.collectedAt.getEpochSecond,
+//                  measurement.temperature,
+//                  measurement.source.unwrap,
+//                ),
+//              ),
+//            )
+//            .apply()
+//        }
       }
       .orDie
       .unit
@@ -43,17 +43,18 @@ class LiveWeatherRepo extends WeatherRepo:
       filters: GetMeasurementsFilters,
   ): UIO[Vector[WeatherMeasurement]] =
     ZIO.attemptBlocking {
-      DB.autoCommit { implicit session =>
-        sql"SELECT * FROM weather_measurement"
-          .map { row =>
-            WeatherMeasurement(
-              Instant.ofEpochSecond(row.long("collected_at")),
-              Temperature(row.double("temperature")),
-              SensorId(row.string("source")),
-            )
-          }
-          .list
-          .apply()
-          .toVector
-      }
+      ???
+//      DB.autoCommit { implicit session =>
+//        sql"SELECT * FROM weather_measurement"
+//          .map { row =>
+//            WeatherMeasurement(
+//              Instant.ofEpochSecond(row.long("collected_at")),
+//              Temperature(row.double("temperature")),
+//              SensorId(row.string("source")),
+//            )
+//          }
+//          .list
+//          .apply()
+//          .toVector
+//      }
     }.orDie

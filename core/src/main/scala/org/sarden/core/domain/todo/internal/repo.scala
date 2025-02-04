@@ -6,7 +6,6 @@ import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.*
 
 import com.github.f4b6a3.ulid.Ulid
-import scalikejdbc.*
 import zio.*
 
 import org.sarden.core.IdGenerator
@@ -33,23 +32,24 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
   override def getActiveTodos(): UIO[Vector[Todo]] =
     ZIO.attemptBlocking {
-      DB.autoCommit { implicit session =>
-        sql"SELECT * FROM todo"
-          .map { row =>
-            Todo(
-              TodoId(Ulid.from(row.string("id"))),
-              TodoName(row.string("name")),
-              upickle.default.read[TodoSchedule](row.string("schedule")),
-              upickle.default.read[FiniteDuration](row.string("notify_before")),
-              row.longOpt("last_run").map { lastRun =>
-                OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
-              },
-            )
-          }
-          .list
-          .apply()
-          .toVector
-      }
+      ???
+//      DB.autoCommit { implicit session =>
+//        sql"SELECT * FROM todo"
+//          .map { row =>
+//            Todo(
+//              TodoId(Ulid.from(row.string("id"))),
+//              TodoName(row.string("name")),
+//              upickle.default.read[TodoSchedule](row.string("schedule")),
+//              upickle.default.read[FiniteDuration](row.string("notify_before")),
+//              row.longOpt("last_run").map { lastRun =>
+//                OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
+//              },
+//            )
+//          }
+//          .list
+//          .apply()
+//          .toVector
+//      }
     }.orDie
 
   override def createTodo(todo: CreateTodo): UIO[Todo] =
@@ -57,17 +57,18 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
       id <- idGenerator.next()
       now <- zio.Clock.currentDateTime
       _ <- ZIO.attemptBlocking {
-        DB.autoCommit { implicit session =>
-          sql"""INSERT INTO todo
-           (id, name, schedule, notify_before, last_run, created_at)
-           VALUES
-           ( ${id}
-           , ${todo.name.unwrap}
-           , ${upickle.default.write(todo.schedule)}
-           , ${upickle.default.write(todo.notifyBefore)}
-           , NULL
-           , ${now.toInstant.getEpochSecond})""".update.apply()
-        }
+//        DB.autoCommit { implicit session =>
+//          sql"""INSERT INTO todo
+//           (id, name, schedule, notify_before, last_run, created_at)
+//           VALUES
+//           ( ${id}
+//           , ${todo.name.unwrap}
+//           , ${upickle.default.write(todo.schedule)}
+//           , ${upickle.default.write(todo.notifyBefore)}
+//           , NULL
+//           , ${now.toInstant.getEpochSecond})""".update.apply()
+//        }
+        ???
       }.orDie
     yield Todo(
       TodoId(id),
@@ -83,9 +84,10 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
   override def deleteTodo(id: TodoId): UIO[Unit] =
     ZIO
       .attemptBlocking {
-        DB.autoCommit { implicit session =>
-          sql"DELETE FROM todo WHERE id = ${id.unwrap}".update.apply()
-        }
+//        DB.autoCommit { implicit session =>
+//          sql"DELETE FROM todo WHERE id = ${id.unwrap}".update.apply()
+//        }
+        ???
       }
       .orDie
       .unit

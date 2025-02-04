@@ -7,12 +7,16 @@ import zio.*
 trait Migrator:
   def migrate(): UIO[Unit]
 
-class LiveMigrator(dbUrl: String) extends Migrator:
+object Migrator:
+  val live: URLayer[CoreConfig, Migrator] =
+    ZLayer.fromFunction(LiveMigrator.apply)
+
+class LiveMigrator(config: CoreConfig) extends Migrator:
   override def migrate(): UIO[Unit] =
     ZIO
       .attemptBlocking {
         SQLiteDataSource()
-        val flyway = Flyway.configure().dataSource(dbUrl, "", "").load()
+        val flyway = Flyway.configure().dataSource(config.dbUrl, "", "").load()
         // TODO: Check if we need to validate MigrationResult or if it throws anyway
         val _ = flyway.migrate()
       }

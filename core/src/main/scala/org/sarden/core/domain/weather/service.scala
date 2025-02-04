@@ -1,5 +1,6 @@
 package org.sarden.core.domain.weather
 
+import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.domain.weather.internal.*
@@ -10,7 +11,12 @@ trait WeatherService:
       filters: GetMeasurementsFilters,
   ): UIO[Vector[WeatherMeasurement]]
 
-class LiveWeatherService(repo: WeatherRepo) extends WeatherService:
+object WeatherService:
+  val live: URLayer[Database, WeatherService] =
+    ZLayer.fromFunction(LiveWeatherService(LiveWeatherRepo(), _))
+
+class LiveWeatherService(repo: WeatherRepo, db: Database)
+    extends WeatherService:
 
   override def addMeasurements(
       measurements: Vector[WeatherMeasurement],

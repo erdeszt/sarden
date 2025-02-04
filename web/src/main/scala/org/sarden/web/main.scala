@@ -4,38 +4,45 @@ import java.time.ZoneId
 
 import scala.language.postfixOps
 
-import scalikejdbc.ConnectionPool
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.ztapir.ZServerEndpoint
 import zio.*
 import zio.http.{Response as ZioHttpResponse, Routes, Server}
 
 import org.sarden.core.*
+import org.sarden.core.domain.plant.PlantService
+import org.sarden.core.domain.todo.TodoService
+import org.sarden.core.domain.weather.WeatherService
+
+type AppServerEndpoint = ZServerEndpoint[CoreServices, ZioStreams & WebSockets]
+type CoreServices = TodoService & PlantService & WeatherService
 
 object Main extends ZIOAppDefault:
 
   override def run: ZIO[Any & ZIOAppArgs & Scope, Any, Any] =
-    val dbUrl = "jdbc:sqlite:dev.db"
-    val coreConfig = CoreConfig(
-      ZoneId.of("UTC"),
-      dbUrl,
-    )
-    for
+    (for
+      migrator <- ZIO.service[Migrator]
       _ <- ZIO.attemptBlocking {
         Class.forName("org.sqlite.JDBC")
-        ConnectionPool.singleton(dbUrl, "", "")
       }
-      services = wireLive(coreConfig)
-      _ <- services.migrator.migrate()
-      routes: Routes[Any, ZioHttpResponse] = ZioHttpInterpreter().toHttp(
-        List(
-          endpoints.cssAssetsServerEndpoint,
-          endpoints.jsAssetsServerEndpoint,
-        ) ++ endpoints.todoEndpoints(services.todo) ++ endpoints
-          .weatherEndpoints(services.weather) ++ endpoints.plantEndpoints(
-          services.plant,
-        ),
-      )
+      _ <- migrator.migrate()
+      routes: Routes[
+        CoreServices,
+        ZioHttpResponse,
+      ] = ZioHttpInterpreter()
+        .toHttp[CoreServices](
+          List(
+            endpoints.cssAssetsServerEndpoint,
+            endpoints.jsAssetsServerEndpoint,
+          ) ++ endpoints.todoEndpoints ++ endpoints.weatherEndpoints ++ endpoints.plantEndpoints,
+        )
       exitCode <- Server
         .serve(routes)
-        .provide(ZLayer.succeed(Server.Config.default.port(8080)), Server.live)
-    yield exitCode
+    yield exitCode).provide(
+      ZLayer.succeed(Server.Config.default.port(8080)),
+      Server.live,
+      CoreConfig.live,
+      wireLive,
+    )

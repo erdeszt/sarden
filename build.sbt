@@ -30,13 +30,15 @@ lazy val core = (project in file("core"))
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "dev.zio" %% "zio" % Versions.zio,
       "dev.zio" %% "zio-json" % Versions.zioJson,
-      "dev.zio" %% "zio-test" % Versions.zio % Test,
-      "dev.zio" %% "zio-test-sbt" % Versions.zio % Test,
       "org.flywaydb" % "flyway-core" % Versions.flyway,
       "org.opensearch.client" % "opensearch-java" % Versions.openSearch,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
-      "org.scalikejdbc" %% "scalikejdbc" % Versions.scalikeJdbc,
+      "io.github.gaelrenoux" %% "tranzactio-doobie" % Versions.tranzactio,
     ),
+    libraryDependencies ++= Seq(
+      "dev.zio" %% "zio-test" % Versions.zio,
+      "dev.zio" %% "zio-test-sbt" % Versions.zio,
+    ).map(_ % Test),
   )
 
 lazy val web = (project in file("web"))
@@ -50,7 +52,6 @@ lazy val web = (project in file("web"))
       "com.softwaremill.sttp.tapir" %% "tapir-zio" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-json-upickle" % Versions.tapir,
-      "com.softwaremill.sttp.tapir" %% "tapir-netty-server-sync" % Versions.tapir,
     ),
   )
   .dependsOn(core)

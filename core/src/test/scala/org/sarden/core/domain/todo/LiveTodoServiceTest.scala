@@ -5,7 +5,6 @@ import java.time.{LocalTime, ZoneId}
 import scala.concurrent.duration.*
 
 import org.flywaydb.core.Flyway
-import scalikejdbc.ConnectionPool
 import zio.*
 import zio.test.*
 
@@ -14,10 +13,9 @@ import org.sarden.core.{CoreConfig, CoreServices}
 object LiveTodoServiceTest extends ZIOSpecDefault:
 
   def coreConfig: CoreConfig =
-    CoreConfig(ZoneId.of("UTC"), "jdbc:sqlite:dev.db")
+    CoreConfig(ZoneId.of("UTC"), "jdbc:sqlite:test.db")
 
-  def coreServices: CoreServices =
-    org.sarden.core.wireLive(coreConfig)
+  def testConfig: ULayer[CoreConfig] = ZLayer.succeed(coreConfig)
 
   def setupDb: Task[Unit] =
     ZIO.attemptBlocking {
@@ -29,15 +27,13 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
       flyway.getConfiguration
       flyway.clean()
       flyway.migrate()
-
-      Class.forName("org.sqlite.JDBC")
-
-      ConnectionPool.singleton(coreConfig.dbUrl, "", "")
-
+//
+//      Class.forName("org.sqlite.JDBC")
+//
+//      ConnectionPool.singleton(coreConfig.dbUrl, "", "")
+//
       ()
     }
-
-  lazy val services = coreServices
 
   def spec =
     suite("Live TodoService Test")(
@@ -47,7 +43,8 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
         val notifyBefore: FiniteDuration = 24.hours
 
         for
-          todo <- services.todo.createTodo(
+          todoService <- ZIO.service[TodoService]
+          todo <- todoService.createTodo(
             CreateTodo(
               TodoName("test"),
               schedule,
@@ -55,7 +52,7 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
             ),
           )
 
-          todos <- services.todo.getActiveTodos()
+          todos <- todoService.getActiveTodos()
         yield assertTrue(
           todos.length == 1,
           todos.head.id == todo.id,
@@ -65,4 +62,7 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
           todos.head.lastRun.isEmpty,
         )
       },
-    ) @@ TestAspect.before(setupDb)
+    ).provide(testConfig, org.sarden.core.wireLive) @@ TestAspect
+      .before(
+        setupDb,
+      )

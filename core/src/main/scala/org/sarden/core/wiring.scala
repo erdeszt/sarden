@@ -1,5 +1,11 @@
 package org.sarden.core
 
+import javax.sql.DataSource
+
+import io.github.gaelrenoux.tranzactio.doobie.*
+import org.sqlite.SQLiteDataSource
+import zio.*
+
 import org.sarden.core.domain.plant.internal.LivePlantRepo
 import org.sarden.core.domain.plant.{LivePlantService, PlantService}
 import org.sarden.core.domain.todo.internal.LiveTodoRepo
@@ -14,19 +20,28 @@ case class CoreServices(
     migrator: Migrator,
 )
 
-def wireLive(config: CoreConfig): CoreServices =
-  val idGenerator = LiveIdGenerator()
-  val todoRepo = LiveTodoRepo(idGenerator)
-  val todoService = LiveTodoService(todoRepo)
-  val weatherRepo = LiveWeatherRepo()
-  val weatherService = LiveWeatherService(weatherRepo)
-  val plantRepo = LivePlantRepo()
-  val plantService = LivePlantService(plantRepo)
-  val migrator = LiveMigrator(config.dbUrl)
+def wireLive: URLayer[
+  CoreConfig,
+  TodoService & WeatherService & PlantService & Migrator,
+] =
+  val dbLayer = Database.fromDatasource
+  val connectionPoolLayer: URLayer[CoreConfig, DataSource] = ZLayer.fromZIO {
+    ZIO.service[CoreConfig].map { config =>
+      val dataSource = new SQLiteDataSource()
+      dataSource.setUrl(config.dbUrl)
+      dataSource
+    }
+  }
 
-  CoreServices(
-    todoService,
-    weatherService,
-    plantService,
-    migrator,
+  ZLayer.makeSome[
+    CoreConfig,
+    TodoService & WeatherService & PlantService & Migrator,
+  ](
+    connectionPoolLayer,
+    dbLayer,
+    Migrator.live,
+    IdGenerator.live,
+    TodoService.live,
+    WeatherService.live,
+    PlantService.live,
   )

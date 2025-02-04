@@ -1,6 +1,7 @@
 package org.sarden.core.domain.plant
 
 import com.github.f4b6a3.ulid.Ulid
+import doobie.Read
 
 opaque type PlantName = String
 

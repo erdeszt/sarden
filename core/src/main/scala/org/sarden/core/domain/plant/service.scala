@@ -1,8 +1,10 @@
 package org.sarden.core.domain.plant
 
+import io.github.gaelrenoux.tranzactio.*
+import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
-import org.sarden.core.domain.plant.internal.PlantRepo
+import org.sarden.core.domain.plant.internal.*
 
 trait PlantService:
   def createPlant(name: PlantName, details: PlantDetails): UIO[PlantId]
@@ -10,7 +12,11 @@ trait PlantService:
   def getPlant(id: PlantId): UIO[Option[Plant]]
   def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]]
 
-class LivePlantService(repo: PlantRepo) extends PlantService:
+object PlantService:
+  val live: URLayer[Database, PlantService] =
+    ZLayer.fromFunction(LivePlantService(LivePlantRepo(), _))
+
+class LivePlantService(repo: PlantRepo, db: Database) extends PlantService:
   override def createPlant(
       name: PlantName,
       details: PlantDetails,
@@ -24,4 +30,4 @@ class LivePlantService(repo: PlantRepo) extends PlantService:
     ZIO.attempt(???).orDie
 
   override def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]] =
-    repo.searchPlants(filters)
+    db.transactionOrDie(repo.searchPlants(filters))

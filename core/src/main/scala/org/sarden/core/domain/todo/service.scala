@@ -1,8 +1,10 @@
 package org.sarden.core.domain.todo
 
+import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
-import org.sarden.core.domain.todo.internal.TodoRepo
+import org.sarden.core.IdGenerator
+import org.sarden.core.domain.todo.internal.*
 
 trait TodoService:
   def deliverPendingNotifications(): UIO[Unit]
@@ -10,7 +12,15 @@ trait TodoService:
   def getActiveTodos(): UIO[Vector[Todo]]
   def deleteTodo(id: TodoId): UIO[Unit]
 
-class LiveTodoService(repo: TodoRepo) extends TodoService:
+object TodoService:
+  val live: URLayer[Database & IdGenerator, TodoService] = ZLayer.fromZIO {
+    for
+      db <- ZIO.service[Database]
+      idGenerator <- ZIO.service[IdGenerator]
+    yield LiveTodoService(LiveTodoRepo(idGenerator), db)
+  }
+
+class LiveTodoService(repo: TodoRepo, db: Database) extends TodoService:
 
   override def deliverPendingNotifications(): UIO[Unit] =
     ???

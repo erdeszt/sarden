@@ -8,6 +8,7 @@ import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.Schema
 import sttp.tapir.json.upickle.*
 import sttp.tapir.ztapir.*
+import zio.*
 
 import org.sarden.core.domain.todo.*
 import org.sarden.web.*
@@ -37,15 +38,15 @@ val deleteTodoEndpoint = endpoint.delete
   .in("todos" / path[String]("id"))
   .out(htmlView[Unit](_ => scalatags.Text.all.div()))
 
-def todoEndpoints(
-    service: TodoService,
-): List[ZServerEndpoint[Any, ZioStreams & WebSockets]] =
+def todoEndpoints: List[AppServerEndpoint] =
   List(
-    todosEndpoint.zServerLogic(_ => service.getActiveTodos()),
+    todosEndpoint.zServerLogic(_ =>
+      ZIO.serviceWithZIO[TodoService](_.getActiveTodos()),
+    ),
     createTodoEndpoint.zServerLogic(createTodo =>
-      service.createTodo(createTodo),
+      ZIO.serviceWithZIO[TodoService](_.createTodo(createTodo)),
     ),
     deleteTodoEndpoint.zServerLogic(id =>
-      service.deleteTodo(TodoId(Ulid.from(id))),
+      ZIO.serviceWithZIO[TodoService](_.deleteTodo(TodoId(Ulid.from(id)))),
     ),
   )

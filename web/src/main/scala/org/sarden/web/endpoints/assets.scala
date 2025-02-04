@@ -13,7 +13,7 @@ import zio.*
 
 import org.sarden.web.*
 
-val cssAssetsServerEndpoint: ZServerEndpoint[Any, ZioStreams & WebSockets] =
+val cssAssetsServerEndpoint: AppServerEndpoint =
   endpoint.get
     .in("assets" / "css" / path[String]("name"))
     .out(sttp.tapir.header(Header.contentType(MediaType.TextCss)))
@@ -28,7 +28,7 @@ val cssAssetsServerEndpoint: ZServerEndpoint[Any, ZioStreams & WebSockets] =
       }.orDie,
     )
 
-val jsAssetsServerEndpoint: ZServerEndpoint[Any, ZioStreams & WebSockets] =
+val jsAssetsServerEndpoint: AppServerEndpoint =
   endpoint.get
     .in("assets" / "js" / path[String]("name"))
     .out(sttp.tapir.header(Header.contentType(MediaType.TextJavascript)))

@@ -8,7 +8,7 @@ trait WeatherService:
   def addMeasurements(measurements: Vector[WeatherMeasurement]): UIO[Unit]
   def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): UIO[List[WeatherMeasurement]]
+  ): UIO[Vector[WeatherMeasurement]]
 
 class LiveWeatherService(repo: WeatherRepo) extends WeatherService:
 
@@ -19,5 +19,5 @@ class LiveWeatherService(repo: WeatherRepo) extends WeatherService:
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): UIO[List[WeatherMeasurement]] =
+  ): UIO[Vector[WeatherMeasurement]] =
     repo.getMeasurements(filters)

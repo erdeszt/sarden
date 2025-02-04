@@ -23,8 +23,8 @@ val todosEndpoint = endpoint.get
   .in("todos")
   .out(
     oneOfBody(
-      jsonBody[List[Todo]],
-      htmlView[List[Todo]](views.todoList),
+      jsonBody[Vector[Todo]],
+      htmlView[Vector[Todo]](views.todoList),
     ),
   )
 

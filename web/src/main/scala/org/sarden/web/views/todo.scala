@@ -5,7 +5,7 @@ import scalatags.Text.all.*
 
 import org.sarden.core.domain.todo.*
 
-def todoList(todos: List[Todo]): TypedTag[String] =
+def todoList(todos: Vector[Todo]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",

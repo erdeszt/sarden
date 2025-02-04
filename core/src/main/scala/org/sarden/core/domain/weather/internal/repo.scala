@@ -11,7 +11,7 @@ private[weather] trait WeatherRepo:
   def addMeasurements(measurements: Vector[WeatherMeasurement]): UIO[Unit]
   def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): UIO[List[WeatherMeasurement]]
+  ): UIO[Vector[WeatherMeasurement]]
 
 class LiveWeatherRepo extends WeatherRepo:
 
@@ -41,7 +41,7 @@ class LiveWeatherRepo extends WeatherRepo:
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): UIO[List[WeatherMeasurement]] =
+  ): UIO[Vector[WeatherMeasurement]] =
     ZIO.attemptBlocking {
       DB.autoCommit { implicit session =>
         sql"SELECT * FROM weather_measurement"
@@ -54,5 +54,6 @@ class LiveWeatherRepo extends WeatherRepo:
           }
           .list
           .apply()
+          .toVector
       }
     }.orDie

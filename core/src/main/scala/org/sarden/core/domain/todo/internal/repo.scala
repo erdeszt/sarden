@@ -24,14 +24,14 @@ private[internal] case class TodoDTO(
 )
 
 private[todo] trait TodoRepo:
-  def getActiveTodos(): UIO[List[Todo]]
+  def getActiveTodos(): UIO[Vector[Todo]]
   def createTodo(todo: CreateTodo): UIO[Todo]
   def updateLastRun(id: TodoId, lastRun: OffsetDateTime): UIO[Unit]
   def deleteTodo(id: TodoId): UIO[Unit]
 
 class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
-  override def getActiveTodos(): UIO[List[Todo]] =
+  override def getActiveTodos(): UIO[Vector[Todo]] =
     ZIO.attemptBlocking {
       DB.autoCommit { implicit session =>
         sql"SELECT * FROM todo"
@@ -48,6 +48,7 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
           }
           .list
           .apply()
+          .toVector
       }
     }.orDie
 

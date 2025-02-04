@@ -20,7 +20,6 @@
   * Setup proper error handling
     * Define domain errors vs system errors
   * Setup base test for zio service tests
-  * Figure out `should not compile` in zio-test and remove scalatest
   * Load config with zio-config
   * zio-json
   * zio-tapir
@@ -35,4 +34,3 @@
 * Load app config from env
 * Ulid type in tapir layer
 * Use host/user/pass instead of dbUrl for migrator
-* Use Vector instead of List

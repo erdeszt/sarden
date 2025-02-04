@@ -31,7 +31,7 @@ val getWeatherMeasurementsEndpoint = endpoint.get
   .in(query[Option[Instant]]("from"))
   .in(query[Option[Instant]]("to"))
   .in(query[Option[SensorId]]("sensor_id"))
-  .out(jsonBody[List[WeatherMeasurement]])
+  .out(jsonBody[Vector[WeatherMeasurement]])
 
 def weatherEndpoints(
     service: WeatherService,

@@ -1,8 +1,7 @@
 package org.sarden.core.domain.todo.internal
 
-import java.time.{Instant, OffsetDateTime}
+import java.time.OffsetDateTime
 
-import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.*
 
 import com.github.f4b6a3.ulid.Ulid
@@ -12,7 +11,7 @@ import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.IdGenerator
-import org.sarden.core.domain.todo.*
+import org.sarden.core.domain.todo.{*, given}
 
 // Info on jvm date types: https://stackoverflow.com/questions/32437550
 
@@ -35,29 +34,28 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
   override def getActiveTodos(): URIO[Connection, Vector[Todo]] =
     tzio {
-      sql"SELECT * FROM todo".query[Todo].to[Vector]
+      sql"SELECT id, name, schedule, notify_before, last_run FROM todo"
+        .query[Todo]
+        .to[Vector]
     }.orDie
 
   override def createTodo(todo: CreateTodo): URIO[Connection, Todo] =
     for
-      id <- idGenerator.next()
+      id <- idGenerator.next().map(TodoId(_))
       now <- zio.Clock.currentDateTime
-      _ <- ZIO.attemptBlocking {
-//        DB.autoCommit { implicit session =>
-//          sql"""INSERT INTO todo
-//           (id, name, schedule, notify_before, last_run, created_at)
-//           VALUES
-//           ( ${id}
-//           , ${todo.name.unwrap}
-//           , ${upickle.default.write(todo.schedule)}
-//           , ${upickle.default.write(todo.notifyBefore)}
-//           , NULL
-//           , ${now.toInstant.getEpochSecond})""".update.apply()
-//        }
-        ???
+      _ <- tzio {
+        sql"""INSERT INTO todo
+             |(id, name, schedule, notify_before, last_run, created_at)
+             |VALUES
+             |( ${id}
+             |, ${todo.name}
+             |, ${todo.schedule}
+             |, ${todo.notifyBefore}
+             |, NULL
+             |, ${now})""".stripMargin.update.run
       }.orDie
     yield Todo(
-      TodoId(id),
+      id,
       todo.name,
       todo.schedule,
       todo.notifyBefore,
@@ -72,5 +70,5 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
   override def deleteTodo(id: TodoId): URIO[Connection, Unit] =
     tzio {
-      sql"DELET FROM todo WHERE id = ${id}".update.run
+      sql"DELETE FROM todo WHERE id = ${id}".update.run
     }.orDie.unit

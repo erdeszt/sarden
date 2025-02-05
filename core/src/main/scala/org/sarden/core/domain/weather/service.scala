@@ -21,9 +21,9 @@ class LiveWeatherService(repo: WeatherRepo, db: Database)
   override def addMeasurements(
       measurements: Vector[WeatherMeasurement],
   ): UIO[Unit] =
-    repo.addMeasurements(measurements)
+    db.transactionOrDie(repo.addMeasurements(measurements))
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
   ): UIO[Vector[WeatherMeasurement]] =
-    repo.getMeasurements(filters)
+    db.transactionOrDie(repo.getMeasurements(filters))

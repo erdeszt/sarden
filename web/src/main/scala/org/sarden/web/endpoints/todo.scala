@@ -4,7 +4,7 @@ import scala.concurrent.duration.FiniteDuration
 
 import com.github.f4b6a3.ulid.Ulid
 import sttp.tapir.Schema
-import sttp.tapir.json.upickle.*
+import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
 import zio.*
 

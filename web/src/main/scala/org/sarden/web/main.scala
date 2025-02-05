@@ -1,7 +1,5 @@
 package org.sarden.web
 
-import java.time.ZoneId
-
 import scala.language.postfixOps
 
 import sttp.capabilities.WebSockets

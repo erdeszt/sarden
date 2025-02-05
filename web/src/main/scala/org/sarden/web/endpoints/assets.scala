@@ -5,8 +5,6 @@ import java.nio.charset.StandardCharsets
 import scala.io.Source
 import scala.util.Using
 
-import sttp.capabilities.WebSockets
-import sttp.capabilities.zio.ZioStreams
 import sttp.model.{Header, MediaType}
 import sttp.tapir.ztapir.*
 import zio.*

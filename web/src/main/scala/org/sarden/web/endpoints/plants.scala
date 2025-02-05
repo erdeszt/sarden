@@ -1,6 +1,4 @@
 package org.sarden.web.endpoints
-import sttp.capabilities.WebSockets
-import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*

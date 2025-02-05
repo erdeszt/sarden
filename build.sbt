@@ -26,12 +26,10 @@ lazy val core = (project in file("core"))
     name := "sarden-core",
     libraryDependencies ++= Seq(
       "com.github.f4b6a3" % "ulid-creator" % Versions.ulid,
-      "com.lihaoyi" %% "upickle" % Versions.upickle,
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "dev.zio" %% "zio" % Versions.zio,
       "dev.zio" %% "zio-json" % Versions.zioJson,
       "org.flywaydb" % "flyway-core" % Versions.flyway,
-      "org.opensearch.client" % "opensearch-java" % Versions.openSearch,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
       "io.github.gaelrenoux" %% "tranzactio-doobie" % Versions.tranzactio,
     ),
@@ -51,7 +49,7 @@ lazy val web = (project in file("web"))
       "com.softwaremill.sttp.tapir" %% "tapir-core" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-zio" % Versions.tapir,
       "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % Versions.tapir,
-      "com.softwaremill.sttp.tapir" %% "tapir-json-upickle" % Versions.tapir,
+      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % Versions.tapir,
     ),
   )
   .dependsOn(core)

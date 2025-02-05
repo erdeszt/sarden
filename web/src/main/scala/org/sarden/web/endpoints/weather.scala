@@ -2,11 +2,11 @@ package org.sarden.web.endpoints
 
 import java.time.Instant
 
-import sttp.tapir.json.upickle.*
+import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
 import sttp.tapir.{Codec, CodecFormat, Mapping, Schema}
-import upickle.default.ReadWriter
 import zio.*
+import zio.json.JsonCodec
 
 import org.sarden.core.domain.weather.*
 import org.sarden.web.*
@@ -18,7 +18,7 @@ given Schema[EmptyResponse] = Schema.derived
 given Codec[String, SensorId, CodecFormat.TextPlain] =
   Codec.string.map(Mapping.from(SensorId(_))(_.unwrap))
 
-case class EmptyResponse() derives ReadWriter
+case class EmptyResponse() derives JsonCodec
 
 val addWeatherMeasurementEndpoint = endpoint.post
   .in("weather")

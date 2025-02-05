@@ -1,43 +1,46 @@
 package org.sarden.web
 
-import java.time.ZoneId
-
 import scala.language.postfixOps
 
-import ox.*
-import scalikejdbc.ConnectionPool
-import sttp.tapir.*
-import sttp.tapir.server.netty.sync.NettySyncServer
+import sttp.capabilities.WebSockets
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.ztapir.ZServerEndpoint
+import zio.*
+import zio.http.{Response as ZioHttpResponse, Routes, Server}
 
 import org.sarden.core.*
+import org.sarden.core.domain.plant.PlantService
+import org.sarden.core.domain.todo.TodoService
+import org.sarden.core.domain.weather.WeatherService
 
-object Main:
-  def main(args: Array[String]): Unit =
-    Class.forName("org.sqlite.JDBC")
-    val dbUrl = "jdbc:sqlite:dev.db"
-    ConnectionPool.singleton(dbUrl, "", "")
-    val coreConfig = CoreConfig(
-      ZoneId.of("UTC"),
-      dbUrl,
+type AppServerEndpoint = ZServerEndpoint[CoreServices, ZioStreams & WebSockets]
+type CoreServices = TodoService & PlantService & WeatherService
+
+object Main extends ZIOAppDefault:
+
+  override def run: ZIO[Any & ZIOAppArgs & Scope, Any, Any] =
+    (for
+      migrator <- ZIO.service[Migrator]
+      _ <- ZIO.attemptBlocking {
+        Class.forName("org.sqlite.JDBC")
+      }
+      _ <- migrator.migrate()
+      routes: Routes[
+        CoreServices,
+        ZioHttpResponse,
+      ] = ZioHttpInterpreter()
+        .toHttp[CoreServices](
+          List(
+            endpoints.cssAssetsServerEndpoint,
+            endpoints.jsAssetsServerEndpoint,
+          ) ++ endpoints.todoEndpoints ++ endpoints.weatherEndpoints ++ endpoints.plantEndpoints,
+        )
+      exitCode <- Server
+        .serve(routes)
+    yield exitCode).provide(
+      ZLayer.succeed(Server.Config.default.port(8080)),
+      Server.live,
+      CoreConfig.live,
+      wireLive,
     )
-    val services = wireLive(coreConfig)
-
-    services.migrator.migrate()
-
-    val server = NettySyncServer()
-      .port(8080)
-      .addEndpoint(endpoints.cssAssetsServerEndpoint)
-      .addEndpoint(endpoints.jsAssetsServerEndpoint)
-      .addEndpoints(endpoints.todoEndpoints(services.todo))
-      .addEndpoints(endpoints.plantEndpoitns(services.plant))
-      .addEndpoints(endpoints.weatherEndpoints(services.weather))
-
-    supervised {
-      val serverBinding = useInScope(server.start())(_.stop())
-
-      println(
-        s"Server is running on: ${serverBinding.hostName}:${serverBinding.port}",
-      )
-
-      never
-    }

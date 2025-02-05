@@ -1,11 +1,14 @@
 package org.sarden.core
 
-import org.sarden.core.domain.plant.internal.LivePlantRepo
-import org.sarden.core.domain.plant.{LivePlantService, PlantService}
-import org.sarden.core.domain.todo.internal.LiveTodoRepo
-import org.sarden.core.domain.todo.{LiveTodoService, TodoService}
-import org.sarden.core.domain.weather.internal.LiveWeatherRepo
-import org.sarden.core.domain.weather.{LiveWeatherService, WeatherService}
+import javax.sql.DataSource
+
+import io.github.gaelrenoux.tranzactio.doobie.*
+import org.sqlite.SQLiteDataSource
+import zio.*
+
+import org.sarden.core.domain.plant.PlantService
+import org.sarden.core.domain.todo.TodoService
+import org.sarden.core.domain.weather.WeatherService
 
 case class CoreServices(
     todo: TodoService,
@@ -14,20 +17,28 @@ case class CoreServices(
     migrator: Migrator,
 )
 
-def wireLive(config: CoreConfig): CoreServices =
-  val clock = LiveClock(config.zoneId)
-  val idGenerator = LiveIdGenerator()
-  val todoRepo = LiveTodoRepo(clock, idGenerator)
-  val todoService = LiveTodoService(todoRepo)
-  val weatherRepo = LiveWeatherRepo()
-  val weatherService = LiveWeatherService(weatherRepo)
-  val plantRepo = LivePlantRepo()
-  val plantService = LivePlantService(plantRepo)
-  val migrator = LiveMigrator(config.dbUrl)
+def wireLive: URLayer[
+  CoreConfig,
+  TodoService & WeatherService & PlantService & Migrator,
+] =
+  val dbLayer = Database.fromDatasource
+  val connectionPoolLayer: URLayer[CoreConfig, DataSource] = ZLayer.fromZIO {
+    ZIO.serviceWith[CoreConfig] { config =>
+      val dataSource = new SQLiteDataSource()
+      dataSource.setUrl(config.dbUrl)
+      dataSource
+    }
+  }
 
-  CoreServices(
-    todoService,
-    weatherService,
-    plantService,
-    migrator,
+  ZLayer.makeSome[
+    CoreConfig,
+    TodoService & WeatherService & PlantService & Migrator,
+  ](
+    connectionPoolLayer,
+    dbLayer,
+    Migrator.live,
+    IdGenerator.live,
+    TodoService.live,
+    WeatherService.live,
+    PlantService.live,
   )

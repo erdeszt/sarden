@@ -2,10 +2,11 @@ package org.sarden.web.views
 
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
+import zio.json.*
 
 import org.sarden.core.domain.todo.*
 
-def todoList(todos: List[Todo]): TypedTag[String] =
+def todoList(todos: Vector[Todo]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",
@@ -29,7 +30,7 @@ def todoList(todos: List[Todo]): TypedTag[String] =
             yield tr(
               th(attr("scope") := "row", todo.id.unwrap.toString),
               td(todo.name.unwrap),
-              td(upickle.default.write(todo.schedule)),
+              td(todo.schedule.toJson),
               td(s"${todo.notifyBefore.toHours} Hours"),
               td(todo.lastRun.map(_.toString).getOrElse("n. / a.")),
               td(

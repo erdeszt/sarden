@@ -1,50 +1,39 @@
 package org.sarden.core.domain.weather.internal
 
-import java.time.Instant
-
-import scalikejdbc.*
+import doobie.Update
+import doobie.implicits.given
+import io.github.gaelrenoux.tranzactio.*
+import io.github.gaelrenoux.tranzactio.doobie.*
+import zio.*
 
 import org.sarden.core.domain.weather.*
 
 private[weather] trait WeatherRepo:
-  def addMeasurements(measurements: Vector[WeatherMeasurement]): Unit
+  def addMeasurements(
+      measurements: Vector[WeatherMeasurement],
+  ): URIO[Connection, Unit]
   def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): List[WeatherMeasurement]
+  ): URIO[Connection, Vector[WeatherMeasurement]]
 
 class LiveWeatherRepo extends WeatherRepo:
 
-  override def addMeasurements(measurements: Vector[WeatherMeasurement]): Unit =
-    DB.autoCommit { implicit session =>
-      sql"""INSERT INTO weather_measurement
-           (collected_at, temperature, sensor_id)
-           VALUES (?, ?, ?)"""
-        .batch(
-          measurements.map(measurement =>
-            (
-              measurement.collectedAt.getEpochSecond,
-              measurement.temperature,
-              measurement.source.unwrap,
-            ),
-          ),
-        )
-        .apply()
-    }
-
-    ()
+  override def addMeasurements(
+      measurements: Vector[WeatherMeasurement],
+  ): URIO[Connection, Unit] =
+    tzio {
+      Update[WeatherMeasurement](
+        """INSERT INTO weather_measurement
+           |(collected_at, temperature, sensor_id)
+           |VALUES (?, ?, ?)""".stripMargin,
+      ).updateMany(measurements)
+    }.orDie.unit
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): List[WeatherMeasurement] =
-    DB.autoCommit { implicit session =>
+  ): URIO[Connection, Vector[WeatherMeasurement]] =
+    tzio {
       sql"SELECT * FROM weather_measurement"
-        .map { row =>
-          WeatherMeasurement(
-            Instant.ofEpochSecond(row.long("collected_at")),
-            Temperature(row.double("temperature")),
-            SensorId(row.string("source")),
-          )
-        }
-        .list
-        .apply()
-    }
+        .query[WeatherMeasurement]
+        .to[Vector]
+    }.orDie

@@ -14,19 +14,19 @@
   * Tests
 
 ## Tech debt:
-* ZIO + Doobie(or zio sql)
-  * Setup proper connection pooling
-  * Setup proper logging
-  * Setup proper error handling
-    * Define domain errors vs system errors
+* Setup proper connection pooling
+* Setup proper logging
+* Setup proper error handling
+  * Define domain errors vs system errors
+* Setup base test for zio service tests
+* Load config with zio-config
+* Fix .toOption.get calls in codecs
 * Setup CI with Werror enabled
 * Check if LiveMigrator handles error correctly
-* Transactions in types
-* Better handling of connections/transactions
-* Switch to zio-newtypes instead of opaque types(better ergonomics)
+* Switch to neotype instead of opaque types(better ergonomics)
     * Fix newtype schemas
     * Autoderive more
+    * Fix unsafe mapping to ulid
 * Load app config from env
 * Ulid type in tapir layer
 * Use host/user/pass instead of dbUrl for migrator
-* Use Vector instead of List

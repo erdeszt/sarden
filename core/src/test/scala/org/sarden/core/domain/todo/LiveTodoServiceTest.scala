@@ -1,31 +1,68 @@
 package org.sarden.core.domain.todo
 
-import java.time.LocalTime
+import java.time.{LocalTime, ZoneId}
 
 import scala.concurrent.duration.*
 
-import org.sarden.core.ServiceSpec
+import org.flywaydb.core.Flyway
+import zio.*
+import zio.test.*
 
-class LiveTodoServiceTest extends ServiceSpec:
+import org.sarden.core.CoreConfig
 
-  "getActiveTodos" should "return all the created todos" in { services =>
-    val schedule = Schedule.EverySecondFridayOfTheMonth(LocalTime.of(13, 0))
-    val notifyBefore = 24.hours
+object LiveTodoServiceTest extends ZIOSpecDefault:
 
-    val todo = services.todo.createTodo(
-      CreateTodo(
-        TodoName("test"),
-        schedule,
-        notifyBefore,
-      ),
-    )
+  def coreConfig: CoreConfig =
+    CoreConfig(ZoneId.of("UTC"), "jdbc:sqlite:test.db")
 
-    val todos = services.todo.getActiveTodos()
+  def testConfig: ULayer[CoreConfig] = ZLayer.succeed(coreConfig)
 
-    assert(todos.length == 1)
-    assert(todos.head.id == todo.id)
-    assert(todos.head.name == todo.name)
-    assert(todos.head.schedule == schedule)
-    assert(todos.head.notifyBefore.equals(notifyBefore))
-    assert(todos.head.lastRun.isEmpty)
-  }
+  def setupDb: Task[Unit] =
+    ZIO.attemptBlocking {
+      val flyway = Flyway
+        .configure()
+        .cleanDisabled(false)
+        .dataSource(coreConfig.dbUrl, "", "")
+        .load()
+      flyway.getConfiguration
+      flyway.clean()
+      flyway.migrate()
+//
+//      Class.forName("org.sqlite.JDBC")
+//
+//      ConnectionPool.singleton(coreConfig.dbUrl, "", "")
+//
+      ()
+    }
+
+  def spec =
+    suite("Live TodoService Test")(
+      test(".getActiveTodos should return all the created todos") {
+        val schedule =
+          TodoSchedule.EverySecondFridayOfTheMonth(LocalTime.of(13, 0))
+        val notifyBefore: FiniteDuration = 24.hours
+
+        for
+          todoService <- ZIO.service[TodoService]
+          todo <- todoService.createTodo(
+            CreateTodo(
+              TodoName("test"),
+              schedule,
+              notifyBefore,
+            ),
+          )
+
+          todos <- todoService.getActiveTodos()
+        yield assertTrue(
+          todos.length == 1,
+          todos.head.id == todo.id,
+          todos.head.name == todo.name,
+          todos.head.schedule == schedule,
+          todos.head.notifyBefore.equals(notifyBefore),
+          todos.head.lastRun.isEmpty,
+        )
+      },
+    ).provide(testConfig, org.sarden.core.wireLive) @@ TestAspect
+      .before(
+        setupDb,
+      )

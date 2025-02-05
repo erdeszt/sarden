@@ -1,15 +1,17 @@
 package org.sarden.core.domain.todo.internal
 
-import java.time.{Instant, OffsetDateTime}
+import java.time.OffsetDateTime
 
-import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.*
 
 import com.github.f4b6a3.ulid.Ulid
-import scalikejdbc.*
+import doobie.implicits.given
+import io.github.gaelrenoux.tranzactio.*
+import io.github.gaelrenoux.tranzactio.doobie.*
+import zio.*
 
-import org.sarden.core.domain.todo.*
-import org.sarden.core.{Clock, IdGenerator}
+import org.sarden.core.IdGenerator
+import org.sarden.core.domain.todo.{*, given}
 
 // Info on jvm date types: https://stackoverflow.com/questions/32437550
 
@@ -23,60 +25,50 @@ private[internal] case class TodoDTO(
 )
 
 private[todo] trait TodoRepo:
-  def getActiveTodos(): List[Todo]
-  def createTodo(todo: CreateTodo): Todo
-  def updateLastRun(id: TodoId, lastRun: OffsetDateTime): Unit
-  def deleteTodo(id: TodoId): Unit
+  def getActiveTodos(): URIO[Connection, Vector[Todo]]
+  def createTodo(todo: CreateTodo): URIO[Connection, Todo]
+  def updateLastRun(id: TodoId, lastRun: OffsetDateTime): URIO[Connection, Unit]
+  def deleteTodo(id: TodoId): URIO[Connection, Unit]
 
-class LiveTodoRepo(clock: Clock, idGenerator: IdGenerator) extends TodoRepo:
+class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
-  override def getActiveTodos(): List[Todo] =
-    DB.autoCommit { implicit session =>
-      sql"SELECT * FROM todo"
-        .map { row =>
-          Todo(
-            TodoId(Ulid.from(row.string("id"))),
-            TodoName(row.string("name")),
-            upickle.default.read[Schedule](row.string("schedule")),
-            upickle.default.read[FiniteDuration](row.string("notify_before")),
-            row.longOpt("last_run").map { lastRun =>
-              OffsetDateTime.from(Instant.ofEpochSecond(lastRun))
-            },
-          )
-        }
-        .list
-        .apply()
-    }
+  override def getActiveTodos(): URIO[Connection, Vector[Todo]] =
+    tzio {
+      sql"SELECT id, name, schedule, notify_before, last_run FROM todo"
+        .query[Todo]
+        .to[Vector]
+    }.orDie
 
-  override def createTodo(todo: CreateTodo): Todo =
-    val id = idGenerator.next()
-    val now = clock.currentDateTime()
-
-    DB.autoCommit { implicit session =>
-      sql"""INSERT INTO todo
-           (id, name, schedule, notify_before, last_run, created_at)
-           VALUES
-           ( ${id}
-           , ${todo.name.unwrap}
-           , ${upickle.default.write(todo.schedule)}
-           , ${upickle.default.write(todo.notifyBefore)}
-           , NULL
-           , ${now.toInstant.getEpochSecond})""".update.apply()
-    }
-
-    Todo(
-      TodoId(id),
+  override def createTodo(todo: CreateTodo): URIO[Connection, Todo] =
+    for
+      id <- idGenerator.next().map(TodoId(_))
+      now <- zio.Clock.currentDateTime
+      _ <- tzio {
+        sql"""INSERT INTO todo
+             |(id, name, schedule, notify_before, last_run, created_at)
+             |VALUES
+             |( ${id}
+             |, ${todo.name}
+             |, ${todo.schedule}
+             |, ${todo.notifyBefore}
+             |, NULL
+             |, ${now})""".stripMargin.update.run
+      }.orDie
+    yield Todo(
+      id,
       todo.name,
       todo.schedule,
       todo.notifyBefore,
       None,
     )
 
-  override def updateLastRun(id: TodoId, lastRun: OffsetDateTime): Unit =
-    ???
+  override def updateLastRun(
+      id: TodoId,
+      lastRun: OffsetDateTime,
+  ): URIO[Connection, Unit] =
+    ZIO.attempt(???).orDie
 
-  override def deleteTodo(id: TodoId): Unit =
-    DB.autoCommit { implicit session =>
-      sql"DELETE FROM todo WHERE id = ${id.unwrap}".update.apply()
-    }
-    ()
+  override def deleteTodo(id: TodoId): URIO[Connection, Unit] =
+    tzio {
+      sql"DELETE FROM todo WHERE id = ${id}".update.run
+    }.orDie.unit

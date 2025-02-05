@@ -3,15 +3,15 @@ package org.sarden.web.endpoints
 import scala.concurrent.duration.FiniteDuration
 
 import com.github.f4b6a3.ulid.Ulid
-import sttp.shared.Identity
-import sttp.tapir.*
-import sttp.tapir.json.upickle.*
-import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.Schema
+import sttp.tapir.json.zio.*
+import sttp.tapir.ztapir.*
+import zio.*
 
 import org.sarden.core.domain.todo.*
 import org.sarden.web.*
 
-given Schema[Schedule] = Schema.derived
+given Schema[TodoSchedule] = Schema.derived
 given Schema[FiniteDuration] = Schema.anyObject
 given Schema[TodoId] = Schema.string
 given Schema[TodoName] = Schema.string
@@ -22,8 +22,8 @@ val todosEndpoint = endpoint.get
   .in("todos")
   .out(
     oneOfBody(
-      jsonBody[List[Todo]],
-      htmlView[List[Todo]](views.todoList),
+      jsonBody[Vector[Todo]],
+      htmlView[Vector[Todo]](views.todoList),
     ),
   )
 
@@ -36,15 +36,15 @@ val deleteTodoEndpoint = endpoint.delete
   .in("todos" / path[String]("id"))
   .out(htmlView[Unit](_ => scalatags.Text.all.div()))
 
-def todoEndpoints(
-    service: TodoService,
-): List[ServerEndpoint[Any, Identity]] =
+def todoEndpoints: List[AppServerEndpoint] =
   List(
-    todosEndpoint.handleSuccess(_ => service.getActiveTodos()),
-    createTodoEndpoint.handleSuccess(createTodo =>
-      service.createTodo(createTodo),
+    todosEndpoint.zServerLogic(_ =>
+      ZIO.serviceWithZIO[TodoService](_.getActiveTodos()),
     ),
-    deleteTodoEndpoint.handleSuccess(id =>
-      service.deleteTodo(TodoId(Ulid.from(id))),
+    createTodoEndpoint.zServerLogic(createTodo =>
+      ZIO.serviceWithZIO[TodoService](_.createTodo(createTodo)),
+    ),
+    deleteTodoEndpoint.zServerLogic(id =>
+      ZIO.serviceWithZIO[TodoService](_.deleteTodo(TodoId(Ulid.from(id)))),
     ),
   )

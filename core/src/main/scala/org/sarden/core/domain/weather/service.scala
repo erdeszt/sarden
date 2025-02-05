@@ -1,19 +1,29 @@
 package org.sarden.core.domain.weather
 
+import io.github.gaelrenoux.tranzactio.doobie.*
+import zio.*
+
 import org.sarden.core.domain.weather.internal.*
 
 trait WeatherService:
-  def addMeasurements(measurements: Vector[WeatherMeasurement]): Unit
+  def addMeasurements(measurements: Vector[WeatherMeasurement]): UIO[Unit]
   def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): List[WeatherMeasurement]
+  ): UIO[Vector[WeatherMeasurement]]
 
-class LiveWeatherService(repo: WeatherRepo) extends WeatherService:
+object WeatherService:
+  val live: URLayer[Database, WeatherService] =
+    ZLayer.fromFunction(LiveWeatherService(LiveWeatherRepo(), _))
 
-  override def addMeasurements(measurements: Vector[WeatherMeasurement]): Unit =
-    repo.addMeasurements(measurements)
+class LiveWeatherService(repo: WeatherRepo, db: Database)
+    extends WeatherService:
+
+  override def addMeasurements(
+      measurements: Vector[WeatherMeasurement],
+  ): UIO[Unit] =
+    db.transactionOrDie(repo.addMeasurements(measurements))
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): List[WeatherMeasurement] =
-    repo.getMeasurements(filters)
+  ): UIO[Vector[WeatherMeasurement]] =
+    db.transactionOrDie(repo.getMeasurements(filters))

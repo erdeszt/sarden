@@ -1,38 +1,30 @@
-package org.sarden.web.endpoints
-
-import scala.concurrent.duration.FiniteDuration
+package org.sarden.web.routes.api
 
 import com.github.f4b6a3.ulid.Ulid
-import sttp.tapir.Schema
 import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
 import zio.*
 
 import org.sarden.core.domain.todo.*
 import org.sarden.web.*
+import org.sarden.web.routes.pages.htmlView
+import org.sarden.web.routes.schemas.todo.given
 
-given Schema[TodoSchedule] = Schema.derived
-given Schema[FiniteDuration] = Schema.anyObject
-given Schema[TodoId] = Schema.string
-given Schema[TodoName] = Schema.string
-given Schema[CreateTodo] = Schema.derived
-given Schema[Todo] = Schema.derived
-
-val todosEndpoint = endpoint.get
+val todosEndpoint = baseEndpoint.get
   .in("todos")
   .out(
     oneOfBody(
       jsonBody[Vector[Todo]],
-      htmlView[Vector[Todo]](views.todoList),
     ),
   )
 
-val createTodoEndpoint = endpoint.post
+val createTodoEndpoint = baseEndpoint.post
   .in("todos")
   .in(jsonBody[CreateTodo])
   .out(jsonBody[Todo])
 
-val deleteTodoEndpoint = endpoint.delete
+// TODO: Remove this view when the htmx delete logic is removed
+val deleteTodoEndpoint = baseEndpoint.delete
   .in("todos" / path[String]("id"))
   .out(htmlView[Unit](_ => scalatags.Text.all.div()))
 

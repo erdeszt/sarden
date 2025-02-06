@@ -1,4 +1,4 @@
-package org.sarden.web.views
+package org.sarden.web.routes.pages
 
 import scalatags.Text
 import scalatags.Text.all.*

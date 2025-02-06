@@ -1,4 +1,4 @@
-package org.sarden.web
+package org.sarden.web.routes.pages
 
 import java.nio.charset.StandardCharsets
 
@@ -20,3 +20,5 @@ def htmlView[T: Schema](
     htmlViewCodec(renderer),
     EndpointIO.Info.empty,
   )
+
+val baseEndpoint = sttp.tapir.ztapir.endpoint

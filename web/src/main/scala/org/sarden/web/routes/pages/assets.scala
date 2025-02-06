@@ -1,4 +1,4 @@
-package org.sarden.web.endpoints
+package org.sarden.web.routes.pages
 
 import java.nio.charset.StandardCharsets
 
@@ -12,7 +12,7 @@ import zio.*
 import org.sarden.web.*
 
 val cssAssetsServerEndpoint: AppServerEndpoint =
-  endpoint.get
+  baseEndpoint.get
     .in("assets" / "css" / path[String]("name"))
     .out(sttp.tapir.header(Header.contentType(MediaType.TextCss)))
     .out(stringBody(StandardCharsets.UTF_8))
@@ -27,7 +27,7 @@ val cssAssetsServerEndpoint: AppServerEndpoint =
     )
 
 val jsAssetsServerEndpoint: AppServerEndpoint =
-  endpoint.get
+  baseEndpoint.get
     .in("assets" / "js" / path[String]("name"))
     .out(sttp.tapir.header(Header.contentType(MediaType.TextJavascript)))
     .out(stringBody(StandardCharsets.UTF_8))

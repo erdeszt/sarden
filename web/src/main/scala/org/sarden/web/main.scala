@@ -13,6 +13,10 @@ import org.sarden.core.*
 import org.sarden.core.domain.plant.PlantService
 import org.sarden.core.domain.todo.TodoService
 import org.sarden.core.domain.weather.WeatherService
+import org.sarden.web.routes.pages.{
+  cssAssetsServerEndpoint,
+  jsAssetsServerEndpoint,
+}
 
 type AppServerEndpoint = ZServerEndpoint[CoreServices, ZioStreams & WebSockets]
 type CoreServices = TodoService & PlantService & WeatherService
@@ -26,18 +30,14 @@ object Main extends ZIOAppDefault:
         Class.forName("org.sqlite.JDBC")
       }
       _ <- migrator.migrate()
-      routes: Routes[
+      allRoutes: Routes[
         CoreServices,
         ZioHttpResponse,
-      ] = ZioHttpInterpreter()
-        .toHttp[CoreServices](
-          List(
-            endpoints.cssAssetsServerEndpoint,
-            endpoints.jsAssetsServerEndpoint,
-          ) ++ endpoints.todoEndpoints ++ endpoints.weatherEndpoints ++ endpoints.plantEndpoints,
-        )
+      ] = ZioHttpInterpreter().toHttp[CoreServices](
+        routes.api.apiRoutes ++ routes.pages.pageRoutes,
+      )
       exitCode <- Server
-        .serve(routes)
+        .serve(allRoutes)
     yield exitCode).provide(
       ZLayer.succeed(Server.Config.default.port(8080)),
       Server.live,

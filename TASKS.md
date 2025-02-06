@@ -1,19 +1,27 @@
 # TASKS:
 ## Features:
-* Weather:
-  * Handle filters when getting measurements
-  * UI for displaying temperatures(plot)
-  * Tests
 * Plant db:
   * Finish implementation
   * Figure out plant details
   * UI
+  * Tests
+* SowingLog:
+  * Finish implementation
+  * UI
+  * Tests
+* Weather:
+  * Handle filters when getting measurements
+  * UI for displaying temperatures(plot)
   * Tests
 * Todos:
   * Finish notifier loop
   * Tests
 
 ## Tech debt:
+* Remove htmx
+* Remove json/doobie instances from domain files
+  * Create api dtos
+  * Create db dtos
 * Setup proper connection pooling
 * Setup proper logging
 * Setup proper error handling

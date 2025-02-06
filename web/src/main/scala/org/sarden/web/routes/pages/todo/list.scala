@@ -1,12 +1,24 @@
-package org.sarden.web.views
+package org.sarden.web.routes.pages.todo
 
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
+import sttp.tapir.ztapir.*
+import zio.*
 import zio.json.*
 
 import org.sarden.core.domain.todo.*
+import org.sarden.web.AppServerEndpoint
+import org.sarden.web.routes.pages.*
+import org.sarden.web.routes.schemas.todo.given
 
-def todoList(todos: Vector[Todo]): TypedTag[String] =
+val listTodos: AppServerEndpoint = baseEndpoint.get
+  .in("todos")
+  .out(htmlView[Vector[Todo]](view))
+  .zServerLogic { (_: Unit) =>
+    ZIO.serviceWithZIO[TodoService](_.getActiveTodos())
+  }
+
+private def view(todos: Vector[Todo]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",

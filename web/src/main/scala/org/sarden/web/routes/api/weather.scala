@@ -1,4 +1,4 @@
-package org.sarden.web.endpoints
+package org.sarden.web.routes.api
 
 import java.time.Instant
 
@@ -10,22 +10,18 @@ import zio.json.JsonCodec
 
 import org.sarden.core.domain.weather.*
 import org.sarden.web.*
+import org.sarden.web.routes.schemas.weather.given
 
-given Schema[Temperature] = Schema.anyObject
-given Schema[SensorId] = Schema.anyObject
-given Schema[WeatherMeasurement] = Schema.derived
 given Schema[EmptyResponse] = Schema.derived
-given Codec[String, SensorId, CodecFormat.TextPlain] =
-  Codec.string.map(Mapping.from(SensorId(_))(_.unwrap))
 
 case class EmptyResponse() derives JsonCodec
 
-val addWeatherMeasurementEndpoint = endpoint.post
+val addWeatherMeasurementEndpoint = baseEndpoint.post
   .in("weather")
   .in(jsonBody[Vector[WeatherMeasurement]])
   .out(jsonBody[EmptyResponse])
 
-val getWeatherMeasurementsEndpoint = endpoint.get
+val getWeatherMeasurementsEndpoint = baseEndpoint.get
   .in("weather")
   .in(query[Option[Instant]]("from"))
   .in(query[Option[Instant]]("to"))

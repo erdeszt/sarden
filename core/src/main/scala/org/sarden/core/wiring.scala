@@ -10,13 +10,6 @@ import org.sarden.core.domain.plant.PlantService
 import org.sarden.core.domain.todo.TodoService
 import org.sarden.core.domain.weather.WeatherService
 
-case class CoreServices(
-    todo: TodoService,
-    weather: WeatherService,
-    plant: PlantService,
-    migrator: Migrator,
-)
-
 def wireLive: URLayer[
   CoreConfig,
   TodoService & WeatherService & PlantService & Migrator,

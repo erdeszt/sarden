@@ -21,6 +21,7 @@
 * Remove json/doobie instances from domain files
   * Create api dtos
   * Create db dtos
+  * Use chimney for mapping
 * Setup proper connection pooling
 * Setup proper logging
 * Setup proper error handling

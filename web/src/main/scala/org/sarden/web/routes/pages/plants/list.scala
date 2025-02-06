@@ -21,6 +21,9 @@ private def view(plants: Vector[Plant]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",
+      div(
+        a(href := "/plants/new", cls := "btn btn-primary", "Add new plant"),
+      ),
       table(
         cls := "table table-striped",
         thead(
@@ -34,7 +37,23 @@ private def view(plants: Vector[Plant]): TypedTag[String] =
           for (plant <- plants)
             yield tr(
               th(attr("scope") := "row", plant.id.unwrap.toString),
-              th(plant.name.unwrap),
+              td(plant.name.unwrap),
+              td(
+                a(
+                  href := s"/plants/edit/${plant.id.unwrap.toString}",
+                  cls := "btn btn-warning",
+                  "Edit",
+                ),
+                form(
+                  action := s"/plants/delete/${plant.id.unwrap.toString}",
+                  method := "post",
+                  button(
+                    `type` := "submit",
+                    cls := "btn btn-danger",
+                    "Delete",
+                  ),
+                ),
+              ),
             ),
         ),
       ),

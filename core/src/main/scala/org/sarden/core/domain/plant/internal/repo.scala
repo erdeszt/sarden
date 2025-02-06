@@ -32,6 +32,9 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
       id <- idGenerator.next()
       now <- zio.Clock.instant
       _ <- tzio {
-        sql"INSERT INTO plant (${id.toString}, ${name.unwrap}, ${now.getEpochSecond})".update.run
+        sql"""INSERT INTO plant
+             |(id, name, created_at)
+             |VALUES
+             |(${id.toString}, ${name.unwrap}, ${now.getEpochSecond})""".stripMargin.update.run
       }.orDie
     yield PlantId(id)

@@ -4,7 +4,7 @@ import java.time.Instant
 
 import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
-import sttp.tapir.{Codec, CodecFormat, Mapping, Schema}
+import sttp.tapir.{Codec, Schema}
 import zio.*
 import zio.json.JsonCodec
 

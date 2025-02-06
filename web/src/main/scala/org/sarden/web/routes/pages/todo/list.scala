@@ -35,9 +35,6 @@ private def view(todos: Vector[Todo]): TypedTag[String] =
           ),
         ),
         tbody(
-          attr("hx-confirm") := "Are you sure?",
-          attr("hx-target") := "closest tr",
-          attr("hx-swap") := "outerHTML swap:1s",
           for (todo <- todos)
             yield tr(
               th(attr("scope") := "row", todo.id.unwrap.toString),
@@ -46,11 +43,14 @@ private def view(todos: Vector[Todo]): TypedTag[String] =
               td(s"${todo.notifyBefore.toHours} Hours"),
               td(todo.lastRun.map(_.toString).getOrElse("n. / a.")),
               td(
-                button(
-                  `type` := "button",
-                  cls := "btn btn-danger",
-                  attr("hx-delete") := s"/todos/${todo.id.unwrap}",
-                  "Delete",
+                form(
+                  action := s"/todos/delete/${todo.id.unwrap}",
+                  method := "post",
+                  button(
+                    `type` := "submit",
+                    cls := "btn btn-danger",
+                    "Delete",
+                  ),
                 ),
               ),
             ),

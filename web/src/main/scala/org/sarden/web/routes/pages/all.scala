@@ -7,4 +7,5 @@ val pageRoutes: List[AppServerEndpoint] = List(
   jsAssetsServerEndpoint,
   plants.listPlants,
   todo.listTodos,
+  todo.deleteTodo,
 )

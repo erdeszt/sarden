@@ -6,6 +6,7 @@ import scala.concurrent.duration.*
 
 import org.flywaydb.core.Flyway
 import zio.*
+import zio.json.*
 import zio.test.*
 
 import org.sarden.core.CoreConfig
@@ -27,13 +28,7 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
       flyway.getConfiguration
       flyway.clean()
       flyway.migrate()
-//
-//      Class.forName("org.sqlite.JDBC")
-//
-//      ConnectionPool.singleton(coreConfig.dbUrl, "", "")
-//
-      ()
-    }
+    }.unit
 
   def spec =
     suite("Live TodoService Test")(

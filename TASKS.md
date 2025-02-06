@@ -18,7 +18,6 @@
   * Tests
 
 ## Tech debt:
-* Remove htmx
 * Remove json/doobie instances from domain files
   * Create api dtos
   * Create db dtos

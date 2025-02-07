@@ -1,7 +1,5 @@
 package org.sarden.core.plant.internal
 
-import scala.util.Try
-
 import com.github.f4b6a3.ulid.Ulid
 import io.scalaland.chimney.dsl.*
 import neotype.interop.chimney.given
@@ -25,16 +23,8 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
       filter: SearchPlantFilters,
   ): URIO[Tx, Vector[Plant]] =
     Tx {
-      sql"SELECT id, name FROM plant".query[PlantDTO].to[Vector]
-    }.flatMap(
-      // TODO: Clean this up
-      ZIO
-        .foreach(_)(dto =>
-          ZIO.fromEither(dto.transformIntoPartial[Plant].asEither),
-        )
-        .mapError(FatalErrors.DataInconsistencyError(_))
-        .orDie,
-    )
+      sql"SELECT id, name FROM plant".queryThrough[PlantDTO, Plant].to[Vector]
+    }
 
   override def createPlant(
       name: PlantName,

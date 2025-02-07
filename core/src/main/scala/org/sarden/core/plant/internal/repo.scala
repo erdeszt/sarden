@@ -1,9 +1,9 @@
-package org.sarden.core.domain.plant.internal
+package org.sarden.core.plant.internal
 
 import zio.*
 
 import org.sarden.core.IdGenerator
-import org.sarden.core.domain.plant.*
+import org.sarden.core.plant.*
 import org.sarden.core.tx.*
 
 private[plant] trait PlantRepo:

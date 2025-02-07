@@ -2,7 +2,7 @@ package org.sarden.web.routes.schemas
 
 import sttp.tapir.*
 
-import org.sarden.core.domain.weather.*
+import org.sarden.core.weather.*
 
 object weather:
   given Schema[Temperature] = Schema.anyObject

@@ -5,10 +5,9 @@ import javax.sql.DataSource
 import io.github.gaelrenoux.tranzactio.doobie.*
 import org.sqlite.SQLiteDataSource
 import zio.*
-
-import org.sarden.core.domain.plant.PlantService
-import org.sarden.core.domain.todo.TodoService
-import org.sarden.core.domain.weather.WeatherService
+import org.sarden.core.plant.PlantService
+import org.sarden.core.todo.TodoService
+import org.sarden.core.weather.WeatherService
 
 def wireLive: URLayer[
   CoreConfig,

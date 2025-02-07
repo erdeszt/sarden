@@ -1,8 +1,7 @@
 package org.sarden.web.routes.schemas
 
 import sttp.tapir.Schema
-
-import org.sarden.core.domain.plant.*
+import org.sarden.core.plant.{Plant, PlantDetails, PlantId, PlantName}
 
 object plants:
 

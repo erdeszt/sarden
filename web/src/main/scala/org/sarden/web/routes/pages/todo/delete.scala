@@ -5,7 +5,7 @@ import sttp.model.{HeaderNames, StatusCode}
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.domain.todo.*
+import org.sarden.core.todo.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 

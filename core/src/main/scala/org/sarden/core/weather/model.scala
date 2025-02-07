@@ -1,9 +1,9 @@
-package org.sarden.core.domain.weather
-
-import java.time.Instant
+package org.sarden.core.weather
 
 import doobie.{Get, Put, Read, Write}
 import zio.json.*
+
+import java.time.Instant
 
 //import org.sarden.core.json.javatime.given
 

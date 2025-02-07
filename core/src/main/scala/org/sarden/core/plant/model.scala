@@ -1,4 +1,4 @@
-package org.sarden.core.domain.plant
+package org.sarden.core.plant
 
 import com.github.f4b6a3.ulid.Ulid
 import doobie.{Get, Read}

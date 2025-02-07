@@ -6,10 +6,10 @@ import scala.concurrent.duration.*
 
 import org.flywaydb.core.Flyway
 import zio.*
-import zio.json.*
 import zio.test.*
 
 import org.sarden.core.CoreConfig
+import org.sarden.core.todo.{CreateTodo, TodoName, TodoSchedule, TodoService}
 
 object LiveTodoServiceTest extends ZIOSpecDefault:
 

@@ -1,4 +1,4 @@
-package org.sarden.core.domain.plant
+package org.sarden.core.plant
 
 // TODO: Use wrapper (maybe zio-nio)
 import java.nio.file.{Files, Paths}
@@ -7,7 +7,7 @@ import zio.*
 import zio.json.*
 
 import org.sarden.core.IdGenerator
-import org.sarden.core.domain.plant.internal.*
+import org.sarden.core.plant.internal.{LivePlantRepo, PlantRepo}
 import org.sarden.core.tx.*
 
 trait PlantService:

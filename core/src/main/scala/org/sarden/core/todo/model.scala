@@ -1,4 +1,4 @@
-package org.sarden.core.domain.todo
+package org.sarden.core.todo
 
 import java.time.{DayOfWeek, Instant, LocalTime, OffsetDateTime, ZoneId}
 import java.util.concurrent.TimeUnit

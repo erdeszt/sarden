@@ -1,9 +1,9 @@
-package org.sarden.core.domain.weather
+package org.sarden.core.weather
 
 import zio.*
 
-import org.sarden.core.domain.weather.internal.*
 import org.sarden.core.tx.*
+import org.sarden.core.weather.internal.{LiveWeatherRepo, WeatherRepo}
 
 trait WeatherService:
   def addMeasurements(measurements: Vector[WeatherMeasurement]): UIO[Unit]

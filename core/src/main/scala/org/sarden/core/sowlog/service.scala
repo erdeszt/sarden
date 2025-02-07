@@ -1,9 +1,9 @@
-package org.sarden.core.domain.sowlog
+package org.sarden.core.sowlog
 
 import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
-import org.sarden.core.domain.sowlog.internal.*
+import org.sarden.core.sowlog.internal.{LiveSowlogRepo, SowlogRepo}
 
 trait SowlogService
 

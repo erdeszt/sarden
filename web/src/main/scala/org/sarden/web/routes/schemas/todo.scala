@@ -4,7 +4,7 @@ import scala.concurrent.duration.FiniteDuration
 
 import sttp.tapir.Schema
 
-import org.sarden.core.domain.todo.*
+import org.sarden.core.todo.*
 
 object todo:
   given Schema[TodoSchedule] = Schema.derived

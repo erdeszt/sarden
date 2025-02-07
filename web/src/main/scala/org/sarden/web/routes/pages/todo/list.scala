@@ -6,19 +6,19 @@ import sttp.tapir.ztapir.*
 import zio.*
 import zio.json.*
 
-import org.sarden.core.domain.todo.*
+import org.sarden.core.todo.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 import org.sarden.web.routes.schemas.todo.given
 
 val listTodos: AppServerEndpoint = baseEndpoint.get
   .in("todos")
-  .out(htmlView[Vector[Todo]](view))
+  .out(htmlView[Vector[Todo]](listView))
   .zServerLogic { (_: Unit) =>
     ZIO.serviceWithZIO[TodoService](_.getActiveTodos())
   }
 
-private def view(todos: Vector[Todo]): TypedTag[String] =
+private def listView(todos: Vector[Todo]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",

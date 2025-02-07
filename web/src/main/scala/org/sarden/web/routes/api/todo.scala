@@ -4,7 +4,7 @@ import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.domain.todo.*
+import org.sarden.core.todo.*
 import org.sarden.web.*
 import org.sarden.web.routes.schemas.todo.given
 

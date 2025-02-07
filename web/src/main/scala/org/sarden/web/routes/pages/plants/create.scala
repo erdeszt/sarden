@@ -7,7 +7,7 @@ import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.domain.plant.*
+import org.sarden.core.plant.{PlantDetails, PlantName, PlantService}
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 
@@ -19,7 +19,7 @@ given Schema[CreatePlantForm] = Schema.derived
 
 val createPlantForm: AppServerEndpoint = baseEndpoint.get
   .in("plants" / "new")
-  .out(htmlView[Unit](view))
+  .out(htmlView[Unit](createView))
   .zServerLogic(_ => ZIO.unit)
 
 val createPlant: AppServerEndpoint = baseEndpoint.post
@@ -37,7 +37,7 @@ val createPlant: AppServerEndpoint = baseEndpoint.post
       .as("/plants"),
   )
 
-private def view(_unit: Unit): TypedTag[String] =
+private def createView(_unit: Unit): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",

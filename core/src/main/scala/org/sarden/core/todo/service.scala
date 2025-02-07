@@ -1,9 +1,9 @@
-package org.sarden.core.domain.todo
+package org.sarden.core.todo
 
 import zio.*
 
 import org.sarden.core.IdGenerator
-import org.sarden.core.domain.todo.internal.*
+import org.sarden.core.todo.internal.{LiveTodoRepo, TodoRepo}
 import org.sarden.core.tx.*
 
 trait TodoService:

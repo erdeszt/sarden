@@ -8,7 +8,7 @@ import sttp.tapir.{Codec, Schema}
 import zio.*
 import zio.json.JsonCodec
 
-import org.sarden.core.domain.weather.*
+import org.sarden.core.weather.*
 import org.sarden.web.*
 import org.sarden.web.routes.schemas.weather.given
 

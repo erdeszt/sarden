@@ -1,4 +1,4 @@
-package org.sarden.core.domain.todo.internal
+package org.sarden.core.todo.internal
 
 import java.time.OffsetDateTime
 
@@ -6,7 +6,8 @@ import com.github.f4b6a3.ulid.Ulid
 import zio.*
 
 import org.sarden.core.IdGenerator
-import org.sarden.core.domain.todo.{*, given}
+import org.sarden.core.todo.*
+import org.sarden.core.todo.given
 import org.sarden.core.tx.*
 
 // Info on jvm date types: https://stackoverflow.com/questions/32437550

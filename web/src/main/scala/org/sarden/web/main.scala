@@ -10,13 +10,9 @@ import zio.*
 import zio.http.{Response as ZioHttpResponse, Routes, Server}
 
 import org.sarden.core.*
-import org.sarden.core.domain.plant.PlantService
-import org.sarden.core.domain.todo.TodoService
-import org.sarden.core.domain.weather.WeatherService
-import org.sarden.web.routes.pages.{
-  cssAssetsServerEndpoint,
-  jsAssetsServerEndpoint,
-}
+import org.sarden.core.plant.PlantService
+import org.sarden.core.todo.TodoService
+import org.sarden.core.weather.WeatherService
 
 type AppServerEndpoint = ZServerEndpoint[CoreServices, ZioStreams & WebSockets]
 type CoreServices = TodoService & PlantService & WeatherService

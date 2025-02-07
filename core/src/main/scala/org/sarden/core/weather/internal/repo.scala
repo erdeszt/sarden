@@ -1,9 +1,9 @@
-package org.sarden.core.domain.weather.internal
+package org.sarden.core.weather.internal
 
 import zio.*
 
-import org.sarden.core.domain.weather.*
 import org.sarden.core.tx.*
+import org.sarden.core.weather.*
 
 private[weather] trait WeatherRepo:
   def addMeasurements(

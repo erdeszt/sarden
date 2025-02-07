@@ -1,6 +1,4 @@
-package org.sarden.core.domain.sowlog.internal
-
-import zio.*
+package org.sarden.core.sowlog.internal
 
 private[sowlog] trait SowlogRepo
 

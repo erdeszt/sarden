@@ -2,16 +2,12 @@ package org.sarden.core.domain.todo.internal
 
 import java.time.OffsetDateTime
 
-import scala.jdk.CollectionConverters.*
-
 import com.github.f4b6a3.ulid.Ulid
-import doobie.implicits.given
-import io.github.gaelrenoux.tranzactio.*
-import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.IdGenerator
 import org.sarden.core.domain.todo.{*, given}
+import org.sarden.core.tx.*
 
 // Info on jvm date types: https://stackoverflow.com/questions/32437550
 
@@ -25,25 +21,25 @@ private[internal] case class TodoDTO(
 )
 
 private[todo] trait TodoRepo:
-  def getActiveTodos(): URIO[Connection, Vector[Todo]]
-  def createTodo(todo: CreateTodo): URIO[Connection, Todo]
-  def updateLastRun(id: TodoId, lastRun: OffsetDateTime): URIO[Connection, Unit]
-  def deleteTodo(id: TodoId): URIO[Connection, Unit]
+  def getActiveTodos(): URIO[Tx, Vector[Todo]]
+  def createTodo(todo: CreateTodo): URIO[Tx, Todo]
+  def updateLastRun(id: TodoId, lastRun: OffsetDateTime): URIO[Tx, Unit]
+  def deleteTodo(id: TodoId): URIO[Tx, Unit]
 
 class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
-  override def getActiveTodos(): URIO[Connection, Vector[Todo]] =
-    tzio {
+  override def getActiveTodos(): URIO[Tx, Vector[Todo]] =
+    Tx {
       sql"SELECT id, name, schedule, notify_before, last_run FROM todo"
         .query[Todo]
         .to[Vector]
-    }.orDie
+    }
 
-  override def createTodo(todo: CreateTodo): URIO[Connection, Todo] =
+  override def createTodo(todo: CreateTodo): URIO[Tx, Todo] =
     for
       id <- idGenerator.next().map(TodoId(_))
       now <- zio.Clock.currentDateTime
-      _ <- tzio {
+      _ <- Tx {
         sql"""INSERT INTO todo
              |(id, name, schedule, notify_before, last_run, created_at)
              |VALUES
@@ -53,7 +49,7 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
              |, ${todo.notifyBefore}
              |, NULL
              |, ${now})""".stripMargin.update.run
-      }.orDie
+      }
     yield Todo(
       id,
       todo.name,
@@ -65,10 +61,10 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
   override def updateLastRun(
       id: TodoId,
       lastRun: OffsetDateTime,
-  ): URIO[Connection, Unit] =
+  ): URIO[Tx, Unit] =
     ZIO.attempt(???).orDie
 
-  override def deleteTodo(id: TodoId): URIO[Connection, Unit] =
-    tzio {
+  override def deleteTodo(id: TodoId): URIO[Tx, Unit] =
+    Tx {
       sql"DELETE FROM todo WHERE id = ${id}".update.run
-    }.orDie.unit
+    }.unit

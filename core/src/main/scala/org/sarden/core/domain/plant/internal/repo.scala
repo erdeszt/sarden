@@ -1,40 +1,38 @@
 package org.sarden.core.domain.plant.internal
 
-import doobie.implicits.given
-import io.github.gaelrenoux.tranzactio.*
-import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.IdGenerator
 import org.sarden.core.domain.plant.*
+import org.sarden.core.tx.*
 
 private[plant] trait PlantRepo:
-  def searchPlants(filter: SearchPlantFilters): URIO[Connection, Vector[Plant]]
+  def searchPlants(filter: SearchPlantFilters): URIO[Tx, Vector[Plant]]
   def createPlant(
       name: PlantName,
       details: PlantDetails,
-  ): URIO[Connection, PlantId]
+  ): URIO[Tx, PlantId]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
   override def searchPlants(
       filter: SearchPlantFilters,
-  ): URIO[Connection, Vector[Plant]] =
-    tzio {
+  ): URIO[Tx, Vector[Plant]] =
+    Tx {
       sql"SELECT id, name FROM plant".query[Plant].to[Vector]
-    }.orDie
+    }
 
   override def createPlant(
       name: PlantName,
       details: PlantDetails,
-  ): URIO[Connection, PlantId] =
+  ): URIO[Tx, PlantId] =
     for
       id <- idGenerator.next()
       now <- zio.Clock.instant
-      _ <- tzio {
+      _ <- Tx {
         sql"""INSERT INTO plant
              |(id, name, created_at)
              |VALUES
              |(${id.toString}, ${name.unwrap}, ${now.getEpochSecond})""".stripMargin.update.run
-      }.orDie
+      }
     yield PlantId(id)

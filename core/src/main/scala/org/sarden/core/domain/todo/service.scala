@@ -1,10 +1,10 @@
 package org.sarden.core.domain.todo
 
-import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.IdGenerator
 import org.sarden.core.domain.todo.internal.*
+import org.sarden.core.tx.*
 
 trait TodoService:
   def deliverPendingNotifications(): UIO[Unit]
@@ -13,23 +13,23 @@ trait TodoService:
   def deleteTodo(id: TodoId): UIO[Unit]
 
 object TodoService:
-  val live: URLayer[Database & IdGenerator, TodoService] = ZLayer.fromZIO {
+  val live: URLayer[Tx.Runner & IdGenerator, TodoService] = ZLayer.fromZIO {
     for
-      db <- ZIO.service[Database]
+      tx <- ZIO.service[Tx.Runner]
       idGenerator <- ZIO.service[IdGenerator]
-    yield LiveTodoService(LiveTodoRepo(idGenerator), db)
+    yield LiveTodoService(LiveTodoRepo(idGenerator), tx)
   }
 
-class LiveTodoService(repo: TodoRepo, db: Database) extends TodoService:
+class LiveTodoService(repo: TodoRepo, tx: Tx.Runner) extends TodoService:
 
   override def deliverPendingNotifications(): UIO[Unit] =
     ???
 
   override def createTodo(todo: CreateTodo): UIO[Todo] =
-    db.transactionOrDie(repo.createTodo(todo))
+    tx.runOrDie(repo.createTodo(todo))
 
   override def getActiveTodos(): UIO[Vector[Todo]] =
-    db.transactionOrDie(repo.getActiveTodos())
+    tx.runOrDie(repo.getActiveTodos())
 
   override def deleteTodo(id: TodoId): UIO[Unit] =
-    db.transactionOrDie(repo.deleteTodo(id))
+    tx.runOrDie(repo.deleteTodo(id))

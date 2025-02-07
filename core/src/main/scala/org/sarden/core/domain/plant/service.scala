@@ -1,14 +1,14 @@
 package org.sarden.core.domain.plant
 
+// TODO: Use wrapper (maybe zio-nio)
 import java.nio.file.{Files, Paths}
 
-import io.github.gaelrenoux.tranzactio.*
-import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 import zio.json.*
 
 import org.sarden.core.IdGenerator
 import org.sarden.core.domain.plant.internal.*
+import org.sarden.core.tx.*
 
 trait PlantService:
   def createPlant(name: PlantName, details: PlantDetails): UIO[PlantId]
@@ -18,20 +18,20 @@ trait PlantService:
   def backupPlants(): UIO[Unit]
 
 object PlantService:
-  val live: URLayer[Database & IdGenerator, PlantService] =
+  val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
     ZLayer.fromZIO {
       for
-        db <- ZIO.service[Database]
+        tx <- ZIO.service[Tx.Runner]
         idGenerator <- ZIO.service[IdGenerator]
-      yield LivePlantService(LivePlantRepo(idGenerator), db)
+      yield LivePlantService(LivePlantRepo(idGenerator), tx)
     }
 
-class LivePlantService(repo: PlantRepo, db: Database) extends PlantService:
+class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
   override def createPlant(
       name: PlantName,
       details: PlantDetails,
   ): UIO[PlantId] =
-    db.transactionOrDie(repo.createPlant(name, details)) <* backupPlants()
+    tx.runOrDie(repo.createPlant(name, details)) <* backupPlants()
 
   override def deletePlant(id: PlantId): UIO[Unit] =
     ZIO.attempt(???).orDie
@@ -40,10 +40,10 @@ class LivePlantService(repo: PlantRepo, db: Database) extends PlantService:
     ZIO.attempt(???).orDie
 
   override def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]] =
-    db.transactionOrDie(repo.searchPlants(filters))
+    tx.runOrDie(repo.searchPlants(filters))
 
   override def backupPlants(): UIO[Unit] =
-    db.transactionOrDie(repo.searchPlants(SearchPlantFilters.empty))
+    tx.runOrDie(repo.searchPlants(SearchPlantFilters.empty))
       .flatMap { plants =>
         ZIO.attemptBlocking {
           Files.writeString(Paths.get("plants.json"), plants.toJson)

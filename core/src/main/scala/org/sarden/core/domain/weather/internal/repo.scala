@@ -1,39 +1,36 @@
 package org.sarden.core.domain.weather.internal
 
-import doobie.Update
-import doobie.implicits.given
-import io.github.gaelrenoux.tranzactio.*
-import io.github.gaelrenoux.tranzactio.doobie.*
 import zio.*
 
 import org.sarden.core.domain.weather.*
+import org.sarden.core.tx.*
 
 private[weather] trait WeatherRepo:
   def addMeasurements(
       measurements: Vector[WeatherMeasurement],
-  ): URIO[Connection, Unit]
+  ): URIO[Tx, Unit]
   def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): URIO[Connection, Vector[WeatherMeasurement]]
+  ): URIO[Tx, Vector[WeatherMeasurement]]
 
 class LiveWeatherRepo extends WeatherRepo:
 
   override def addMeasurements(
       measurements: Vector[WeatherMeasurement],
-  ): URIO[Connection, Unit] =
-    tzio {
-      Update[WeatherMeasurement](
+  ): URIO[Tx, Unit] =
+    Tx {
+      Tx.Bulk[WeatherMeasurement](
         """INSERT INTO weather_measurement
            |(collected_at, temperature, sensor_id)
            |VALUES (?, ?, ?)""".stripMargin,
       ).updateMany(measurements)
-    }.orDie.unit
+    }.unit
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
-  ): URIO[Connection, Vector[WeatherMeasurement]] =
-    tzio {
+  ): URIO[Tx, Vector[WeatherMeasurement]] =
+    Tx {
       sql"SELECT * FROM weather_measurement"
         .query[WeatherMeasurement]
         .to[Vector]
-    }.orDie
+    }

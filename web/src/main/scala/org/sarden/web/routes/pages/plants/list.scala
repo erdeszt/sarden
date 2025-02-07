@@ -36,16 +36,16 @@ private def listView(plants: Vector[Plant]): TypedTag[String] =
         tbody(
           for (plant <- plants)
             yield tr(
-              th(attr("scope") := "row", plant.id.unwrap.toString),
-              td(plant.name.unwrap),
+//              th(attr("scope") := "row", plant.id.unwrap.toString),
+//              td(plant.name.unwrap),
               td(
-                a(
-                  href := s"/plants/edit/${plant.id.unwrap.toString}",
-                  cls := "btn btn-warning",
-                  "Edit",
-                ),
+//                a(
+//                  href := s"/plants/edit/${plant.id.unwrap.toString}",
+//                  cls := "btn btn-warning",
+//                  "Edit",
+//                ),
                 form(
-                  action := s"/plants/delete/${plant.id.unwrap.toString}",
+//                  action := s"/plants/delete/${plant.id.unwrap.toString}",
                   method := "post",
                   button(
                     `type` := "submit",

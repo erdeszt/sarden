@@ -15,7 +15,6 @@ trait PlantService:
   def deletePlant(id: PlantId): UIO[Unit]
   def getPlant(id: PlantId): UIO[Option[Plant]]
   def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]]
-  def backupPlants(): UIO[Unit]
 
 object PlantService:
   val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
@@ -31,7 +30,7 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
       name: PlantName,
       details: PlantDetails,
   ): UIO[PlantId] =
-    tx.runOrDie(repo.createPlant(name, details)) <* backupPlants()
+    tx.runOrDie(repo.createPlant(name, details))
 
   override def deletePlant(id: PlantId): UIO[Unit] =
     ZIO.attempt(???).orDie
@@ -41,12 +40,3 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
 
   override def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]] =
     tx.runOrDie(repo.searchPlants(filters))
-
-  override def backupPlants(): UIO[Unit] =
-    tx.runOrDie(repo.searchPlants(SearchPlantFilters.empty))
-      .flatMap { plants =>
-        ZIO.attemptBlocking {
-          Files.writeString(Paths.get("plants.json"), plants.toJson)
-        }.orDie
-      }
-      .unit

@@ -1,8 +1,14 @@
 package org.sarden.core.plant.internal
 
+import scala.util.Try
+
+import com.github.f4b6a3.ulid.Ulid
+import io.scalaland.chimney.dsl.*
+import neotype.interop.chimney.given
+import neotype.interop.doobie.given
 import zio.*
 
-import org.sarden.core.IdGenerator
+import org.sarden.core.*
 import org.sarden.core.plant.*
 import org.sarden.core.tx.*
 
@@ -19,8 +25,16 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
       filter: SearchPlantFilters,
   ): URIO[Tx, Vector[Plant]] =
     Tx {
-      sql"SELECT id, name FROM plant".query[Plant].to[Vector]
-    }
+      sql"SELECT id, name FROM plant".query[PlantDTO].to[Vector]
+    }.flatMap(
+      // TODO: Clean this up
+      ZIO
+        .foreach(_)(dto =>
+          ZIO.fromEither(dto.transformIntoPartial[Plant].asEither),
+        )
+        .mapError(FatalErrors.DataInconsistencyError(_))
+        .orDie,
+    )
 
   override def createPlant(
       name: PlantName,
@@ -33,6 +47,6 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
         sql"""INSERT INTO plant
              |(id, name, created_at)
              |VALUES
-             |(${id.toString}, ${name.unwrap}, ${now.getEpochSecond})""".stripMargin.update.run
+             |(${id.toString}, ${name}, ${now.getEpochSecond})""".stripMargin.update.run
       }
     yield PlantId(id)

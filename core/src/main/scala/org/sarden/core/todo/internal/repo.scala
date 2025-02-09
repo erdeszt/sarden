@@ -1,20 +1,13 @@
 package org.sarden.core.todo.internal
 
-import java.time.OffsetDateTime
-
-import scala.concurrent.duration.FiniteDuration
-
 import io.scalaland.chimney.dsl.*
-import io.scalaland.chimney.partial.Result
-import neotype.interop.chimney.given
-import neotype.interop.doobie.given
 import zio.*
 
 import org.sarden.core.IdGenerator
-import org.sarden.core.time.given
+import org.sarden.core.mapping.given
+import org.sarden.core.time.*
 import org.sarden.core.todo.*
 import org.sarden.core.tx.*
-import org.sarden.core.ulid.given
 
 // Info on jvm date types: https://stackoverflow.com/questions/32437550
 

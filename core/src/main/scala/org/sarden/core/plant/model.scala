@@ -5,9 +5,7 @@ import neotype.*
 import org.sarden.core.ulid.*
 
 type PlantName = PlantName.Type
-object PlantName extends Newtype[String]:
-  override inline def validate(input: String): Boolean =
-    input.nonEmpty
+object PlantName extends Newtype[String]
 
 type PlantId = PlantId.Type
 object PlantId extends UlidNewtype

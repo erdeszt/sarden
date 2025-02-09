@@ -1,13 +1,13 @@
 package org.sarden.web.routes.pages.plants
 
 import io.scalaland.chimney.dsl.*
-import neotype.interop.chimney.given
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
 import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
+import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*

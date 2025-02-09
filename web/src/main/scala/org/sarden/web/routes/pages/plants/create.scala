@@ -1,5 +1,6 @@
 package org.sarden.web.routes.pages.plants
 
+import io.scalaland.chimney.dsl.*
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
 import sttp.model.{HeaderNames, StatusCode}
@@ -7,7 +8,8 @@ import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.plant.{PlantDetails, PlantName, PlantService}
+import org.sarden.core.mapping.given
+import org.sarden.core.plant.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 
@@ -32,7 +34,10 @@ val createPlant: AppServerEndpoint = baseEndpoint.post
   .zServerLogic { formData =>
     ZIO.serviceWithZIO[PlantService]:
       // TODO: Make safely
-      _.createPlant(PlantName.unsafeMake(formData.name), PlantDetails())
+      _.createPlant(
+        formData.name.transformInto[PlantName],
+        PlantDetails(),
+      )
         .as("/plants")
   }
 

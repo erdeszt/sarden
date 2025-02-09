@@ -1,14 +1,11 @@
 package org.sarden.core.plant.internal
 
-import io.scalaland.chimney.dsl.*
-import neotype.interop.chimney.given
-import neotype.interop.doobie.given
 import zio.*
 
-import org.sarden.core.*
+import org.sarden.core.IdGenerator
+import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.core.tx.*
-import org.sarden.core.ulid.given
 
 private[plant] trait PlantRepo:
   def searchPlants(filter: SearchPlantFilters): URIO[Tx, Vector[Plant]]

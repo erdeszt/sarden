@@ -1,11 +1,6 @@
 package org.sarden.web.routes.pages.todo
 
-import scala.concurrent.duration.FiniteDuration
-
 import io.scalaland.chimney.dsl.*
-import io.scalaland.chimney.partial.Result
-import io.scalaland.chimney.{PartialTransformer, Transformer}
-import neotype.interop.chimney.given
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
 import sttp.tapir.Schema
@@ -13,7 +8,8 @@ import sttp.tapir.ztapir.*
 import zio.*
 import zio.json.*
 
-import org.sarden.core.time.given
+import org.sarden.core.mapping.{*, given}
+import org.sarden.core.time.*
 import org.sarden.core.todo.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*

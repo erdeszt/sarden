@@ -16,6 +16,11 @@ import org.sarden.core.SystemErrors.InvalidTimeUnitError
 
 object time:
 
+  export java.time.{Instant, LocalTime, OffsetDateTime, ZoneId}
+  export java.util.concurrent.TimeUnit
+
+  export scala.concurrent.duration.FiniteDuration
+
   given JsonDecoder[FiniteDuration] = JsonDecoder[Map[String, Json]].map: raw =>
     FiniteDuration(
       raw("length").as[Long].toOption.get,

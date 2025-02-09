@@ -3,15 +3,13 @@ package org.sarden.web.routes.api
 import java.time.OffsetDateTime
 
 import io.scalaland.chimney.dsl.*
-import neotype.interop.chimney.given
 import sttp.tapir.Schema
 import sttp.tapir.json.zio.*
 import sttp.tapir.ztapir.*
 import zio.*
-import zio.json.JsonCodec
+import zio.json.*
 
-import org.sarden.core.SystemErrors.DataInconsistencyError
-import org.sarden.core.time.given
+import org.sarden.core.mapping.{*, given}
 import org.sarden.core.weather.*
 import org.sarden.web.*
 

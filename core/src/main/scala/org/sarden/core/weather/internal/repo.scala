@@ -2,10 +2,9 @@ package org.sarden.core.weather.internal
 
 import cats.syntax.functor.given
 import io.scalaland.chimney.dsl.*
-import neotype.interop.chimney.given
 import zio.*
 
-import org.sarden.core.time.given
+import org.sarden.core.mapping.given
 import org.sarden.core.tx.*
 import org.sarden.core.weather.*
 

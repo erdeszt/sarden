@@ -1,6 +1,6 @@
 package org.sarden.core
 
-import doobie.util.{Read, Write}
+import doobie.util.{Get, Put}
 import io.scalaland.chimney.partial.Result
 import io.scalaland.chimney.{PartialTransformer, Transformer}
 import neotype.Newtype
@@ -20,6 +20,7 @@ object ulid:
             Left(error.getMessage)
 
     given Transformer[self.Type, String] = (ulid: self.Type) => ulid.toString
+    given CanEqual[self.Type, self.Type] = CanEqual.derived
 
-  given Read[Ulid] = Read[String].map(com.github.f4b6a3.ulid.Ulid.from)
-  given Write[Ulid] = Write[String].contramap(_.toString)
+  given Get[Ulid] = Get[String].map(com.github.f4b6a3.ulid.Ulid.from)
+  given Put[Ulid] = Put[String].contramap(_.toString)

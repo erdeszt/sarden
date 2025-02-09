@@ -7,6 +7,7 @@ import io.github.gaelrenoux.tranzactio.doobie.*
 import io.github.gaelrenoux.tranzactio.{ErrorStrategies, ErrorStrategiesRef}
 import io.scalaland.chimney.PartialTransformer
 import io.scalaland.chimney.dsl.*
+import io.scalaland.chimney.partial.Result
 import zio.*
 
 import org.sarden.core.FatalErrors.DataInconsistencyError
@@ -55,6 +56,22 @@ object tx:
               throw DataInconsistencyError(error)
             case Right(value) => value
 
+        },
+      )
+
+    def queryTransform[DTO: Read, DO]: QueryTransformer[DTO, DO] =
+      QueryTransformer(fragment)
+
+  class QueryTransformer[DTO, DO](fragment: Fragment):
+    def apply(
+        f: DTO => Result[DO],
+    )(using read: Read[DTO]): Query0[DO] =
+      fragment.query[DO](using
+        read.map { dto =>
+          f(dto).asEither match
+            case Left(error) =>
+              throw DataInconsistencyError(error)
+            case Right(value) => value
         },
       )
 

@@ -1,9 +1,8 @@
 package org.sarden.core.plant
 
-import com.github.f4b6a3.ulid.Ulid
 import neotype.*
 
-import org.sarden.core.UlidNewtype
+import org.sarden.core.ulid.*
 
 type PlantName = PlantName.Type
 object PlantName extends Newtype[String]:

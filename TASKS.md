@@ -2,11 +2,15 @@
 ## Features:
 * Plant db:
   * Finish implementation
+    * Add/Delete variety
+    * List varieties on plant site
   * Figure out plant details
   * UI
   * Tests
 * SowingLog:
   * Finish implementation
+    * Sow date, plant, variety, pot/direct, indoor/outdoor/greenhouse, amount(per cell, cell) 
+    * List plantings
   * UI
   * Tests
 * Weather:

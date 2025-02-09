@@ -1,49 +1,24 @@
 package org.sarden.core.weather
 
-import doobie.{Get, Put, Read, Write}
-import zio.json.*
+import java.time.OffsetDateTime
 
-import java.time.Instant
-
-//import org.sarden.core.json.javatime.given
+import neotype.*
 
 case class WeatherMeasurement(
-    collectedAt: Instant,
+    collectedAt: OffsetDateTime,
     temperature: Temperature,
     source: SensorId,
-) derives JsonCodec,
-      Read,
-      Write
+)
 
-opaque type Temperature = Double
+type Temperature = Temperature.Type
+object Temperature extends Newtype[Double]
 
-object Temperature:
-  def apply(raw: Double): Temperature = raw
-
-  given Get[Temperature] = Get[Double].map(raw => raw)
-  given Put[Temperature] = Put[Double].contramap(raw => raw)
-  given JsonEncoder[Temperature] = JsonEncoder[Double].contramap(raw => raw)
-  given JsonDecoder[Temperature] = JsonDecoder[Double].map(raw => raw)
-
-opaque type SensorId = String
-
-extension (sensorId: SensorId) def unwrap: String = sensorId
-
-object SensorId:
-  def apply(raw: String): SensorId = raw
-
-  given Get[SensorId] = Get[String].map(raw => raw)
-  given Put[SensorId] = Put[String].contramap(raw => raw)
-  given JsonEncoder[SensorId] = JsonEncoder[String].contramap(raw => raw)
-  given JsonDecoder[SensorId] = JsonDecoder[String].map(raw => raw)
-
-given instantGet: Get[Instant] =
-  Get[Long].map(raw => Instant.ofEpochSecond(raw))
-given instantPut: Put[Instant] =
-  Put[Long].contramap(instant => instant.getEpochSecond)
+// TODO: Ulid
+type SensorId = SensorId.Type
+object SensorId extends Newtype[String]
 
 case class GetMeasurementsFilters(
-    from: Option[Instant],
-    to: Option[Instant],
+    from: Option[OffsetDateTime],
+    to: Option[OffsetDateTime],
     sensorId: Option[SensorId],
 )

@@ -67,6 +67,12 @@ object time:
 
   given Transformer[OffsetDateTime, Long] = _.toEpochSecond
 
+  given instantGet: Get[Instant] =
+    Get[Long].map(raw => Instant.ofEpochSecond(raw))
+
+  given instantPut: Put[Instant] =
+    Put[Long].contramap(instant => instant.getEpochSecond)
+
   given JsonDecoder[LocalTime] = JsonDecoder[Map[String, Json]].map { raw =>
     LocalTime.of(
       raw("hour").as[Int].toOption.get,

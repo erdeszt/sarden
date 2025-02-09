@@ -18,6 +18,7 @@
   * Tests
 
 ## Tech debt:
+* Use iron to refine domain types
 * Remove json/doobie instances from domain files
   * Create api dtos
   * Create db dtos

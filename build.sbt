@@ -32,6 +32,9 @@ lazy val core = (project in file("core"))
       "org.flywaydb" % "flyway-core" % Versions.flyway,
       "org.xerial" % "sqlite-jdbc" % Versions.sqlite,
       "io.github.gaelrenoux" %% "tranzactio-doobie" % Versions.tranzactio,
+      "io.github.kitlangton" %% "neotype" % Versions.neotype,
+      "io.github.kitlangton" %% "neotype-doobie" % Versions.neotype,
+      "io.github.kitlangton" %% "neotype-chimney" % Versions.neotype,
     ),
     libraryDependencies ++= Seq(
       "dev.zio" %% "zio-test" % Versions.zio,

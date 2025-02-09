@@ -2,24 +2,21 @@ package org.sarden.core.todo.internal
 
 import java.time.OffsetDateTime
 
-import com.github.f4b6a3.ulid.Ulid
+import scala.concurrent.duration.FiniteDuration
+
+import io.scalaland.chimney.dsl.*
+import io.scalaland.chimney.partial.Result
+import neotype.interop.chimney.given
+import neotype.interop.doobie.given
 import zio.*
 
 import org.sarden.core.IdGenerator
+import org.sarden.core.time.given
 import org.sarden.core.todo.*
-import org.sarden.core.todo.given
 import org.sarden.core.tx.*
+import org.sarden.core.ulid.given
 
 // Info on jvm date types: https://stackoverflow.com/questions/32437550
-
-private[internal] case class TodoDTO(
-    id: String,
-    name: String,
-    schedule: String,
-    notifyBefore: String,
-    lastRun: Option[Long],
-    createdAt: Long,
-)
 
 private[todo] trait TodoRepo:
   def getActiveTodos(): URIO[Tx, Vector[Todo]]
@@ -31,8 +28,10 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
   override def getActiveTodos(): URIO[Tx, Vector[Todo]] =
     Tx {
-      sql"SELECT id, name, schedule, notify_before, last_run FROM todo"
-        .query[Todo]
+      sql"SELECT * FROM todo"
+        .queryTransform[TodoDTO, Todo](
+          _.intoPartial[Todo].transform,
+        )
         .to[Vector]
     }
 
@@ -46,7 +45,7 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
              |VALUES
              |( ${id}
              |, ${todo.name}
-             |, ${todo.schedule}
+             |, ${todo.schedule.transformInto[String]}
              |, ${todo.notifyBefore}
              |, NULL
              |, ${now})""".stripMargin.update.run

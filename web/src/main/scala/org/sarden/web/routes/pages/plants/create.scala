@@ -32,7 +32,8 @@ val createPlant: AppServerEndpoint = baseEndpoint.post
   .zServerLogic(formData =>
     ZIO
       .serviceWithZIO[PlantService](
-        _.createPlant(PlantName(formData.name), PlantDetails()),
+        // TODO: Make safely
+        _.createPlant(PlantName.unsafeMake(formData.name), PlantDetails()),
       )
       .as("/plants"),
   )

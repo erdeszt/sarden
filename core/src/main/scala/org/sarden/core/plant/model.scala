@@ -1,29 +1,16 @@
 package org.sarden.core.plant
 
-import com.github.f4b6a3.ulid.Ulid
-import doobie.{Get, Read}
-import zio.json.*
+import neotype.*
 
-opaque type PlantName = String
+import org.sarden.core.ulid.*
 
-extension (name: PlantName) def unwrap: String = name
+type PlantName = PlantName.Type
+object PlantName extends Newtype[String]:
+  override inline def validate(input: String): Boolean =
+    input.nonEmpty
 
-object PlantName:
-  def apply(raw: String): PlantName = raw
-  given Get[PlantName] = Get[String].map(raw => raw)
-  given JsonDecoder[PlantName] = JsonDecoder[String].map(raw => raw)
-  given JsonEncoder[PlantName] = JsonEncoder[String].contramap(raw => raw)
-
-opaque type PlantId = Ulid
-
-extension (id: PlantId) def unwrap: Ulid = id
-
-object PlantId:
-  def apply(raw: Ulid): PlantId = raw
-  given Get[PlantId] = Get[String].map(raw => Ulid.from(raw))
-  given JsonDecoder[PlantId] =
-    JsonDecoder[String].map(raw => Ulid.from(raw))
-  given JsonEncoder[PlantId] = JsonEncoder[String].contramap(id => id.toString)
+type PlantId = PlantId.Type
+object PlantId extends UlidNewtype
 
 case class PlantDetails(
 )
@@ -31,8 +18,7 @@ case class PlantDetails(
 case class Plant(
     id: PlantId,
     name: PlantName,
-) derives Read,
-      JsonCodec
+)
 
 case class SearchPlantFilters(
     name: Option[PlantName],

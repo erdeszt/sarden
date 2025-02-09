@@ -10,7 +10,7 @@ import io.scalaland.chimney.dsl.*
 import io.scalaland.chimney.partial.Result
 import zio.*
 
-import org.sarden.core.FatalErrors.DataInconsistencyError
+import org.sarden.core.SystemErrors.DataInconsistencyError
 
 object tx:
   type Tx = Connection

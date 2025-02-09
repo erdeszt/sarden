@@ -1,24 +1,51 @@
 package org.sarden.web.routes.pages.todo
 
+import scala.concurrent.duration.FiniteDuration
+
+import io.scalaland.chimney.dsl.*
+import io.scalaland.chimney.partial.Result
+import io.scalaland.chimney.{PartialTransformer, Transformer}
+import neotype.interop.chimney.given
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
+import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 import zio.json.*
 
+import org.sarden.core.time.given
 import org.sarden.core.todo.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
-import org.sarden.web.routes.schemas.todo.given
+
+// TODO: Move to common place and define better
+given Schema[FiniteDuration] = Schema.anyObject
+
+given JsonCodec[TodoSchedule] = JsonCodec.derived
+
+given PartialTransformer[String, TodoSchedule] = PartialTransformer: raw =>
+  Result.fromEitherString(raw.fromJson)
+
+given Transformer[TodoSchedule, String] = _.toJson
+
+private[pages] case class TodoVM(
+    id: String,
+    name: String,
+    schedule: String,
+    notifyBefore: FiniteDuration,
+    lastRun: Option[Long],
+) derives Schema
 
 val listTodos: AppServerEndpoint = baseEndpoint.get
   .in("todos")
-  .out(htmlView[Vector[Todo]](listView))
+  .out(htmlView[Vector[TodoVM]](listView))
   .zServerLogic { (_: Unit) =>
-    ZIO.serviceWithZIO[TodoService](_.getActiveTodos())
+    ZIO.serviceWithZIO[TodoService](
+      _.getActiveTodos().map(_.map(_.transformInto[TodoVM])),
+    )
   }
 
-private def listView(todos: Vector[Todo]): TypedTag[String] =
+private def listView(todos: Vector[TodoVM]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",
@@ -37,14 +64,14 @@ private def listView(todos: Vector[Todo]): TypedTag[String] =
         tbody(
           for (todo <- todos)
             yield tr(
-              th(attr("scope") := "row", todo.id.unwrap.toString),
-              td(todo.name.unwrap),
-              td(todo.schedule.toJson),
+              th(attr("scope") := "row", todo.id),
+              td(todo.name),
+              td(todo.schedule),
               td(s"${todo.notifyBefore.toHours} Hours"),
               td(todo.lastRun.map(_.toString).getOrElse("n. / a.")),
               td(
                 form(
-                  action := s"/todos/delete/${todo.id.unwrap}",
+                  action := s"/todos/delete/${todo.id}",
                   method := "post",
                   button(
                     `type` := "submit",

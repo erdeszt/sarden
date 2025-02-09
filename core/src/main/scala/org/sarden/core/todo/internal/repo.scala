@@ -31,21 +31,7 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
     Tx {
       sql"SELECT * FROM todo"
         .queryTransform[TodoDTO, Todo](
-          _.intoPartial[Todo]
-            .withFieldComputedPartial(
-              _.schedule,
-              dto =>
-                Result.fromEitherString(dto.schedule.fromJson[TodoSchedule]),
-            )
-            .withFieldComputed(
-              _.lastRun,
-              dto =>
-                dto.lastRun.map(raw =>
-                  OffsetDateTime
-                    .ofInstant(Instant.ofEpochSecond(raw), ZoneId.of("UTC")),
-                ),
-            )
-            .transform,
+          _.intoPartial[Todo].transform,
         )
         .to[Vector]
     }

@@ -4,12 +4,15 @@ import java.time.{Instant, LocalTime, OffsetDateTime, ZoneId}
 import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 
 import doobie.{Get, Put}
 import io.scalaland.chimney.partial.Result
 import io.scalaland.chimney.{PartialTransformer, Transformer}
 import zio.json.*
 import zio.json.ast.Json
+
+import org.sarden.core.SystemErrors.InvalidTimeUnitError
 
 object time:
 
@@ -55,6 +58,15 @@ object time:
   given JsonEncoder[OffsetDateTime] =
     JsonEncoder[Long].contramap(dateTime => dateTime.toInstant.getEpochSecond)
 
+  given PartialTransformer[Long, OffsetDateTime] = PartialTransformer: raw =>
+    Result.fromEitherString(
+      Try(
+        OffsetDateTime.ofInstant(Instant.ofEpochSecond(raw), ZoneId.of("UTC")),
+      ).toEither.left.map(_.getMessage),
+    )
+
+  given Transformer[OffsetDateTime, Long] = _.toEpochSecond
+
   given JsonDecoder[LocalTime] = JsonDecoder[Map[String, Json]].map { raw =>
     LocalTime.of(
       raw("hour").as[Int].toOption.get,
@@ -72,9 +84,6 @@ object time:
 
   given CanEqual[TimeUnit, TimeUnit] = CanEqual.derived
 
-  class InvalidTimeUnitException(rawValue: String)
-      extends Exception(s"Invalid TimeUnit: `${rawValue}`")
-
   object TimeUnitCodec:
     def write: TimeUnit => String = {
       case TimeUnit.NANOSECONDS  => "NANOSECONDS"
@@ -86,7 +95,7 @@ object time:
       case TimeUnit.DAYS         => "DAYS"
     }
 
-    def read: String => Either[InvalidTimeUnitException, TimeUnit] = {
+    def read: String => Either[InvalidTimeUnitError, TimeUnit] = {
       case "NANOSECONDS"  => Right(TimeUnit.NANOSECONDS)
       case "MICROSECONDS" => Right(TimeUnit.MICROSECONDS)
       case "MILLISECONDS" => Right(TimeUnit.MILLISECONDS)
@@ -94,5 +103,5 @@ object time:
       case "MINUTES"      => Right(TimeUnit.MINUTES)
       case "HOURS"        => Right(TimeUnit.HOURS)
       case "DAYS"         => Right(TimeUnit.DAYS)
-      case other          => Left(InvalidTimeUnitException(other))
+      case other          => Left(InvalidTimeUnitError(other))
     }

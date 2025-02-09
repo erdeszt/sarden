@@ -16,25 +16,25 @@ val cssAssetsServerEndpoint: AppServerEndpoint =
     .in("assets" / "css" / path[String]("name"))
     .out(sttp.tapir.header(Header.contentType(MediaType.TextCss)))
     .out(stringBody(StandardCharsets.UTF_8))
-    .zServerLogic(name =>
+    .zServerLogic { name =>
       ZIO.attemptBlocking {
         Using(
           Source.fromURL(Main.getClass.getResource(s"/assets/css/${name}")),
         )(
           _.mkString(""),
         ).get
-      }.orDie,
-    )
+      }.orDie
+    }
 
 val jsAssetsServerEndpoint: AppServerEndpoint =
   baseEndpoint.get
     .in("assets" / "js" / path[String]("name"))
     .out(sttp.tapir.header(Header.contentType(MediaType.TextJavascript)))
     .out(stringBody(StandardCharsets.UTF_8))
-    .zServerLogic(name =>
+    .zServerLogic { name =>
       ZIO.attemptBlocking {
         Using(Source.fromURL(Main.getClass.getResource(s"/assets/js/${name}")))(
           _.mkString(""),
         ).get
-      }.orDie,
-    )
+      }.orDie
+    }

@@ -42,51 +42,22 @@ def weatherEndpoints: List[AppServerEndpoint] =
   List(
     addWeatherMeasurementEndpoint.zServerLogic { measurementDtos =>
       for
-        measurements <- ZIO
-          .foreach(measurementDtos) { dto =>
-            // TODO: Extract this pattern
-            ZIO.fromEither(
-              dto
-                .transformIntoPartial[WeatherMeasurement]
-                .asEither
-                .left
-                .map(DataInconsistencyError(_)),
-            )
-          }
-          .orDie
+        measurements <- ZIO.foreach(measurementDtos):
+          _.transformIntoPartialZIOOrDie[WeatherMeasurement]
         _ <- ZIO.serviceWithZIO[WeatherService]:
           _.addMeasurements(measurements)
       yield EmptyResponse()
     },
     getWeatherMeasurementsEndpoint.zServerLogic { (fromRaw, toRaw, sourceRaw) =>
       for
-        from <- ZIO
-          .foreach(fromRaw) { raw =>
-            ZIO.fromEither(
-              raw
-                .transformIntoPartial[OffsetDateTime]
-                .asEither
-                .left
-                .map(DataInconsistencyError(_)),
-            )
-          }
-          .orDie
-        to <- ZIO
-          .foreach(toRaw) { raw =>
-            ZIO.fromEither(
-              raw
-                .transformIntoPartial[OffsetDateTime]
-                .asEither
-                .left
-                .map(DataInconsistencyError(_)),
-            )
-          }
-          .orDie
+        from <- ZIO.foreach(fromRaw):
+          _.transformIntoPartialZIOOrDie[OffsetDateTime]
+        to <- ZIO.foreach(toRaw):
+          _.transformIntoPartialZIOOrDie[OffsetDateTime]
         source = sourceRaw.map(SensorId(_))
         measurements <- ZIO.serviceWithZIO[WeatherService]:
-          _.getMeasurements(GetMeasurementsFilters(from, to, source)).map(
-            _.map(_.transformInto[WeatherMeasurementDTO]),
-          )
+          _.getMeasurements(GetMeasurementsFilters(from, to, source)).map:
+            _.map(_.transformInto[WeatherMeasurementDTO])
       yield measurements
     },
   )

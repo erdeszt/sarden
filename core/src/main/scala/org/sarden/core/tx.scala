@@ -50,13 +50,11 @@ object tx:
         partialTransformer: PartialTransformer.AutoDerived[DTO, DO],
     ): Query0[DO] =
       fragment.query[DO](using
-        read.map { dto =>
+        read.map: dto =>
           dto.transformIntoPartial[DO].asEither match
             case Left(error) =>
               throw DataInconsistencyError(error)
-            case Right(value) => value
-
-        },
+            case Right(value) => value,
       )
 
     def queryTransform[DTO: Read, DO]: QueryTransformer[DTO, DO] =
@@ -67,12 +65,11 @@ object tx:
         f: DTO => Result[DO],
     )(using read: Read[DTO]): Query0[DO] =
       fragment.query[DO](using
-        read.map { dto =>
+        read.map: dto =>
           f(dto).asEither match
             case Left(error) =>
               throw DataInconsistencyError(error)
-            case Right(value) => value
-        },
+            case Right(value) => value,
       )
 
   export doobie.syntax.string.*

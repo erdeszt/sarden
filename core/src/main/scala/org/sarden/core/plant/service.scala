@@ -14,12 +14,11 @@ trait PlantService:
 
 object PlantService:
   val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
-    ZLayer.fromZIO {
+    ZLayer.fromZIO:
       for
         tx <- ZIO.service[Tx.Runner]
         idGenerator <- ZIO.service[IdGenerator]
       yield LivePlantService(LivePlantRepo(idGenerator), tx)
-    }
 
 class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
   override def createPlant(

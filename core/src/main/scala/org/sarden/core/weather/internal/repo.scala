@@ -1,5 +1,6 @@
 package org.sarden.core.weather.internal
 
+import cats.syntax.functor.given
 import io.scalaland.chimney.dsl.*
 import neotype.interop.chimney.given
 import zio.*
@@ -21,19 +22,18 @@ class LiveWeatherRepo extends WeatherRepo:
   override def addMeasurements(
       measurements: Vector[WeatherMeasurement],
   ): URIO[Tx, Unit] =
-    Tx {
+    Tx:
       Tx.Bulk[WeatherMeasurementDTO](
         """INSERT INTO weather_measurement
            |(collected_at, temperature, sensor_id)
            |VALUES (?, ?, ?)""".stripMargin,
       ).updateMany(measurements.map(_.transformInto[WeatherMeasurementDTO]))
-    }.unit
+        .as(())
 
   override def getMeasurements(
       filters: GetMeasurementsFilters,
   ): URIO[Tx, Vector[WeatherMeasurement]] =
-    Tx {
+    Tx:
       sql"SELECT * FROM weather_measurement"
         .queryThrough[WeatherMeasurementDTO, WeatherMeasurement]
         .to[Vector]
-    }

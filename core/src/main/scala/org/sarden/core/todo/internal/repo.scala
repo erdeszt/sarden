@@ -27,19 +27,18 @@ private[todo] trait TodoRepo:
 class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
 
   override def getActiveTodos(): URIO[Tx, Vector[Todo]] =
-    Tx {
+    Tx:
       sql"SELECT * FROM todo"
         .queryTransform[TodoDTO, Todo](
           _.intoPartial[Todo].transform,
         )
         .to[Vector]
-    }
 
   override def createTodo(todo: CreateTodo): URIO[Tx, Todo] =
     for
       id <- idGenerator.next().map(TodoId(_))
       now <- zio.Clock.currentDateTime
-      _ <- Tx {
+      _ <- Tx:
         sql"""INSERT INTO todo
              |(id, name, schedule, notify_before, last_run, created_at)
              |VALUES
@@ -49,7 +48,6 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
              |, ${todo.notifyBefore}
              |, NULL
              |, ${now})""".stripMargin.update.run
-      }
     yield Todo(
       id,
       todo.name,

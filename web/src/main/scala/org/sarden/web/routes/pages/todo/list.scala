@@ -40,9 +40,8 @@ val listTodos: AppServerEndpoint = baseEndpoint.get
   .in("todos")
   .out(htmlView[Vector[TodoVM]](listView))
   .zServerLogic { (_: Unit) =>
-    ZIO.serviceWithZIO[TodoService](
-      _.getActiveTodos().map(_.map(_.transformInto[TodoVM])),
-    )
+    ZIO.serviceWithZIO[TodoService]:
+      _.getActiveTodos().map(_.map(_.transformInto[TodoVM]))
   }
 
 private def listView(todos: Vector[TodoVM]): TypedTag[String] =

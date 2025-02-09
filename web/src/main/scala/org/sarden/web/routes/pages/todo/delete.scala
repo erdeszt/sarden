@@ -15,8 +15,7 @@ val deleteTodo: AppServerEndpoint = baseEndpoint.post
     statusCode(StatusCode.Found)
       .and(header[String](HeaderNames.Location)),
   )
-  .zServerLogic(id =>
-    ZIO
-      .serviceWithZIO[TodoService](_.deleteTodo(TodoId(Ulid.from(id))))
-      .as("/todos"),
-  )
+  .zServerLogic { id =>
+    ZIO.serviceWithZIO[TodoService]:
+      _.deleteTodo(TodoId(Ulid.from(id))).as("/todos")
+  }

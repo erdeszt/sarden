@@ -16,21 +16,18 @@ import org.sarden.core.SystemErrors.InvalidTimeUnitError
 
 object time:
 
-  given JsonDecoder[FiniteDuration] = JsonDecoder[Map[String, Json]].map {
-    raw =>
-      FiniteDuration(
-        raw("length").as[Long].toOption.get,
-        TimeUnitCodec.read(raw("unit").as[String].toOption.get).toOption.get,
-      )
-  }
+  given JsonDecoder[FiniteDuration] = JsonDecoder[Map[String, Json]].map: raw =>
+    FiniteDuration(
+      raw("length").as[Long].toOption.get,
+      TimeUnitCodec.read(raw("unit").as[String].toOption.get).toOption.get,
+    )
 
-  given JsonEncoder[FiniteDuration] = JsonEncoder[Map[String, Json]].contramap {
+  given JsonEncoder[FiniteDuration] = JsonEncoder[Map[String, Json]].contramap:
     duration =>
       Map(
         "length" -> Json.Num(duration.length.toDouble),
         "unit" -> Json.Str(TimeUnitCodec.write(duration.unit)),
       )
-  }
 
   given PartialTransformer[String, FiniteDuration] = PartialTransformer: raw =>
     Result.fromEitherString(raw.fromJson[FiniteDuration])
@@ -59,11 +56,10 @@ object time:
     JsonEncoder[Long].contramap(dateTime => dateTime.toInstant.getEpochSecond)
 
   given PartialTransformer[Long, OffsetDateTime] = PartialTransformer: raw =>
-    Result.fromEitherString(
+    Result.fromEitherString:
       Try(
         OffsetDateTime.ofInstant(Instant.ofEpochSecond(raw), ZoneId.of("UTC")),
-      ).toEither.left.map(_.getMessage),
-    )
+      ).toEither.left.map(_.getMessage)
 
   given Transformer[OffsetDateTime, Long] = _.toEpochSecond
 
@@ -73,25 +69,23 @@ object time:
   given instantPut: Put[Instant] =
     Put[Long].contramap(instant => instant.getEpochSecond)
 
-  given JsonDecoder[LocalTime] = JsonDecoder[Map[String, Json]].map { raw =>
+  given JsonDecoder[LocalTime] = JsonDecoder[Map[String, Json]].map: raw =>
     LocalTime.of(
       raw("hour").as[Int].toOption.get,
       raw("minute").as[Int].toOption.get,
     )
-  }
 
-  given JsonEncoder[LocalTime] = JsonEncoder[Map[String, Json]].contramap {
+  given JsonEncoder[LocalTime] = JsonEncoder[Map[String, Json]].contramap:
     localTime =>
       Map(
         "hour" -> Json.Num(localTime.getHour),
         "minute" -> Json.Num(localTime.getMinute),
       )
-  }
 
   given CanEqual[TimeUnit, TimeUnit] = CanEqual.derived
 
   object TimeUnitCodec:
-    def write: TimeUnit => String = {
+    def write: TimeUnit => String =
       case TimeUnit.NANOSECONDS  => "NANOSECONDS"
       case TimeUnit.MICROSECONDS => "MICROSECONDS"
       case TimeUnit.MILLISECONDS => "MILLISECONDS"
@@ -99,9 +93,8 @@ object time:
       case TimeUnit.MINUTES      => "MINUTES"
       case TimeUnit.HOURS        => "HOURS"
       case TimeUnit.DAYS         => "DAYS"
-    }
 
-    def read: String => Either[InvalidTimeUnitError, TimeUnit] = {
+    def read: String => Either[InvalidTimeUnitError, TimeUnit] =
       case "NANOSECONDS"  => Right(TimeUnit.NANOSECONDS)
       case "MICROSECONDS" => Right(TimeUnit.MICROSECONDS)
       case "MILLISECONDS" => Right(TimeUnit.MILLISECONDS)
@@ -110,4 +103,3 @@ object time:
       case "HOURS"        => Right(TimeUnit.HOURS)
       case "DAYS"         => Right(TimeUnit.DAYS)
       case other          => Left(InvalidTimeUnitError(other))
-    }

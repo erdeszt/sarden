@@ -22,9 +22,8 @@ object Main extends ZIOAppDefault:
   override def run: ZIO[Any & ZIOAppArgs & Scope, Any, Any] =
     (for
       migrator <- ZIO.service[Migrator]
-      _ <- ZIO.attemptBlocking {
+      _ <- ZIO.attemptBlocking:
         Class.forName("org.sqlite.JDBC")
-      }
       _ <- migrator.migrate()
       allRoutes: Routes[
         CoreServices,
@@ -32,8 +31,7 @@ object Main extends ZIOAppDefault:
       ] = ZioHttpInterpreter().toHttp[CoreServices](
         routes.api.apiRoutes ++ routes.pages.pageRoutes,
       )
-      exitCode <- Server
-        .serve(allRoutes)
+      exitCode <- Server.serve(allRoutes)
     yield exitCode).provide(
       ZLayer.succeed(Server.Config.default.port(8080)),
       Server.live,

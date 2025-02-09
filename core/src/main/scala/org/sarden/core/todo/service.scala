@@ -13,12 +13,12 @@ trait TodoService:
   def deleteTodo(id: TodoId): UIO[Unit]
 
 object TodoService:
-  val live: URLayer[Tx.Runner & IdGenerator, TodoService] = ZLayer.fromZIO {
-    for
-      tx <- ZIO.service[Tx.Runner]
-      idGenerator <- ZIO.service[IdGenerator]
-    yield LiveTodoService(LiveTodoRepo(idGenerator), tx)
-  }
+  val live: URLayer[Tx.Runner & IdGenerator, TodoService] =
+    ZLayer.fromZIO:
+      for
+        tx <- ZIO.service[Tx.Runner]
+        idGenerator <- ZIO.service[IdGenerator]
+      yield LiveTodoService(LiveTodoRepo(idGenerator), tx)
 
 class LiveTodoService(repo: TodoRepo, tx: Tx.Runner) extends TodoService:
 

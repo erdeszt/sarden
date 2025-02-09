@@ -21,10 +21,9 @@ val listPlants: AppServerEndpoint = baseEndpoint.get
   .in("plants")
   .out(htmlView[Vector[PlantVM]](listView))
   .zServerLogic { (_: Unit) =>
-    ZIO.serviceWithZIO[PlantService](
+    ZIO.serviceWithZIO[PlantService]:
       _.searchPlants(SearchPlantFilters(None))
-        .map(_.map(_.transformInto[PlantVM])),
-    )
+        .map(_.map(_.transformInto[PlantVM]))
   }
 
 private def listView(plants: Vector[PlantVM]): TypedTag[String] =

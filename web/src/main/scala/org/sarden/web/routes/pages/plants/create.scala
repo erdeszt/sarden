@@ -29,14 +29,12 @@ val createPlant: AppServerEndpoint = baseEndpoint.post
     statusCode(StatusCode.Found)
       .and(sttp.tapir.header[String](HeaderNames.Location)),
   )
-  .zServerLogic(formData =>
-    ZIO
-      .serviceWithZIO[PlantService](
-        // TODO: Make safely
-        _.createPlant(PlantName.unsafeMake(formData.name), PlantDetails()),
-      )
-      .as("/plants"),
-  )
+  .zServerLogic { formData =>
+    ZIO.serviceWithZIO[PlantService]:
+      // TODO: Make safely
+      _.createPlant(PlantName.unsafeMake(formData.name), PlantDetails())
+        .as("/plants")
+  }
 
 private def createView(_unit: Unit): TypedTag[String] =
   layout(

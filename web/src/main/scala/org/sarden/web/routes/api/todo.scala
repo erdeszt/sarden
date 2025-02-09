@@ -54,22 +54,13 @@ val createTodoEndpoint = baseEndpoint.post
 
 def todoEndpoints: List[AppServerEndpoint] =
   List(
-    todosEndpoint.zServerLogic(_ =>
-      ZIO.serviceWithZIO[TodoService](
-        _.getActiveTodos().map(_.map(_.transformInto[TodoDTO])),
-      ),
-    ),
+    todosEndpoint.zServerLogic { _ =>
+      ZIO.serviceWithZIO[TodoService]:
+        _.getActiveTodos().map(_.map(_.transformInto[TodoDTO]))
+    },
     createTodoEndpoint.zServerLogic { createTodoDto =>
       for
-        createTodo <- ZIO
-          .fromEither(
-            createTodoDto
-              .transformIntoPartial[CreateTodo]
-              .asEither
-              .left
-              .map(DataInconsistencyError(_)),
-          )
-          .orDie
+        createTodo <- createTodoDto.transformIntoPartialZIOOrDie[CreateTodo]
         todo <- ZIO.serviceWithZIO[TodoService](
           _.createTodo(createTodo).map(_.transformInto[TodoDTO]),
         )

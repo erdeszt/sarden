@@ -7,7 +7,6 @@ import scala.io.Source
 import scala.util.Using
 
 import sttp.model.{Header, MediaType}
-import sttp.tapir.RawBodyType
 import sttp.tapir.ztapir.*
 import zio.*
 

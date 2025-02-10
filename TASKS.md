@@ -24,6 +24,7 @@
 ## Tech debt:
 * Use iron to refine domain types
 * Setup proper connection pooling
+  * Switch to postgres
 * Setup proper logging
 * Setup proper error handling
   * Define domain errors vs system errors
@@ -34,3 +35,5 @@
 * Setup CI with Werror enabled
 * Check if LiveMigrator handles error correctly
 * Use host/user/pass instead of dbUrl for migrator
+* Authentication for web service
+* Multiple image format support for assets

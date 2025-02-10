@@ -30,7 +30,7 @@ object time:
   given JsonEncoder[FiniteDuration] = JsonEncoder[Map[String, Json]].contramap:
     duration =>
       Map(
-        "length" -> Json.Num(duration.length.toDouble),
+        "length" -> Json.Num(duration.length),
         "unit" -> Json.Str(TimeUnitCodec.write(duration.unit)),
       )
 
@@ -53,13 +53,6 @@ object time:
   given putOffsetDateTime: Put[OffsetDateTime] =
     Put[Long].contramap(dateTime => dateTime.toEpochSecond)
 
-  given JsonDecoder[OffsetDateTime] = JsonDecoder[Long].map { raw =>
-    OffsetDateTime.ofInstant(Instant.ofEpochSecond(raw), ZoneId.of("UTC"))
-  }
-
-  given JsonEncoder[OffsetDateTime] =
-    JsonEncoder[Long].contramap(dateTime => dateTime.toInstant.getEpochSecond)
-
   given PartialTransformer[Long, OffsetDateTime] = PartialTransformer: raw =>
     Result.fromEitherString:
       Try(
@@ -73,19 +66,6 @@ object time:
 
   given instantPut: Put[Instant] =
     Put[Long].contramap(instant => instant.getEpochSecond)
-
-  given JsonDecoder[LocalTime] = JsonDecoder[Map[String, Json]].map: raw =>
-    LocalTime.of(
-      raw("hour").as[Int].toOption.get,
-      raw("minute").as[Int].toOption.get,
-    )
-
-  given JsonEncoder[LocalTime] = JsonEncoder[Map[String, Json]].contramap:
-    localTime =>
-      Map(
-        "hour" -> Json.Num(localTime.getHour),
-        "minute" -> Json.Num(localTime.getMinute),
-      )
 
   given CanEqual[TimeUnit, TimeUnit] = CanEqual.derived
 

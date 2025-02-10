@@ -40,47 +40,82 @@ val listTodos: AppServerEndpoint = baseEndpoint.get
       _.getActiveTodos().map(_.map(_.transformInto[TodoVM]))
   }
 
+// TODO: Generalize list page code
 private def listView(todos: Vector[TodoVM]): TypedTag[String] =
   layout(
     div(
-      cls := "container-fluid",
-      table(
-        cls := "table table-striped",
-        thead(
-          tr(
-            th("ID"),
-            th("Name"),
-            th("Schedule"),
-            th("Notify before"),
-            th("Last run"),
-            th("Actions"),
-          ),
-        ),
-        tbody(
-          for (todo <- todos)
-            yield tr(
-              th(attr("scope") := "row", todo.id),
-              td(todo.name),
-              td(todo.schedule),
-              td(s"${todo.notifyBefore.toHours} Hours"),
-              td(todo.lastRun.map(_.toString).getOrElse("n. / a.")),
-              td(
-                form(
-                  action := s"/todos/delete/${todo.id}",
-                  method := "post",
-                  button(
-                    `type` := "submit",
-                    cls := "btn btn-danger",
-                    "Delete",
+      cls := "container py-5",
+      div(
+        cls := "row justify-content-center",
+        div(
+          cls := "col-lg-10",
+          div(
+            cls := "card border-1 shadow-sm",
+            div(
+              cls := "card-body p-4",
+              // Header:
+              div(
+                cls := "d-flex justify-content-between align-items-center mb-4",
+                h4(cls := "mb-0", "TODOs"),
+              ),
+              // Add todo:
+              div(
+                cls := "row g-3 mb-4",
+                div(
+                  cls := "col-md-6",
+                  input(
+                    cls := "form-control",
+                    `type` := "text",
+                    placeholder := "Add todo...",
+                  ),
+                ),
+                div(
+                  cls := "col-md-6",
+                  div(
+                    cls := "d-flex gap-2 flex-wrap",
+                    span(
+                      cls := "badge px-3 py-2 text-bg-primary",
+                      "Important",
+                    ),
+                    span(
+                      cls := "badge px-3 py-2 text-bg-secondary",
+                      "Not important",
+                    ),
+                  ),
+                ),
+              ),
+              // Todos:
+              div(
+                cls := "row g-3 mb-4",
+                for todo <- todos
+                yield div(
+                  cls := "card border-info mb-3",
+                  div(
+                    cls := "row g-0",
+                    div(
+                      cls := "card-body",
+                      h5(cls := "card-title", s"${todo.name}"),
+                      h6(
+                        cls := "card-subtitle mb-2 text-body-secondary",
+                        s"${todo.schedule}",
+                      ),
+                      a(
+                        href := s"/todos/${todo.id}/complete",
+                        cls := "btn btn-primary",
+                        "Complete",
+                      ),
+                      a(
+                        // TODO: Use form post
+                        href := s"/todos/${todo.id}/delete",
+                        cls := "btn btn-danger",
+                        "Delete",
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-        ),
-      ),
-      div(
-        form(
-          attr("hx-post") := "/todos",
+          ),
         ),
       ),
     ),

@@ -1,6 +1,6 @@
 package org.sarden.web.routes.api
 
-import org.sarden.web.AppServerEndpoint
+import org.sarden.web.*
 
-val apiRoutes: List[AppServerEndpoint] =
+def apiRoutes(using ApiAuthConfig): List[AppServerEndpoint] =
   weatherEndpoints ++ todoEndpoints

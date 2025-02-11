@@ -8,8 +8,8 @@ import org.flywaydb.core.Flyway
 import zio.*
 import zio.test.*
 
-import org.sarden.core.CoreConfig
 import org.sarden.core.todo.{CreateTodo, TodoName, TodoSchedule, TodoService}
+import org.sarden.core.{CoreConfig, CoreServices}
 
 object LiveTodoServiceTest extends ZIOSpecDefault:
 
@@ -57,7 +57,7 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
           todos.head.lastRun.isEmpty,
         )
       },
-    ).provide(testConfig, org.sarden.core.wireLive) @@ TestAspect
+    ).provide(testConfig, CoreServices.live) @@ TestAspect
       .before(
         setupDb,
       )

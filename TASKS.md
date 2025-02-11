@@ -23,9 +23,10 @@
 
 ## Tech debt:
 * Authentication for web service
-* i18n
 * Use iron to refine domain types
+  * Both in core and on the tapir routes
 * Setup proper error handling
+* i18n
 * Setup proper connection pooling
   * Switch to postgres
 * Load config with zio-config

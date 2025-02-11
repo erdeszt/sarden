@@ -24,21 +24,21 @@ private[api] case class WeatherMeasurementDTO(
 ) derives JsonCodec,
       Schema
 
-val addWeatherMeasurementEndpoint = baseEndpoint.post
+def addWeatherMeasurementEndpoint(using ApiAuthConfig) = baseEndpoint.post
   .in("weather")
   .in(jsonBody[Vector[WeatherMeasurementDTO]])
   .out(jsonBody[EmptyResponse])
 
-val getWeatherMeasurementsEndpoint = baseEndpoint.get
+def getWeatherMeasurementsEndpoint(using ApiAuthConfig) = baseEndpoint.get
   .in("weather")
   .in(query[Option[Long]]("from"))
   .in(query[Option[Long]]("to"))
   .in(query[Option[String]]("sensor_id"))
   .out(jsonBody[Vector[WeatherMeasurementDTO]])
 
-def weatherEndpoints: List[AppServerEndpoint] =
+def weatherEndpoints(using ApiAuthConfig): List[AppServerEndpoint] =
   List(
-    addWeatherMeasurementEndpoint.zServerLogic { measurementDtos =>
+    addWeatherMeasurementEndpoint.serverLogic { _ => measurementDtos =>
       for
         measurements <- ZIO.foreach(measurementDtos):
           _.transformIntoPartialZIOOrDie[WeatherMeasurement]
@@ -46,16 +46,17 @@ def weatherEndpoints: List[AppServerEndpoint] =
           _.addMeasurements(measurements)
       yield EmptyResponse()
     },
-    getWeatherMeasurementsEndpoint.zServerLogic { (fromRaw, toRaw, sourceRaw) =>
-      for
-        from <- ZIO.foreach(fromRaw):
-          _.transformIntoPartialZIOOrDie[OffsetDateTime]
-        to <- ZIO.foreach(toRaw):
-          _.transformIntoPartialZIOOrDie[OffsetDateTime]
-        source = sourceRaw.map(SensorId(_))
-        measurements <- ZIO.serviceWithZIO[WeatherService]:
-          _.getMeasurements(GetMeasurementsFilters(from, to, source)).map:
-            _.map(_.transformInto[WeatherMeasurementDTO])
-      yield measurements
+    getWeatherMeasurementsEndpoint.serverLogic {
+      _ => (fromRaw, toRaw, sourceRaw) =>
+        for
+          from <- ZIO.foreach(fromRaw):
+            _.transformIntoPartialZIOOrDie[OffsetDateTime]
+          to <- ZIO.foreach(toRaw):
+            _.transformIntoPartialZIOOrDie[OffsetDateTime]
+          source = sourceRaw.map(SensorId(_))
+          measurements <- ZIO.serviceWithZIO[WeatherService]:
+            _.getMeasurements(GetMeasurementsFilters(from, to, source)).map:
+              _.map(_.transformInto[WeatherMeasurementDTO])
+        yield measurements
     },
   )

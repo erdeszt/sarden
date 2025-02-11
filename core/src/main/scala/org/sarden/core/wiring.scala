@@ -8,29 +8,36 @@ import zio.*
 
 import org.sarden.core.plant.PlantService
 import org.sarden.core.todo.TodoService
+import org.sarden.core.user.UserService
 import org.sarden.core.weather.WeatherService
 
-def wireLive: URLayer[
-  CoreConfig,
-  TodoService & WeatherService & PlantService & Migrator,
-] =
-  val dbLayer = Database.fromDatasource
-  val connectionPoolLayer: URLayer[CoreConfig, DataSource] = ZLayer.fromZIO:
-    ZIO.serviceWith[CoreConfig] { config =>
-      val dataSource = new SQLiteDataSource()
-      dataSource.setUrl(config.dbUrl)
-      dataSource
-    }
+type CoreServices = TodoService & PlantService & WeatherService & UserService
 
-  ZLayer.makeSome[
+object CoreServices:
+  def live: URLayer[
     CoreConfig,
-    TodoService & WeatherService & PlantService & Migrator,
-  ](
-    connectionPoolLayer,
-    dbLayer,
-    Migrator.live,
-    IdGenerator.live,
-    TodoService.live,
-    WeatherService.live,
-    PlantService.live,
-  )
+    CoreServices & Migrator,
+  ] =
+    val dbLayer = Database.fromDatasource
+    val connectionPoolLayer: URLayer[CoreConfig, DataSource] = ZLayer.fromZIO:
+      ZIO.serviceWith[CoreConfig] { config =>
+        val dataSource = new SQLiteDataSource()
+        dataSource.setUrl(config.dbUrl)
+        dataSource
+      }
+
+    ZLayer.makeSome[
+      // TODO: Consider loading the config here?
+      CoreConfig,
+      CoreServices & Migrator,
+    ](
+      connectionPoolLayer,
+      dbLayer,
+      Migrator.live,
+      IdGenerator.live,
+      PasswordHasher.live,
+      TodoService.live,
+      WeatherService.live,
+      PlantService.live,
+      UserService.live,
+    )

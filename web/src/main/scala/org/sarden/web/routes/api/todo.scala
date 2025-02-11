@@ -35,7 +35,9 @@ private[api] case class CreateTodoDTO(
 ) derives JsonCodec,
       Schema
 
-val todosEndpoint = baseEndpoint.get
+private def todosEndpoint(using
+    ApiAuthConfig,
+) = baseEndpoint.get
   .in("todos")
   .out(
     oneOfBody(
@@ -43,18 +45,20 @@ val todosEndpoint = baseEndpoint.get
     ),
   )
 
-val createTodoEndpoint = baseEndpoint.post
+private def createTodoEndpoint(using ApiAuthConfig) = baseEndpoint.post
   .in("todos")
   .in(jsonBody[CreateTodoDTO])
   .out(jsonBody[TodoDTO])
 
-def todoEndpoints: List[AppServerEndpoint] =
+private def todoEndpoints(using
+    authConfig: ApiAuthConfig,
+): List[AppServerEndpoint] =
   List(
-    todosEndpoint.zServerLogic { _ =>
+    todosEndpoint.serverLogic { _ => _ =>
       ZIO.serviceWithZIO[TodoService]:
         _.getActiveTodos().map(_.map(_.transformInto[TodoDTO]))
     },
-    createTodoEndpoint.zServerLogic { createTodoDto =>
+    createTodoEndpoint.serverLogic { _ => createTodoDto =>
       for
         createTodo <- createTodoDto.transformIntoPartialZIOOrDie[CreateTodo]
         todo <- ZIO.serviceWithZIO[TodoService](

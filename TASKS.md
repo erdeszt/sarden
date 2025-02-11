@@ -23,9 +23,9 @@
 
 ## Tech debt:
 * Authentication for web service
-* Use iron to refine domain types
-  * Both in core and on the tapir routes
 * Setup proper error handling
+  * Both in core and on the tapir routes
+* Use iron to refine domain types
 * i18n
 * Setup proper connection pooling
   * Switch to postgres

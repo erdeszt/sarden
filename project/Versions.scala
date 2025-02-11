@@ -1,4 +1,5 @@
 object Versions {
+  val bcrypt = "0.10.2"
   val flyway = "10.21.0"
   val openSearch = "2.18.0"
   val izumiReflect = "3.0.1"

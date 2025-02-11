@@ -25,6 +25,7 @@ lazy val core = (project in file("core"))
   .settings(
     name := "sarden-core",
     libraryDependencies ++= Seq(
+      "at.favre.lib" % "bcrypt" % Versions.bcrypt,
       "com.github.f4b6a3" % "ulid-creator" % Versions.ulid,
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "dev.zio" %% "zio" % Versions.zio,

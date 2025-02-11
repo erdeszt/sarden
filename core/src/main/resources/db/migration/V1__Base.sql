@@ -17,4 +17,11 @@ CREATE TABLE plant (
     id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     created_at INTEGER NOT NULL
+);
+
+CREATE TABLE user (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    created_at INTEGER NOT NULL
 )

@@ -20,6 +20,10 @@ abstract class DomainError(message: String, cause: Option[Throwable] = None)
 abstract class SystemError(message: String, cause: Option[Throwable] = None)
     extends AppError(message, cause)
 
+object DomainErrors:
+  class AuthenticationFailedError()
+      extends DomainError("Failed to authenticate")
+
 object SystemErrors:
   class DataInconsistencyError(violations: Result.Errors)
       extends SystemError(

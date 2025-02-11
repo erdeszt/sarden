@@ -18,6 +18,7 @@ given PartialTransformer[String, TodoSchedule] = PartialTransformer: raw =>
 
 given Transformer[TodoSchedule, String] = _.toJson
 
+// TODO: Use Request/Response Postfix
 private[api] case class TodoDTO(
     id: String,
     name: String,

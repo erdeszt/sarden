@@ -22,18 +22,19 @@
   * Tests
 
 ## Tech debt:
+* Authentication for web service
+* i18n
 * Use iron to refine domain types
+* Setup proper error handling
 * Setup proper connection pooling
   * Switch to postgres
-* Setup proper logging
-* Setup proper error handling
-  * Define domain errors vs system errors
-* Setup base test for zio service tests
 * Load config with zio-config
   * From env with defaults for non secret values
+* Setup proper logging
+  * Define domain errors vs system errors
+* Setup base test for zio service tests
 * Fix .toOption.get calls in codecs
 * Setup CI with Werror enabled
 * Check if LiveMigrator handles error correctly
 * Use host/user/pass instead of dbUrl for migrator
-* Authentication for web service
 * Multiple image format support for assets

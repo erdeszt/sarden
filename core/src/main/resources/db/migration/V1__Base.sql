@@ -24,4 +24,12 @@ CREATE TABLE user (
     name TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     created_at INTEGER NOT NULL
+);
+
+CREATE TABLE sowlog (
+    id TEXT NOT NULL PRIMARY KEY,
+    plant_id TEXT NOT NULL,
+    sowing_date TEXT NOT NULL,
+    details TEXT NOT NULL,
+    created_at INTEGER NOT NULL
 )

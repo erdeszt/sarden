@@ -7,11 +7,13 @@ import org.sqlite.SQLiteDataSource
 import zio.*
 
 import org.sarden.core.plant.PlantService
+import org.sarden.core.sowlog.SowlogService
 import org.sarden.core.todo.TodoService
 import org.sarden.core.user.UserService
 import org.sarden.core.weather.WeatherService
 
-type CoreServices = TodoService & PlantService & WeatherService & UserService
+type CoreServices = TodoService & PlantService & WeatherService & UserService &
+  SowlogService
 
 object CoreServices:
   def live: URLayer[
@@ -40,4 +42,5 @@ object CoreServices:
       WeatherService.live,
       PlantService.live,
       UserService.live,
+      SowlogService.live,
     )

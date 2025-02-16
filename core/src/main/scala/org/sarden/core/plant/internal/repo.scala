@@ -2,6 +2,10 @@ package org.sarden.core.plant.internal
 
 import scala.io.Source
 
+import cats.data.NonEmptyList
+import cats.instances.vector.given
+import doobie.util.fragment.Fragment
+import doobie.util.fragments
 import zio.*
 import zio.json.*
 
@@ -18,6 +22,7 @@ private[plant] trait PlantRepo:
       details: PlantDetails,
   ): URIO[Tx, PlantId]
   def loadPresetData: URIO[Tx, Unit]
+  def getPlantsByIds(ids: NonEmptyList[PlantId]): URIO[Tx, Vector[Plant]]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
@@ -56,3 +61,12 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
       _ <- ZIO.foreachDiscard(plants): plant =>
         createPlant(PlantName(plant.name), PlantDetails())
     yield ()
+
+  override def getPlantsByIds(
+      ids: NonEmptyList[PlantId],
+  ): URIO[Tx, Vector[Plant]] =
+    Tx {
+      (fr"SELECT id, name FROM plant WHERE " ++ fragments.in(fr"id", ids))
+        .queryThrough[PlantDTO, Plant]
+        .to[Vector]
+    }

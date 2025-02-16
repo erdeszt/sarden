@@ -27,9 +27,16 @@ object DomainErrors:
 object SystemErrors:
   class DataFormatError(message: String)
       extends SystemError(s"Invalid data format: ${message}")
-  class DataInconsistencyError(violations: Result.Errors)
-      extends SystemError(
-        s"Inconsistent data at: ${violations.asErrorPathMessages}",
+  class DataInconsistencyError(message: String)
+      extends SystemError(s"Inconsistent data: ${message}")
+  object DataInconsistencyError:
+    def apply(message: String): DataInconsistencyError =
+      new DataInconsistencyError(message)
+    def apply(violations: Result.Errors): DataInconsistencyError =
+      new DataInconsistencyError(
+        violations.asErrorPathMessages
+          .map { case (path, error) => s"${path}: ${error.asString}" }
+          .mkString("\n"),
       )
   class InvalidTimeUnitError(rawValue: String)
       extends SystemError(s"Invalid TimeUnit: `${rawValue}`")

@@ -1,5 +1,6 @@
 package org.sarden.core.plant
 
+import cats.data.NonEmptyList
 import zio.*
 
 import org.sarden.core.IdGenerator
@@ -11,6 +12,7 @@ trait PlantService:
   def deletePlant(id: PlantId): UIO[Unit]
   def getPlant(id: PlantId): UIO[Option[Plant]]
   def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]]
+  def getPlantsByIds(ids: NonEmptyList[PlantId]): UIO[Map[PlantId, Plant]]
   def loadPresetData: UIO[Unit]
 
 object PlantService:
@@ -39,3 +41,9 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
 
   override def loadPresetData: UIO[Unit] =
     tx.runOrDie(repo.loadPresetData)
+
+  override def getPlantsByIds(
+      ids: NonEmptyList[PlantId],
+  ): UIO[Map[PlantId, Plant]] =
+    tx.runOrDie(repo.getPlantsByIds(ids))
+      .map(_.map(plant => (plant.id, plant)).toMap)

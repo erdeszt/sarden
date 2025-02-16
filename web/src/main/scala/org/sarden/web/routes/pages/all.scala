@@ -13,4 +13,5 @@ def pageRoutes(using siteAuthConfig: SiteAuthConfig): List[AppServerEndpoint] =
     plants.createPlant,
     todo.listTodos,
     todo.deleteTodo,
+    sowlog.showSowlog,
   )

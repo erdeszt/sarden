@@ -1,6 +1,6 @@
 package org.sarden.core
 
-import java.time.{Instant, LocalTime, OffsetDateTime, ZoneId}
+import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneId}
 import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
@@ -12,7 +12,7 @@ import io.scalaland.chimney.{PartialTransformer, Transformer}
 import zio.json.*
 import zio.json.ast.Json
 
-import org.sarden.core.SystemErrors.InvalidTimeUnitError
+import org.sarden.core.SystemErrors.{DataFormatError, InvalidTimeUnitError}
 
 object time:
 
@@ -66,6 +66,21 @@ object time:
 
   given instantPut: Put[Instant] =
     Put[Long].contramap(instant => instant.getEpochSecond)
+
+  given localDateGet: Get[LocalDate] =
+    Get[String].map(raw =>
+      raw
+        .fromJson[LocalDate]
+        .getOrElse(throw DataFormatError(s"Invalid LocalDate value: `${raw}`")),
+    )
+
+  given PartialTransformer[String, LocalDate] = PartialTransformer: raw =>
+    Result.fromEitherString(raw.fromJson)
+
+  given Transformer[LocalDate, String] = _.toJson
+
+  given localDatePut: Put[LocalDate] =
+    Put[String].contramap(_.toJson)
 
   given CanEqual[TimeUnit, TimeUnit] = CanEqual.derived
 

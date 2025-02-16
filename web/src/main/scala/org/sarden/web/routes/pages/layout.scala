@@ -38,10 +38,6 @@ def layout(pageContent: Text.TypedTag[String]*): Text.TypedTag[String] =
               cls := "navbar-nav me-auto mb-2 mb-lg-0",
               li(
                 cls := "navbar-item",
-                a(cls := "nav-link", href := "/", "Home"),
-              ),
-              li(
-                cls := "navbar-item",
                 a(cls := "nav-link", href := "/plants", "Plants"),
               ),
               li(

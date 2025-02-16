@@ -12,7 +12,7 @@ import org.sarden.core.plant.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 
-private[routes] case class PlantVM(
+private[pages] case class PlantVM(
     id: String,
     name: String,
 ) derives Schema

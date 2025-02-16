@@ -18,6 +18,7 @@ trait SowlogService:
       sowingDate: LocalDate,
       details: SowlogDetails,
   ): UIO[SowlogEntryId]
+  def deleteEntry(id: SowlogEntryId): UIO[Unit]
 
 object SowlogService:
   val live: URLayer[Tx.Runner & PlantService & IdGenerator, SowlogService] =
@@ -62,3 +63,6 @@ class LiveSowlogService(
       details: SowlogDetails,
   ): UIO[SowlogEntryId] =
     tx.runOrDie(repo.createEntry(plantId, sowingDate, details))
+
+  override def deleteEntry(id: SowlogEntryId): UIO[Unit] =
+    tx.runOrDie(repo.deleteEntry(id))

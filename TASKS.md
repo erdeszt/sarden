@@ -4,6 +4,7 @@
   * display
 * Error handling
 * Test coverage for core services
+* Flash messages
 
 ## Features:
 * Plant db:

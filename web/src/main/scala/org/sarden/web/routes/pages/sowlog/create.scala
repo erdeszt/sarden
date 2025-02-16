@@ -13,20 +13,27 @@ import zio.json.*
 
 import org.sarden.core.SystemErrors.{DataFormatError, DataInconsistencyError}
 import org.sarden.core.mapping.given
-import org.sarden.core.plant.PlantId
+import org.sarden.core.plant.*
 import org.sarden.core.sowlog.*
 import org.sarden.web.*
 import org.sarden.web.routes.pages.*
+import org.sarden.web.routes.pages.plants.PlantVM
 
 private[pages] case class CreateSowlogEntryForm(
     plantId: String,
-    sowingDate: String,
+    sowingDateYear: Int,
+    sowingDateMonth: Int,
+    sowingDateDay: Int,
 ) derives Schema
 
 val createSowlogEntryForm: AppServerEndpoint = baseEndpoint.get
   .in("sowlog" / "new")
-  .out(htmlView[Unit](createView))
-  .zServerLogic(_ => ZIO.unit)
+  .out(htmlView[Vector[PlantVM]](createView))
+  .zServerLogic: _ =>
+    ZIO.serviceWithZIO[PlantService]: plantService =>
+      plantService
+        .searchPlants(SearchPlantFilters(None))
+        .map(_.map(_.transformInto[PlantVM]))
 
 val createSowlogEntry: AppServerEndpoint = baseEndpoint.post
   .in("sowlog" / "new")
@@ -38,10 +45,14 @@ val createSowlogEntry: AppServerEndpoint = baseEndpoint.post
   .zServerLogic { formData =>
     for
       sowingDate <- ZIO
-        .fromEither {
-          s"\"${formData.sowingDate}\"".fromJson[LocalDate]
+        .attempt {
+          LocalDate.of(
+            formData.sowingDateYear,
+            formData.sowingDateMonth,
+            formData.sowingDateDay,
+          )
         }
-        .mapError(DataFormatError(_))
+        .mapError(error => DataFormatError(error.getMessage))
         .orDie
       plantId <- ZIO.fromEither {
         formData.plantId
@@ -55,7 +66,7 @@ val createSowlogEntry: AppServerEndpoint = baseEndpoint.post
     yield "/sowlog"
   }
 
-private def createView(_unit: Unit): TypedTag[String] =
+private def createView(plants: Vector[PlantVM]): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",
@@ -64,16 +75,43 @@ private def createView(_unit: Unit): TypedTag[String] =
         action := "/sowlog/new",
         method := "post",
         div(
-          cls := "mb-3",
-          label(`for` := "plantId", cls := "form-label", "Plant"),
+          cls := "input-group",
+          span(cls := "input-group-text", "Plant"),
           // TODO: Dropdown
-          input(`type` := "text", id := "plantId", name := "plantId"),
+          select(
+            cls := "form-select",
+            name := "plantId",
+            for plant <- plants yield option(value := plant.id, plant.name),
+          ),
         ),
         div(
-          cls := "mb-3",
-          label(`for` := "sowingDate", cls := "form-label", "Sowing Date"),
+          cls := "input-group",
+          span(cls := "input-group-text", "Sowing date"),
           // TODO: Date picker
-          input(`type` := "text", id := "sowingDate", name := "sowingDate"),
+          input(
+            `type` := "number",
+            cls := "form-control",
+            id := "sowingDateYear",
+            name := "sowingDateYear",
+            required,
+            placeholder := "Year",
+          ),
+          input(
+            `type` := "number",
+            cls := "form-control",
+            id := "sowingDateMonth",
+            name := "sowingDateMonth",
+            required,
+            placeholder := "Month",
+          ),
+          input(
+            `type` := "number",
+            cls := "form-control",
+            id := "sowingDateDay",
+            name := "sowingDateDay",
+            required,
+            placeholder := "Day",
+          ),
         ),
         button(
           `type` := "submit",

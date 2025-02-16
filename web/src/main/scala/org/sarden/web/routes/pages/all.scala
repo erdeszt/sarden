@@ -16,4 +16,5 @@ def pageRoutes(using siteAuthConfig: SiteAuthConfig): List[AppServerEndpoint] =
     sowlog.showSowlog,
     sowlog.createSowlogEntryForm,
     sowlog.createSowlogEntry,
+    sowlog.deleteSowlogEntry,
   )

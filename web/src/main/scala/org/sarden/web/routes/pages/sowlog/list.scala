@@ -33,8 +33,42 @@ val showSowlog: AppServerEndpoint = baseEndpoint.get
 
 private def listView(sowlogEntries: Vector[SowlogEntryVM]): TypedTag[String] =
   layout(
-    ul(
-      for entry <- sowlogEntries
-      yield li(s"${entry.id}: ${entry.plant.name} - ${entry.sowingDate}"),
+    div(
+      cls := "container-fluid",
+      a(
+        href := "/sowlog/new",
+        cls := "btn btn-primary btn-sm",
+        "Add new entry",
+      ),
+      table(
+        cls := "table table-striped",
+        thead(
+          tr(
+            th("Plant"),
+            th("Sowing Date"),
+            th("Details"),
+            th("Actions"),
+          ),
+        ),
+        tbody(
+          for entry <- sowlogEntries
+          yield tr(
+            td(entry.plant.name),
+            td(entry.sowingDate),
+            td("coming soon..."),
+            td(
+              form(
+                action := s"/sowlog/delete/${entry.id}",
+                method := "post",
+                button(
+                  `type` := "submit",
+                  cls := "btn btn-danger btn-sm",
+                  "Delete",
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
   )

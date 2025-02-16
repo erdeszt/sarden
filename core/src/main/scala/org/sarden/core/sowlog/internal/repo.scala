@@ -20,6 +20,7 @@ private[sowlog] trait SowlogRepo:
       sowingDate: LocalDate,
       details: SowlogDetails,
   ): URIO[Tx, SowlogEntryId]
+  def deleteEntry(id: SowlogEntryId): URIO[Tx, Unit]
 
 class LiveSowlogRepo(idGenerator: IdGenerator) extends SowlogRepo:
   override def getLog(): URIO[Tx, Vector[SowlogEntry[PlantId]]] =
@@ -57,3 +58,8 @@ class LiveSowlogRepo(idGenerator: IdGenerator) extends SowlogRepo:
       }
       _ <- ZIO.unit
     yield SowlogEntryId(id)
+
+  override def deleteEntry(id: SowlogEntryId): URIO[Tx, Unit] =
+    Tx {
+      sql"DELETE FROM sowlog WHERE id = ${id}".update.run
+    }.unit

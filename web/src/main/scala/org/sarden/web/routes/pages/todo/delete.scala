@@ -17,5 +17,6 @@ val deleteTodo: AppServerEndpoint = baseEndpoint.post
   )
   .zServerLogic { id =>
     ZIO.serviceWithZIO[TodoService]:
+      // TODO: Safe id conversion
       _.deleteTodo(TodoId(Ulid.from(id))).as("/todos")
   }

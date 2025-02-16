@@ -53,6 +53,8 @@ object time:
   given putOffsetDateTime: Put[OffsetDateTime] =
     Put[Long].contramap(dateTime => dateTime.toEpochSecond)
 
+  given CanEqual[OffsetDateTime, OffsetDateTime] = CanEqual.derived
+
   given PartialTransformer[Long, OffsetDateTime] = PartialTransformer: raw =>
     Result.fromEitherString:
       Try(

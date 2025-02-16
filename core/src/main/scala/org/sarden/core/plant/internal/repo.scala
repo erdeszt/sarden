@@ -21,6 +21,7 @@ private[plant] trait PlantRepo:
       name: PlantName,
       details: PlantDetails,
   ): URIO[Tx, PlantId]
+  def deletePlant(id: PlantId): URIO[Tx, Unit]
   def loadPresetData: URIO[Tx, Unit]
   def getPlantsByIds(ids: NonEmptyList[PlantId]): URIO[Tx, Vector[Plant]]
   def getPlant(id: PlantId): URIO[Tx, Option[Plant]]
@@ -47,6 +48,11 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
              |VALUES
              |(${id}, ${name}, ${now.getEpochSecond})""".stripMargin.update.run
     yield PlantId(id)
+
+  override def deletePlant(id: PlantId): URIO[Tx, Unit] =
+    Tx {
+      sql"DELETE FROM plant WHERE id = ${id}".update.run
+    }.unit
 
   override def loadPresetData: URIO[Tx, Unit] =
     for

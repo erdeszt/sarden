@@ -5,6 +5,7 @@ import zio.*
 import zio.test.*
 
 import org.sarden.core.*
+import org.sarden.core.mapping.given
 
 object LivePlantServiceTest extends BaseSpec:
 
@@ -48,5 +49,33 @@ object LivePlantServiceTest extends BaseSpec:
           plant(plantId).id == plantId,
           plant(plantId).name == plantName,
         )
+      },
+      test(
+        "Deleted plants should not be returned by any of the lookup methods",
+      ) {
+        for
+          plantService <- ZIO.service[PlantService]
+          plantId <- plantService.createPlant(
+            PlantName("carrot"),
+            PlantDetails(),
+          )
+          _ <- plantService.deletePlant(plantId)
+          searchResult <- plantService.searchPlants(SearchPlantFilters.empty)
+          getByIdResult <- plantService.getPlant(plantId)
+          getByIdsResult <- plantService.getPlantsByIds(
+            NonEmptyList.of(plantId),
+          )
+        yield assertTrue(
+          searchResult.isEmpty,
+          getByIdResult.isEmpty,
+          getByIdsResult.isEmpty,
+        )
+      },
+      test("Load preset data should load some plants") {
+        for
+          plantService <- ZIO.service[PlantService]
+          _ <- plantService.loadPresetData
+          plants <- plantService.searchPlants(SearchPlantFilters.empty)
+        yield assertTrue(plants.nonEmpty)
       },
     ) @@ TestAspect.before(setupDb) @@ TestAspect.sequential

@@ -24,7 +24,7 @@ class LiveWeatherRepo extends WeatherRepo:
     Tx:
       Tx.Bulk[WeatherMeasurementDTO](
         """INSERT INTO weather_measurement
-           |(collected_at, temperature, sensor_id)
+           |(collected_at, temperature, source)
            |VALUES (?, ?, ?)""".stripMargin,
       ).updateMany(measurements.map(_.transformInto[WeatherMeasurementDTO]))
         .as(())

@@ -2,7 +2,11 @@ package org.sarden.web
 
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
-import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.json.zio.*
+import sttp.tapir.server.interceptor.exception.ExceptionHandler
+import sttp.tapir.server.model.ValuedEndpointOutput
+import sttp.tapir.server.ziohttp.{ZioHttpInterpreter, ZioHttpServerOptions}
+import sttp.tapir.ztapir.*
 import sttp.tapir.ztapir.ZServerEndpoint
 import zio.*
 import zio.http.{Response as ZioHttpResponse, Routes, Server}
@@ -36,7 +40,17 @@ object Main extends ZIOAppDefault:
       allRoutes: Routes[
         CoreServices,
         ZioHttpResponse,
-      ] = ZioHttpInterpreter().toHttp[CoreServices](
+      ] = ZioHttpInterpreter(
+        // TODO: Not great, sould return http for pages and json for apis
+        ZioHttpServerOptions.customiseInterceptors
+          .defaultHandlers(message =>
+            ValuedEndpointOutput(
+              jsonBody[String],
+              s"Something went really wrong: ${message}",
+            ),
+          )
+          .options,
+      ).toHttp[CoreServices](
         apiRoutes ++ siteRoutes,
       )
       exitCode <- Server.serve(allRoutes)

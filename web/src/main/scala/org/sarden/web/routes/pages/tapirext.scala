@@ -5,6 +5,8 @@ import java.nio.charset.StandardCharsets
 import scalatags.Text
 import sttp.tapir.*
 
+import org.sarden.core.DomainError
+
 def htmlViewCodec[T: Schema](
     renderer: T => Text.TypedTag[String],
 ): Codec[String, T, CodecFormat.TextHtml] =

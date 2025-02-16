@@ -26,6 +26,7 @@ lazy val core = (project in file("core"))
     name := "sarden-core",
     libraryDependencies ++= Seq(
       "at.favre.lib" % "bcrypt" % Versions.bcrypt,
+      "ch.qos.logback" % "logback-classic" % Versions.logback,
       "com.github.f4b6a3" % "ulid-creator" % Versions.ulid,
       "dev.zio" %% "izumi-reflect" % Versions.izumiReflect,
       "dev.zio" %% "zio" % Versions.zio,
@@ -41,6 +42,7 @@ lazy val core = (project in file("core"))
       "dev.zio" %% "zio-test" % Versions.zio,
       "dev.zio" %% "zio-test-sbt" % Versions.zio,
     ).map(_ % Test),
+    Test / parallelExecution := false,
   )
 
 lazy val web = (project in file("web"))

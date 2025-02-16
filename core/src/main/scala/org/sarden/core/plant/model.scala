@@ -5,7 +5,8 @@ import neotype.*
 import org.sarden.core.ulid.*
 
 type PlantName = PlantName.Type
-object PlantName extends Newtype[String]
+object PlantName extends Newtype[String]:
+  given CanEqual[PlantName, PlantName] = CanEqual.derived
 
 type PlantId = PlantId.Type
 object PlantId extends UlidNewtype

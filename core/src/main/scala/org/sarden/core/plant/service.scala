@@ -33,6 +33,7 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
   override def deletePlant(id: PlantId): UIO[Unit] =
     ZIO.attempt(???).orDie
 
+  // TODO: Use UserNotFoundError instead of option at the service level
   override def getPlant(id: PlantId): UIO[Option[Plant]] =
     tx.runOrDie(repo.getPlant(id))
 

@@ -2,11 +2,6 @@
 * Deploy
   * Setup PI
   * Create data backup system
-* Error handling
-  * Use defined errors handled in sttp layer
-  * Consider i18n
-  * Smart split(not app/domain)
-  * Specific domain errors instead of inconsistency
 * Test coverage for core services
 * Flash messages
 * Details for plants and sowlog

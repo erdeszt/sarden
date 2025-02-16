@@ -1,37 +1,19 @@
 package org.sarden.core.todo
 
-import java.time.{LocalTime, ZoneId}
+import java.time.LocalTime
 
 import scala.concurrent.duration.*
 
-import org.flywaydb.core.Flyway
 import zio.*
 import zio.test.*
 
-import org.sarden.core.{CoreConfig, CoreServices}
+import org.sarden.core.*
 
-object LiveTodoServiceTest extends ZIOSpecDefault:
-
-  def coreConfig: CoreConfig =
-    CoreConfig(ZoneId.of("UTC"), "jdbc:sqlite:test.db")
-
-  def testConfig: ULayer[CoreConfig] = ZLayer.succeed(coreConfig)
-
-  def setupDb: Task[Unit] =
-    ZIO.attemptBlocking {
-      val flyway = Flyway
-        .configure()
-        .cleanDisabled(false)
-        .dataSource(coreConfig.dbUrl, "", "")
-        .load()
-      flyway.getConfiguration
-      flyway.clean()
-      flyway.migrate()
-    }.unit
+object LiveTodoServiceTest extends BaseSpec:
 
   def spec =
     suite("Live TodoService Test")(
-      test(".getActiveTodos should return all the created todos") {
+      test("Getting todos should return all the created todos") {
         val schedule =
           TodoSchedule.EverySecondFridayOfTheMonth(LocalTime.of(13, 0))
         val notifyBefore: FiniteDuration = 24.hours
@@ -56,7 +38,22 @@ object LiveTodoServiceTest extends ZIOSpecDefault:
           todos.head.lastRun.isEmpty,
         )
       },
-    ).provide(testConfig, CoreServices.live) @@ TestAspect
-      .before(
-        setupDb,
-      )
+      test("Deleted todos should not be returned") {
+        val schedule =
+          TodoSchedule.EverySecondFridayOfTheMonth(LocalTime.of(13, 0))
+        val notifyBefore: FiniteDuration = 24.hours
+
+        for
+          todoService <- ZIO.service[TodoService]
+          todo <- todoService.createTodo(
+            CreateTodo(
+              TodoName("test"),
+              schedule,
+              notifyBefore,
+            ),
+          )
+          _ <- todoService.deleteTodo(todo.id)
+          todos <- todoService.getActiveTodos()
+        yield assertTrue(todos.isEmpty)
+      },
+    ) @@ TestAspect.before(setupDb) @@ TestAspect.sequential

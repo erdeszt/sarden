@@ -25,6 +25,8 @@ object DomainErrors:
       extends DomainError("Failed to authenticate")
 
 object SystemErrors:
+  class DataFormatError(message: String)
+      extends SystemError(s"Invalid data format: ${message}")
   class DataInconsistencyError(violations: Result.Errors)
       extends SystemError(
         s"Inconsistent data at: ${violations.asErrorPathMessages}",

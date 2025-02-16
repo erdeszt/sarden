@@ -4,4 +4,4 @@
 target
 
 *.db
-plants.json
+*.backup

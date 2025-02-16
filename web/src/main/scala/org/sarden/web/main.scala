@@ -23,6 +23,7 @@ object Main extends ZIOAppDefault:
       config <- ZIO.service[WebConfig]
       _ <- ZIO.attemptBlocking:
         Class.forName("org.sqlite.JDBC")
+      _ <- migrator.backup()
       _ <- migrator.migrate()
       apiRoutes =
         if config.serverMode != ServerMode.OnlySite then

@@ -11,6 +11,7 @@ trait PlantService:
   def deletePlant(id: PlantId): UIO[Unit]
   def getPlant(id: PlantId): UIO[Option[Plant]]
   def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]]
+  def loadPresetData: UIO[Unit]
 
 object PlantService:
   val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
@@ -35,3 +36,6 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
 
   override def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]] =
     tx.runOrDie(repo.searchPlants(filters))
+
+  override def loadPresetData: UIO[Unit] =
+    tx.runOrDie(repo.loadPresetData)

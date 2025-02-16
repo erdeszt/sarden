@@ -20,6 +20,10 @@
 * Todos:
   * Finish notifier loop
   * Tests
+* User service:
+  * Multi user
+  * Roles
+  * Admin UI
 
 ## Tech debt:
 * Authentication for web service

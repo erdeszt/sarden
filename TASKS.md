@@ -1,4 +1,10 @@
-# TASKS:
+## Task list:
+* Sowlog:
+  * add entries
+  * display
+* Error handling
+* Test coverage for core services
+
 ## Features:
 * Plant db:
   * Finish implementation

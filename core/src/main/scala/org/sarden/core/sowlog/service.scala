@@ -1,23 +1,32 @@
 package org.sarden.core.sowlog
 
+import java.time.LocalDate
+
 import cats.data.NonEmptyList
 import zio.*
 
+import org.sarden.core.IdGenerator
 import org.sarden.core.SystemErrors.DataInconsistencyError
-import org.sarden.core.plant.{Plant, PlantService}
+import org.sarden.core.plant.*
 import org.sarden.core.sowlog.internal.*
 import org.sarden.core.tx.*
 
 trait SowlogService:
-  def getLog(): UIO[Vector[SowlogEntry[Plant]]]
+  def getEntries(): UIO[Vector[SowlogEntry[Plant]]]
+  def createEntry(
+      plantId: PlantId,
+      sowingDate: LocalDate,
+      details: SowlogDetails,
+  ): UIO[SowlogEntryId]
 
 object SowlogService:
-  val live: URLayer[Tx.Runner & PlantService, SowlogService] =
+  val live: URLayer[Tx.Runner & PlantService & IdGenerator, SowlogService] =
     ZLayer.fromZIO:
       for
         tx <- ZIO.service[Tx.Runner]
         plants <- ZIO.service[PlantService]
-      yield LiveSowlogService(LiveSowlogRepo(), tx, plants)
+        idGenerator <- ZIO.service[IdGenerator]
+      yield LiveSowlogService(LiveSowlogRepo(idGenerator), tx, plants)
 
 class LiveSowlogService(
     repo: SowlogRepo,
@@ -25,7 +34,7 @@ class LiveSowlogService(
     plantService: PlantService,
 ) extends SowlogService:
 
-  override def getLog(): UIO[Vector[SowlogEntry[Plant]]] =
+  override def getEntries(): UIO[Vector[SowlogEntry[Plant]]] =
     for
       entries <- tx.runOrDie(repo.getLog())
       enrichedEntries <- NonEmptyList.fromFoldable(entries) match
@@ -46,3 +55,10 @@ class LiveSowlogService(
                   )
                   .orDie
     yield enrichedEntries
+
+  override def createEntry(
+      plantId: PlantId,
+      sowingDate: LocalDate,
+      details: SowlogDetails,
+  ): UIO[SowlogEntryId] =
+    tx.runOrDie(repo.createEntry(plantId, sowingDate, details))

@@ -27,7 +27,7 @@ val showSowlog: AppServerEndpoint = baseEndpoint.get
   .out(htmlView[Vector[SowlogEntryVM]](listView))
   .zServerLogic { (_: Unit) =>
     ZIO.serviceWithZIO[SowlogService]:
-      _.getLog()
+      _.getEntries()
         .map(_.map(_.transformInto[SowlogEntryVM]))
   }
 

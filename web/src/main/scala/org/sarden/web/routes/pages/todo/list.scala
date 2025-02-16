@@ -101,13 +101,13 @@ private def listView(todos: Vector[TodoVM]): TypedTag[String] =
                       ),
                       a(
                         href := s"/todos/${todo.id}/complete",
-                        cls := "btn btn-primary",
+                        cls := "btn btn-primary btn-sm",
                         "Complete",
                       ),
                       a(
                         // TODO: Use form post
                         href := s"/todos/${todo.id}/delete",
-                        cls := "btn btn-danger",
+                        cls := "btn btn-danger btn-sm",
                         "Delete",
                       ),
                     ),

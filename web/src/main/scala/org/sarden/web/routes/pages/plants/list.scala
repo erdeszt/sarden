@@ -101,12 +101,12 @@ private def listView(plants: Vector[PlantVM]): TypedTag[String] =
                         p(cls := "card-text", "Some description of the plant"),
                         a(
                           href := s"/plants/${plant.id}",
-                          cls := "btn btn-primary",
+                          cls := "btn btn-primary btn-sm",
                           "Details",
                         ),
                         a(
                           href := s"/plants/${plant.id}/companions",
-                          cls := "btn btn-success",
+                          cls := "btn btn-success btn-sm",
                           "Companions",
                         ),
                       ),

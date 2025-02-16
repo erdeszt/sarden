@@ -34,7 +34,7 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
     ZIO.attempt(???).orDie
 
   override def getPlant(id: PlantId): UIO[Option[Plant]] =
-    ZIO.attempt(???).orDie
+    tx.runOrDie(repo.getPlant(id))
 
   override def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]] =
     tx.runOrDie(repo.searchPlants(filters))

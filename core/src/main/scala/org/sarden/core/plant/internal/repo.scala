@@ -23,6 +23,7 @@ private[plant] trait PlantRepo:
   ): URIO[Tx, PlantId]
   def loadPresetData: URIO[Tx, Unit]
   def getPlantsByIds(ids: NonEmptyList[PlantId]): URIO[Tx, Vector[Plant]]
+  def getPlant(id: PlantId): URIO[Tx, Option[Plant]]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
@@ -69,4 +70,11 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
       (fr"SELECT id, name FROM plant WHERE " ++ fragments.in(fr"id", ids))
         .queryThrough[PlantDTO, Plant]
         .to[Vector]
+    }
+
+  override def getPlant(id: PlantId): URIO[Tx, Option[Plant]] =
+    Tx {
+      sql"SELECT id, name FROM plant WHERE id = ${id}"
+        .queryThrough[PlantDTO, Plant]
+        .option
     }

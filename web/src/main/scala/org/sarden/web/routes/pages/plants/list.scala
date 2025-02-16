@@ -45,7 +45,11 @@ private def listView(plants: Vector[PlantVM]): TypedTag[String] =
                 div(
                   cls := "d-flex gap-2",
                   button(cls := "btn btn-outline-secondary btn-sm", "Export"),
-                  button(cls := "btn btn-primary btn-sm", "Filter"),
+                  a(
+                    href := "/plants/new",
+                    cls := "btn btn-primary btn-sm",
+                    "Add new",
+                  ),
                 ),
               ),
               // Search:

@@ -1,4 +1,4 @@
-package org.sarden.core.domain.todo
+package org.sarden.core.todo
 
 import java.time.{LocalTime, ZoneId}
 
@@ -8,7 +8,6 @@ import org.flywaydb.core.Flyway
 import zio.*
 import zio.test.*
 
-import org.sarden.core.todo.{CreateTodo, TodoName, TodoSchedule, TodoService}
 import org.sarden.core.{CoreConfig, CoreServices}
 
 object LiveTodoServiceTest extends ZIOSpecDefault:

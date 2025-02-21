@@ -22,7 +22,7 @@ class LiveTodoRepo(idGenerator: IdGenerator) extends TodoRepo:
   override def getActiveTodos(): URIO[Tx, Vector[Todo]] =
     Tx:
       sql"SELECT * FROM todo"
-        .queryTransform[TodoDTO, Todo](
+        .queryTransformPartial[TodoDTO](
           _.intoPartial[Todo].transform,
         )
         .to[Vector]

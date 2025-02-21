@@ -1,6 +1,7 @@
 package org.sarden.core.plant
 
 import cats.data.NonEmptyList
+import com.github.f4b6a3.ulid.Ulid
 import zio.*
 import zio.test.*
 
@@ -79,5 +80,78 @@ object LivePlantServiceTest extends BaseSpec:
           _ <- plantService.loadPresetData
           plants <- plantService.searchPlants(SearchPlantFilters.empty)
         yield assertTrue(plants.nonEmpty)
+      },
+      test("Added varieties can be listed") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService
+            .createPlant(PlantName("carrot"), PlantDetails())
+          boleroName = VarietyName("bolero")
+          boleroId <- plantService.createVariety(carrotId, boleroName)
+          carrotVarieties <- plantService.getVarietiesOfPlant(carrotId)
+        yield assertTrue(
+          carrotVarieties.length == 1,
+          carrotVarieties.head.id == boleroId,
+          carrotVarieties.head.name == boleroName,
+          carrotVarieties.head.plant == carrotId,
+        )
+      },
+      test("Adding variety to non existing plant causes an error") {
+        for
+          plantService <- ZIO.service[PlantService]
+          plantId = PlantId(Ulid.fast())
+          result <- plantService
+            .createVariety(plantId, VarietyName("whatever"))
+            .either
+        yield assertTrue(
+          result == Left(MissingPlantError(plantId)),
+        )
+      },
+      test("Add companions can be listed") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService
+            .createPlant(PlantName("carrot"), PlantDetails())
+          onionId <- plantService
+            .createPlant(PlantName("onion"), PlantDetails())
+          companionId <- plantService.createCompanion(
+            onionId,
+            carrotId,
+            Set(CompanionBenefit.DetersPests),
+          )
+          carrotCompanions <- plantService.getCompanionsOfPlant(carrotId)
+        yield assertTrue(
+          carrotCompanions.length == 1,
+          carrotCompanions.head.id == companionId,
+          carrotCompanions.head.companionPlant == onionId,
+          carrotCompanions.head.targetPlant == carrotId,
+          carrotCompanions.head.benefits == Set(CompanionBenefit.DetersPests),
+        )
+      },
+      test("Adding a companion to non existing plant causes an error") {
+        for
+          plantService <- ZIO.service[PlantService]
+          onionId <- plantService
+            .createPlant(PlantName("onion"), PlantDetails())
+          plantId = PlantId(Ulid.fast())
+          result <- plantService
+            .createCompanion(onionId, plantId, Set.empty)
+            .either
+        yield assertTrue(
+          result == Left(MissingPlantError(plantId)),
+        )
+      },
+      test("Adding a non existing companion to a plant causes an error") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService
+            .createPlant(PlantName("carrot"), PlantDetails())
+          plantId = PlantId(Ulid.fast())
+          result <- plantService
+            .createCompanion(plantId, carrotId, Set.empty)
+            .either
+        yield assertTrue(
+          result == Left(MissingPlantError(plantId)),
+        )
       },
     ) @@ TestAspect.before(setupDb) @@ TestAspect.sequential

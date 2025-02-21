@@ -4,6 +4,7 @@ import scala.io.Source
 
 import cats.data.NonEmptyList
 import doobie.util.fragments
+import io.scalaland.chimney.dsl.*
 import zio.*
 import zio.json.*
 
@@ -12,8 +13,11 @@ import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.core.tx.*
 
-private[plant] case class PresetDataFormatError(message: String)
+private[internal] case class PresetDataFormatError(message: String)
     extends InvariantViolationError(s"Preset data format error: ${message}")
+
+private[internal] case class InvalidCompanionBenefitFormatError(raw: String)
+    extends InvariantViolationError(s"Invalid CompanioinBenefit format: ${raw}")
 
 private[plant] trait PlantRepo:
   def searchPlants(filter: SearchPlantFilters): URIO[Tx, Vector[Plant]]
@@ -26,7 +30,15 @@ private[plant] trait PlantRepo:
   def getPlantsByIds(ids: NonEmptyList[PlantId]): URIO[Tx, Vector[Plant]]
   def getPlant(id: PlantId): URIO[Tx, Option[Plant]]
   def createVariety(plantId: PlantId, name: VarietyName): URIO[Tx, VarietyId]
-  def getVarietiesOfPlant(plantId: PlantId): URIO[Tx, Vector[Variety]]
+  def getVarietiesOfPlant(plantId: PlantId): URIO[Tx, Vector[Variety[PlantId]]]
+  def createCompanion(
+      companionPlantId: PlantId,
+      targetPlantId: PlantId,
+      benefits: Set[CompanionBenefit],
+  ): URIO[Tx, CompanionId]
+  def getCompanionsOfPlant(
+      targetPlantId: PlantId,
+  ): URIO[Tx, Vector[Companion[PlantId]]]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
@@ -100,8 +112,41 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
   override def getVarietiesOfPlant(
       plantId: PlantId,
-  ): URIO[Tx, Vector[Variety]] =
+  ): URIO[Tx, Vector[Variety[PlantId]]] =
     Tx:
       sql"SELECT id, plant_id, name FROM variety WHERE plant_id = ${plantId}"
-        .queryThrough[VarietyDTO, Variety]
+        .queryTransformPartial[VarietyDTO](
+          _.intoPartial[Variety[PlantId]]
+            .withFieldRenamed(_.plantId, _.plant)
+            .transform,
+        )
+        .to[Vector]
+
+  override def createCompanion(
+      companionPlantId: PlantId,
+      targetPlantId: PlantId,
+      benefits: Set[CompanionBenefit],
+  ): URIO[Tx, CompanionId] =
+    for
+      companionId <- idGenerator.next()
+      now <- zio.Clock.instant.map(_.getEpochSecond)
+      benefitsDTO = BenefitsDTO(benefits)
+      _ <- Tx:
+        sql"""INSERT INTO companion
+             |(id, companion_plant_id, target_plant_id, benefits, created_at)
+             |VALUES
+             |(${companionId}, ${companionPlantId}, ${targetPlantId}, ${benefitsDTO}, ${now})""".stripMargin.update.run
+    yield CompanionId(companionId)
+
+  override def getCompanionsOfPlant(
+      targetPlantId: PlantId,
+  ): URIO[Tx, Vector[Companion[PlantId]]] =
+    Tx:
+      sql"SELECT id, companion_plant_id, target_plant_id, benefits FROM companion WHERE target_plant_id = ${targetPlantId}"
+        .queryTransformPartial[CompanionDTO](
+          _.intoPartial[Companion[PlantId]]
+            .withFieldRenamed(_.companionPlantId, _.companionPlant)
+            .withFieldRenamed(_.targetPlantId, _.targetPlant)
+            .transform,
+        )
         .to[Vector]

@@ -35,9 +35,9 @@ CREATE TABLE variety (
 
 CREATE TABLE companion (
     id TEXT NOT NULL PRIMARY KEY,
-    source_plant_id TEXT NOT NULL,
+    companion_plant_id TEXT NOT NULL,
     target_plant_id TEXT NOT NULL,
-    benefit TEXT NOT NULL,
+    benefits TEXT NOT NULL,
     created_at INTEGER NOT NULL
 );
 

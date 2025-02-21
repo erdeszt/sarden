@@ -8,7 +8,7 @@ import org.sarden.core.tx.*
 import org.sarden.core.{IdGenerator, InvalidRequestError}
 
 case class MissingPlantError(id: PlantId)
-    extends InvalidRequestError(s"Missing plant: ${id}")
+    extends InvalidRequestError(s"Missing plant: ${id}") derives CanEqual
 
 trait PlantService:
   def createPlant(name: PlantName, details: PlantDetails): UIO[PlantId]
@@ -22,8 +22,16 @@ trait PlantService:
   ): IO[MissingPlantError, VarietyId]
   def getVarietiesOfPlant(
       plantId: PlantId,
-  ): IO[MissingPlantError, Vector[Variety]]
+  ): IO[MissingPlantError, Vector[Variety[PlantId]]]
   def loadPresetData: UIO[Unit]
+  def createCompanion(
+      companionPlantId: PlantId,
+      targetPlantId: PlantId,
+      benefits: Set[CompanionBenefit],
+  ): IO[MissingPlantError, CompanionId]
+  def getCompanionsOfPlant(
+      targetPlantId: PlantId,
+  ): IO[MissingPlantError, Vector[Companion[PlantId]]]
 
 object PlantService:
   val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
@@ -71,9 +79,41 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
 
   override def getVarietiesOfPlant(
       plantId: PlantId,
-  ): IO[MissingPlantError, Vector[Variety]] =
+  ): IO[MissingPlantError, Vector[Variety[PlantId]]] =
     tx.runOrDie:
       for
         _ <- repo.getPlant(plantId).someOrFail(MissingPlantError(plantId))
         varieties <- repo.getVarietiesOfPlant(plantId)
       yield varieties
+
+  override def createCompanion(
+      companionPlantId: PlantId,
+      targetPlantId: PlantId,
+      benefits: Set[CompanionBenefit],
+  ): IO[MissingPlantError, CompanionId] =
+    tx.runOrDie:
+      for
+        _ <- repo
+          .getPlant(companionPlantId)
+          .someOrFail(MissingPlantError(companionPlantId))
+          .zipPar:
+            repo
+              .getPlant(targetPlantId)
+              .someOrFail(MissingPlantError(targetPlantId))
+        companionId <- repo.createCompanion(
+          companionPlantId,
+          targetPlantId,
+          benefits,
+        )
+      yield companionId
+
+  override def getCompanionsOfPlant(
+      targetPlantId: PlantId,
+  ): IO[MissingPlantError, Vector[Companion[PlantId]]] =
+    tx.runOrDie:
+      for
+        _ <- repo
+          .getPlant(targetPlantId)
+          .someOrFail(MissingPlantError(targetPlantId))
+        companions <- repo.getCompanionsOfPlant(targetPlantId)
+      yield companions

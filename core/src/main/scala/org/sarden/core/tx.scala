@@ -57,11 +57,20 @@ object tx:
             case Right(value) => value,
       )
 
-    def queryTransform[DTO: Read, DO]: QueryTransformer[DTO, DO] =
+    def queryTransform[DTO: Read]: QueryTransformer[DTO] =
       QueryTransformer(fragment)
 
-  class QueryTransformer[DTO, DO](fragment: Fragment):
-    def apply(
+    def queryTransformPartial[DTO: Read]: QueryTransformerPartial[DTO] =
+      QueryTransformerPartial(fragment)
+
+  class QueryTransformer[DTO](fragment: Fragment):
+    def apply[DO](
+        f: DTO => DO,
+    )(using read: Read[DTO]): Query0[DO] =
+      fragment.query[DO](using read.map(f))
+
+  class QueryTransformerPartial[DTO](fragment: Fragment):
+    def apply[DO](
         f: DTO => Result[DO],
     )(using read: Read[DTO]): Query0[DO] =
       fragment.query[DO](using

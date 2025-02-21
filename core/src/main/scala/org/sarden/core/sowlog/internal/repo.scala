@@ -24,7 +24,7 @@ class LiveSowlogRepo(idGenerator: IdGenerator) extends SowlogRepo:
   override def getLog(): URIO[Tx, Vector[SowlogEntry[PlantId]]] =
     Tx {
       sql"SELECT id, plant_id, sowing_date, details FROM sowlog"
-        .queryTransform[SowlogEntryDTO, SowlogEntry[PlantId]](
+        .queryTransformPartial[SowlogEntryDTO](
           _.intoPartial[SowlogEntry[PlantId]]
             .withFieldRenamed(_.plantId, _.plant)
             .transform,

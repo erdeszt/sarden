@@ -3,10 +3,8 @@ package org.sarden.web
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
 import sttp.tapir.json.zio.*
-import sttp.tapir.server.interceptor.exception.ExceptionHandler
 import sttp.tapir.server.model.ValuedEndpointOutput
 import sttp.tapir.server.ziohttp.{ZioHttpInterpreter, ZioHttpServerOptions}
-import sttp.tapir.ztapir.*
 import sttp.tapir.ztapir.ZServerEndpoint
 import zio.*
 import zio.http.{Response as ZioHttpResponse, Routes, Server}

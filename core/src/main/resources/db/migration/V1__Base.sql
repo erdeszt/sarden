@@ -1,3 +1,10 @@
+CREATE TABLE user (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
+
 CREATE TABLE todo (
   id TEXT NOT NULL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -19,10 +26,18 @@ CREATE TABLE plant (
     created_at INTEGER NOT NULL
 );
 
-CREATE TABLE user (
+CREATE TABLE variety (
     id TEXT NOT NULL PRIMARY KEY,
+    plant_id TEXT NOT NULL,
     name TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+);
+
+CREATE TABLE companion (
+    id TEXT NOT NULL PRIMARY KEY,
+    source_plant_id TEXT NOT NULL,
+    target_plant_id TEXT NOT NULL,
+    benefit TEXT NOT NULL,
     created_at INTEGER NOT NULL
 );
 

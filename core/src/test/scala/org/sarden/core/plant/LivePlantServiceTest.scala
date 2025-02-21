@@ -32,9 +32,8 @@ object LivePlantServiceTest extends BaseSpec:
             .createPlant(plantName, PlantDetails())
           plant <- plantService.getPlant(plantId)
         yield assertTrue(
-          plant.nonEmpty,
-          plant.get.id == plantId,
-          plant.get.name == plantName,
+          plant.id == plantId,
+          plant.name == plantName,
         )
       },
       test("Created plant should be returned when searching by ids") {
@@ -61,7 +60,10 @@ object LivePlantServiceTest extends BaseSpec:
           )
           _ <- plantService.deletePlant(plantId)
           searchResult <- plantService.searchPlants(SearchPlantFilters.empty)
-          getByIdResult <- plantService.getPlant(plantId)
+          getByIdResult <- plantService
+            .getPlant(plantId)
+            .map(Some(_))
+            .catchSome { case _: MissingPlantError => ZIO.succeed(None) }
           getByIdsResult <- plantService.getPlantsByIds(
             NonEmptyList.of(plantId),
           )

@@ -4,8 +4,6 @@ import io.scalaland.chimney.dsl.*
 import neotype.*
 import zio.*
 
-import org.sarden.core.SystemErrors.DataInconsistencyError
-
 object mapping:
 
   export io.scalaland.chimney.partial.Result
@@ -22,16 +20,21 @@ object mapping:
   given [A, B](using newType: Newtype.WithType[A, B]): Transformer[B, A] =
     newType.unwrap(_)
 
+  case class DataTransformationError(errors: Result.Errors)
+      extends InvariantViolationError(
+        s"Data transformation failed with error: ${errors.asErrorPathMessages.mkString(",")}",
+      )
+
   extension [From](from: From)
     def transformIntoPartialZIO[To](using
         transformer: PartialTransformer.AutoDerived[From, To],
-    ): IO[DataInconsistencyError, To] =
+    ): IO[DataTransformationError, To] =
       ZIO.fromEither:
         from
           .transformIntoPartial[To]
           .asEither
           .left
-          .map(DataInconsistencyError(_))
+          .map(DataTransformationError.apply)
 
     def transformIntoPartialZIOOrDie[To](using
         transformer: PartialTransformer.AutoDerived[From, To],
@@ -41,5 +44,5 @@ object mapping:
           .transformIntoPartial[To]
           .asEither
           .left
-          .map(DataInconsistencyError(_))
+          .map(DataTransformationError.apply)
       }.orDie

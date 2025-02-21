@@ -4,7 +4,6 @@ import com.github.f4b6a3.ulid.UlidCreator
 import sttp.tapir.ztapir.*
 import zio.ZIO
 
-import org.sarden.core.DomainErrors.AuthenticationFailedError
 import org.sarden.core.user.*
 import org.sarden.core.{CoreServices, Password}
 import org.sarden.web.ApiAuthConfig

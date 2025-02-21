@@ -19,6 +19,18 @@ case class Plant(
     name: PlantName,
 )
 
+type VarietyId = VarietyId.Type
+object VarietyId extends UlidNewtype
+
+type VarietyName = VarietyName.Type
+object VarietyName extends Newtype[String]
+
+case class Variety(
+    id: VarietyId,
+    plantId: PlantId,
+    name: VarietyName,
+)
+
 case class SearchPlantFilters(
     name: Option[PlantName],
 )

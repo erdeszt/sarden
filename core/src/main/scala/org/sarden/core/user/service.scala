@@ -3,9 +3,11 @@ package org.sarden.core.user
 import zio.*
 
 import org.sarden.core.*
-import org.sarden.core.DomainErrors.AuthenticationFailedError
 import org.sarden.core.tx.*
 import org.sarden.core.user.internal.{LiveUserRepo, UserRepo}
+
+case class AuthenticationFailedError()
+    extends InvalidRequestError("Failed to authenticate the request")
 
 trait UserService:
   def getUserByCredentials(

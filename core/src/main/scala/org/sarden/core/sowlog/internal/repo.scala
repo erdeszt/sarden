@@ -4,10 +4,8 @@ import java.time.LocalDate
 
 import io.scalaland.chimney.dsl.*
 import zio.*
-import zio.json.*
 
-import org.sarden.core.IdGenerator
-import org.sarden.core.SystemErrors.DataInconsistencyError
+import org.sarden.core.*
 import org.sarden.core.mapping.given
 import org.sarden.core.plant.PlantId
 import org.sarden.core.sowlog.*
@@ -29,14 +27,6 @@ class LiveSowlogRepo(idGenerator: IdGenerator) extends SowlogRepo:
         .queryTransform[SowlogEntryDTO, SowlogEntry[PlantId]](
           _.intoPartial[SowlogEntry[PlantId]]
             .withFieldRenamed(_.plantId, _.plant)
-            .withFieldComputed(
-              _.sowingDate,
-              _.sowingDate
-                .fromJson[LocalDate]
-                .getOrElse(
-                  throw DataInconsistencyError("Invalid LocalDate value"),
-                ),
-            )
             .transform,
         )
         .to[Vector]

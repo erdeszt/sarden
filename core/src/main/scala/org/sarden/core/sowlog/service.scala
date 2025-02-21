@@ -5,11 +5,17 @@ import java.time.LocalDate
 import cats.data.NonEmptyList
 import zio.*
 
-import org.sarden.core.IdGenerator
-import org.sarden.core.SystemErrors.DataInconsistencyError
+import org.sarden.core.*
 import org.sarden.core.plant.*
 import org.sarden.core.sowlog.internal.*
 import org.sarden.core.tx.*
+
+case class PlantNotFoundForSowlogError(
+    plantId: PlantId,
+    sowlogEntryId: SowlogEntryId,
+) extends InvariantViolationError(
+      s"Plant(${plantId}) not found for sowlog: ${sowlogEntryId}",
+    )
 
 trait SowlogService:
   def getEntries(): UIO[Vector[SowlogEntry[Plant]]]
@@ -48,10 +54,7 @@ class LiveSowlogService(
                 ZIO
                   .fromOption(plants.get(entry.plant))
                   .mapBoth(
-                    _ =>
-                      DataInconsistencyError(
-                        s"Can't find plant for sow log entry: ${entry.id}",
-                      ),
+                    _ => PlantNotFoundForSowlogError(entry.plant, entry.id),
                     plant => entry.copy[Plant](plant = plant),
                   )
                   .orDie

@@ -4,7 +4,6 @@ import zio.*
 
 import org.sarden.core.mapping.given
 import org.sarden.core.tx.*
-import org.sarden.core.ulid.given
 import org.sarden.core.user.*
 
 private[user] trait UserRepo:

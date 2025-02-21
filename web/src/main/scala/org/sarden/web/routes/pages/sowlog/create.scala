@@ -9,15 +9,14 @@ import sttp.model.{HeaderNames, StatusCode}
 import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
-import zio.json.*
 
-import org.sarden.core.SystemErrors.{DataFormatError, DataInconsistencyError}
+import org.sarden.core.InvalidRequestError
 import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.core.sowlog.*
 import org.sarden.web.*
 import org.sarden.web.routes.pages.*
-import org.sarden.web.routes.pages.plants.PlantVM
+import org.sarden.web.routes.pages.plants.{InvalidPlantIdInputError, PlantVM}
 
 private[pages] case class CreateSowlogEntryForm(
     plantId: String,
@@ -25,6 +24,11 @@ private[pages] case class CreateSowlogEntryForm(
     sowingDateMonth: Int,
     sowingDateDay: Int,
 ) derives Schema
+
+case class InvalidLocalDateInputError(year: Int, month: Int, day: Int)
+    extends InvalidRequestError(
+      s"Invalid LocalDate parts input, year=${year}, month=${month}, day=${day}",
+    )
 
 val createSowlogEntryForm: AppServerEndpoint = baseEndpoint.get
   .in("sowlog" / "new")
@@ -52,14 +56,20 @@ val createSowlogEntry: AppServerEndpoint = baseEndpoint.post
             formData.sowingDateDay,
           )
         }
-        .mapError(error => DataFormatError(error.getMessage))
+        .orElseFail(
+          InvalidLocalDateInputError(
+            formData.sowingDateYear,
+            formData.sowingDateMonth,
+            formData.sowingDateDay,
+          ),
+        )
         .orDie
       plantId <- ZIO.fromEither {
         formData.plantId
           .transformIntoPartial[PlantId]
           .asEither
           .left
-          .map(DataInconsistencyError(_))
+          .map(_ => InvalidPlantIdInputError(formData.plantId))
       }.orDie
       _ <- ZIO.serviceWithZIO[SowlogService]:
         _.createEntry(plantId, sowingDate, SowlogDetails())

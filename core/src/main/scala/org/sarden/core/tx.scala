@@ -10,7 +10,7 @@ import io.scalaland.chimney.dsl.*
 import io.scalaland.chimney.partial.Result
 import zio.*
 
-import org.sarden.core.SystemErrors.DataInconsistencyError
+import org.sarden.core.mapping.DataTransformationError
 
 object tx:
   type Tx = Connection
@@ -53,7 +53,7 @@ object tx:
         read.map: dto =>
           dto.transformIntoPartial[DO].asEither match
             case Left(error) =>
-              throw DataInconsistencyError(error)
+              throw DataTransformationError(error)
             case Right(value) => value,
       )
 
@@ -68,7 +68,7 @@ object tx:
         read.map: dto =>
           f(dto).asEither match
             case Left(error) =>
-              throw DataInconsistencyError(error)
+              throw DataTransformationError(error)
             case Right(value) => value,
       )
 

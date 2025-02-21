@@ -3,17 +3,17 @@ package org.sarden.core.plant.internal
 import scala.io.Source
 
 import cats.data.NonEmptyList
-import cats.instances.vector.given
-import doobie.util.fragment.Fragment
 import doobie.util.fragments
 import zio.*
 import zio.json.*
 
-import org.sarden.core.IdGenerator
-import org.sarden.core.SystemErrors.DataFormatError
+import org.sarden.core.*
 import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.core.tx.*
+
+private[plant] case class PresetDataFormatError(message: String)
+    extends InvariantViolationError(s"Preset data format error: ${message}")
 
 private[plant] trait PlantRepo:
   def searchPlants(filter: SearchPlantFilters): URIO[Tx, Vector[Plant]]
@@ -63,7 +63,7 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
           .orDie
       plants <- ZIO
         .fromEither(rawPlants.fromJson[Vector[CreatePlantDTO]])
-        .mapError(DataFormatError(_))
+        .mapError(PresetDataFormatError.apply)
         .orDie
       _ <- ZIO.foreachDiscard(plants): plant =>
         createPlant(PlantName(plant.name), PlantDetails())

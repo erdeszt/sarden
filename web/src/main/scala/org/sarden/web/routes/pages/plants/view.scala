@@ -6,11 +6,14 @@ import scalatags.Text.all.*
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.SystemErrors.DataInconsistencyError
+import org.sarden.core.InvalidRequestError
 import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.web.*
 import org.sarden.web.routes.pages.*
+
+case class InvalidPlantIdInputError(raw: String)
+    extends InvalidRequestError(s"Invalid plant id: ${raw}")
 
 val viewPlant: AppServerEndpoint = baseEndpoint.get
   .in("plants" / path[String]("id"))
@@ -22,14 +25,10 @@ val viewPlant: AppServerEndpoint = baseEndpoint.get
           .transformIntoPartial[PlantId]
           .asEither
           .left
-          .map(DataInconsistencyError(_))
+          .map(_ => InvalidPlantIdInputError(rawId))
       }.orDie
       plant <- ZIO
-        .serviceWithZIO[PlantService] {
-          _.getPlant(id).someOrFail(
-            DataInconsistencyError(s"Missing plant with id: ${id}"),
-          )
-        }
+        .serviceWithZIO[PlantService](_.getPlant(id))
         .orDie
     yield plant.transformInto[PlantVM]
 

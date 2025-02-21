@@ -5,12 +5,11 @@ import java.nio.charset.StandardCharsets
 import scalatags.Text
 import sttp.tapir.*
 
-import org.sarden.core.DomainError
-
 def htmlViewCodec[T: Schema](
     renderer: T => Text.TypedTag[String],
 ): Codec[String, T, CodecFormat.TextHtml] =
   Codec.anyString(CodecFormat.TextHtml())(_ =>
+    // TODO: Should this be included in the error hierarchy?
     throw new Exception("HTML input body is not supported"),
   )(value => renderer(value).render)
 

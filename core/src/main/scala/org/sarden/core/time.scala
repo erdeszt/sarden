@@ -12,14 +12,18 @@ import io.scalaland.chimney.{PartialTransformer, Transformer}
 import zio.json.*
 import zio.json.ast.Json
 
-import org.sarden.core.SystemErrors.{DataFormatError, InvalidTimeUnitError}
-
 object time:
 
   export java.time.{Instant, LocalTime, OffsetDateTime, ZoneId}
   export java.util.concurrent.TimeUnit
 
   export scala.concurrent.duration.FiniteDuration
+
+  case class InvalidLocalDateValueError(raw: String)
+      extends InvariantViolationError(s"Invalid LocalDate format: ${raw}")
+
+  case class InvalidTimeUnitError(raw: String)
+      extends InvariantViolationError(s"Invalid TimeUnit format: ${raw}")
 
   given JsonDecoder[FiniteDuration] = JsonDecoder[Map[String, Json]].map: raw =>
     FiniteDuration(
@@ -73,7 +77,7 @@ object time:
     Get[String].map(raw =>
       raw
         .fromJson[LocalDate]
-        .getOrElse(throw DataFormatError(s"Invalid LocalDate value: `${raw}`")),
+        .getOrElse(throw InvalidLocalDateValueError(raw)),
     )
 
   given PartialTransformer[String, LocalDate] = PartialTransformer: raw =>

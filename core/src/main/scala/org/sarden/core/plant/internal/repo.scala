@@ -25,15 +25,16 @@ private[plant] trait PlantRepo:
   def loadPresetData: URIO[Tx, Unit]
   def getPlantsByIds(ids: NonEmptyList[PlantId]): URIO[Tx, Vector[Plant]]
   def getPlant(id: PlantId): URIO[Tx, Option[Plant]]
+  def createVariety(plantId: PlantId, name: VarietyName): URIO[Tx, VarietyId]
+  def getVarietiesOfPlant(plantId: PlantId): URIO[Tx, Vector[Variety]]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
   override def searchPlants(
       filter: SearchPlantFilters,
   ): URIO[Tx, Vector[Plant]] =
-    Tx {
+    Tx:
       sql"SELECT id, name FROM plant".queryThrough[PlantDTO, Plant].to[Vector]
-    }
 
   override def createPlant(
       name: PlantName,
@@ -72,15 +73,35 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
   override def getPlantsByIds(
       ids: NonEmptyList[PlantId],
   ): URIO[Tx, Vector[Plant]] =
-    Tx {
+    Tx:
       (fr"SELECT id, name FROM plant WHERE " ++ fragments.in(fr"id", ids))
         .queryThrough[PlantDTO, Plant]
         .to[Vector]
-    }
 
   override def getPlant(id: PlantId): URIO[Tx, Option[Plant]] =
-    Tx {
+    Tx:
       sql"SELECT id, name FROM plant WHERE id = ${id}"
         .queryThrough[PlantDTO, Plant]
         .option
-    }
+
+  override def createVariety(
+      plantId: PlantId,
+      name: VarietyName,
+  ): URIO[Tx, VarietyId] =
+    for
+      varietyId <- idGenerator.next()
+      now <- zio.Clock.instant.map(_.getEpochSecond)
+      _ <- Tx:
+        sql"""INSERT INTO variety
+             |(id, plant_id, name, created_at)
+             |VALUES
+             |(${varietyId}, ${plantId}, ${name}, ${now})""".stripMargin.update.run
+    yield VarietyId(varietyId)
+
+  override def getVarietiesOfPlant(
+      plantId: PlantId,
+  ): URIO[Tx, Vector[Variety]] =
+    Tx:
+      sql"SELECT id, plant_id, name FROM variety WHERE plant_id = ${plantId}"
+        .queryThrough[VarietyDTO, Variety]
+        .to[Vector]

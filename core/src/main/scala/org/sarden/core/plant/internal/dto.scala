@@ -11,3 +11,9 @@ private[internal] case class PlantDTO(
 private[internal] case class CreatePlantDTO(
     name: String,
 ) derives JsonCodec
+
+private[internal] case class VarietyDTO(
+    id: String,
+    plantId: String,
+    name: String,
+) derives Read

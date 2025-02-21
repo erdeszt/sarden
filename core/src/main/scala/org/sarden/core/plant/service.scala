@@ -16,7 +16,13 @@ trait PlantService:
   def getPlant(id: PlantId): IO[MissingPlantError, Plant]
   def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]]
   def getPlantsByIds(ids: NonEmptyList[PlantId]): UIO[Map[PlantId, Plant]]
-  def createVariety(plantId: PlantId, name: VarietyName): UIO[VarietyId]
+  def createVariety(
+      plantId: PlantId,
+      name: VarietyName,
+  ): IO[MissingPlantError, VarietyId]
+  def getVarietiesOfPlant(
+      plantId: PlantId,
+  ): IO[MissingPlantError, Vector[Variety]]
   def loadPresetData: UIO[Unit]
 
 object PlantService:
@@ -47,8 +53,12 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
   override def createVariety(
       plantId: PlantId,
       name: VarietyName,
-  ): UIO[VarietyId] =
-    tx.runOrDie(???)
+  ): IO[MissingPlantError, VarietyId] =
+    tx.runOrDie:
+      for
+        _ <- repo.getPlant(plantId).someOrFail(MissingPlantError(plantId))
+        varietyId <- repo.createVariety(plantId, name)
+      yield varietyId
 
   override def getPlantsByIds(
       ids: NonEmptyList[PlantId],
@@ -58,3 +68,12 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
 
   override def loadPresetData: UIO[Unit] =
     tx.runOrDie(repo.loadPresetData)
+
+  override def getVarietiesOfPlant(
+      plantId: PlantId,
+  ): IO[MissingPlantError, Vector[Variety]] =
+    tx.runOrDie:
+      for
+        _ <- repo.getPlant(plantId).someOrFail(MissingPlantError(plantId))
+        varieties <- repo.getVarietiesOfPlant(plantId)
+      yield varieties

@@ -130,7 +130,7 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
     for
       companionId <- idGenerator.next()
       now <- zio.Clock.instant.map(_.getEpochSecond)
-      benefitsDTO = BenefitsDTO(benefits)
+      benefitsDTO = BenefitsDTO.fromBenefits(benefits)
       _ <- Tx:
         sql"""INSERT INTO companion
              |(id, companion_plant_id, target_plant_id, benefits, created_at)
@@ -147,6 +147,7 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
           _.intoPartial[Companion[PlantId]]
             .withFieldRenamed(_.companionPlantId, _.companionPlant)
             .withFieldRenamed(_.targetPlantId, _.targetPlant)
+            .withFieldRenamed(_.benefits.benefits, _.benefits)
             .transform,
         )
         .to[Vector]

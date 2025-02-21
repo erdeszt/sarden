@@ -1,6 +1,12 @@
 # Conventions:
 * Date times are stored as unix epoch seconds in UTC
 * Data constraints for newtypes are handled with `iron`. Neotype `validate` MUST NOT be used.
+* Domain types are not allowed to derive storage/transport layer specific codecs
+  * Domain types should be mapped to DTOs in the storage/transport layer
+  * Naming conventions:
+    * Database dtos have `DTO` postfix
+    * Api dtos have `Request` or `Response` postfix
+    * Page dtos have `Form` or `VM` (view model) postfix
 * Error handling strategy:
   * Errors are first split into two categories:
     * Invalid requests: 

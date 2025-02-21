@@ -64,7 +64,7 @@ object LivePlantServiceTest extends BaseSpec:
           getByIdResult <- plantService
             .getPlant(plantId)
             .map(Some(_))
-            .catchSome { case _: MissingPlantError => ZIO.succeed(None) }
+            .catchSome { case _: MissingPlantError => ZIO.none }
           getByIdsResult <- plantService.getPlantsByIds(
             NonEmptyList.of(plantId),
           )

@@ -1,7 +1,9 @@
 package org.sarden.core.plant.internal
 
+import cats.syntax.all.*
 import doobie.{Get, Put, Read}
-import io.scalaland.chimney.Transformer
+import io.scalaland.chimney.partial.Result
+import io.scalaland.chimney.{PartialTransformer, Transformer}
 import zio.json.*
 
 import org.sarden.core.plant.CompanionBenefit
@@ -45,20 +47,19 @@ object BenefitMapping:
     case CompanionBenefit.DetersPests =>
       PestControlStringFormat
 
-case class BenefitsDTO(benefits: Set[CompanionBenefit])
+case class BenefitsDTO(benefits: Set[String])
+
+object BenefitsDTO:
+  def fromBenefits(benefits: Set[CompanionBenefit]): BenefitsDTO =
+    new BenefitsDTO(benefits.map(BenefitMapping.toStorageFormat))
 
 given Get[BenefitsDTO] = Get[String].map: raw =>
   raw.fromJson[Set[String]] match
-    case Left(error) => throw InvalidCompanionBenefitFormatError(raw)
-    case Right(rawBenefits) =>
-      BenefitsDTO:
-        rawBenefits.map: rawBenefit =>
-          BenefitMapping.fromStorageFormat(rawBenefit) match
-            case Left(error)    => throw InvalidCompanionBenefitFormatError(raw)
-            case Right(benefit) => benefit
+    case Left(error)        => throw InvalidCompanionBenefitFormatError(raw)
+    case Right(rawBenefits) => BenefitsDTO(rawBenefits)
 
 given Put[BenefitsDTO] = Put[String].contramap: dto =>
-  dto.benefits.map(BenefitMapping.toStorageFormat).toJson
+  dto.benefits.toJson
 
 case class CompanionDTO(
     id: String,
@@ -67,4 +68,9 @@ case class CompanionDTO(
     benefits: BenefitsDTO,
 ) derives Read
 
-given Transformer[BenefitsDTO, Set[CompanionBenefit]] = _.benefits
+given PartialTransformer[String, CompanionBenefit] = PartialTransformer: raw =>
+  Result.fromEitherString(
+    BenefitMapping.fromStorageFormat(raw).left.map(_.getMessage),
+  )
+
+given Transformer[CompanionBenefit, String] = BenefitMapping.toStorageFormat(_)

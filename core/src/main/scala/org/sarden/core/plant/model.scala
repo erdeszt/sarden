@@ -1,5 +1,6 @@
 package org.sarden.core.plant
 
+import cats.Order
 import neotype.*
 
 import org.sarden.core.ulid.*
@@ -46,6 +47,10 @@ enum CompanionBenefit derives CanEqual:
   case AttractsBeneficialBugs
   case AttractsPollinators
   case DetersPests
+
+object CompanionBenefit:
+  given Ordering[CompanionBenefit] = (a, b) => a.toString.compareTo(b.toString)
+  given Order[CompanionBenefit] = Order.fromOrdering
 
 case class Companion[PlantType](
     id: CompanionId,

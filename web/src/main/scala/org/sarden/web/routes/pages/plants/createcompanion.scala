@@ -1,5 +1,8 @@
 package org.sarden.web.routes.pages.plants
 
+import scala.collection.immutable.SortedSet
+
+import cats.data.NonEmptySet
 import io.scalaland.chimney.dsl.*
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
@@ -11,7 +14,6 @@ import zio.*
 import org.sarden.core.InvalidRequestError
 import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
-import org.sarden.core.plant.internal.InvalidCompanionBenefitFormatError
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 
@@ -29,6 +31,9 @@ private[pages] case class CreateCompanionVM(
 
 case class InvalidBenefitFormatError(raw: String)
     extends InvalidRequestError(s"Invalid benefit format: ${raw}")
+
+case class EmptyBenefitsError()
+    extends InvalidRequestError("No benefits provided for companion")
 
 val createCompanionForm: AppServerEndpoint = baseEndpoint.get
   .in("plants" / path[String]("targetPlantId") / "companions" / "new")
@@ -91,9 +96,15 @@ val createCompanion: AppServerEndpoint = baseEndpoint.post
               case _              => Left(InvalidBenefitFormatError(benefit))
         }
         .orDie
-      _ = println(s"Form: ${form}")
+      nonEmptyBenefits <- ZIO
+        .fromOption(
+          NonEmptySet
+            .fromSet(SortedSet.from(benefits)),
+        )
+        .orElseFail(EmptyBenefitsError())
+        .orDie
       _ <- plantService
-        .createCompanion(companionPlantId, targetPlantId, benefits)
+        .createCompanion(companionPlantId, targetPlantId, nonEmptyBenefits)
         .orDie
     yield s"/plants/${rawTargetPlantId}"
 

@@ -1,12 +1,13 @@
 package org.sarden.core.plant
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, NonEmptySet}
 import com.github.f4b6a3.ulid.Ulid
 import zio.*
 import zio.test.*
 
 import org.sarden.core.*
 import org.sarden.core.mapping.given
+import org.sarden.core.plant.CompanionBenefit.DetersPests
 
 object LivePlantServiceTest extends BaseSpec:
 
@@ -120,7 +121,7 @@ object LivePlantServiceTest extends BaseSpec:
           companionId <- plantService.createCompanion(
             onionId,
             carrotId,
-            Set(CompanionBenefit.DetersPests),
+            NonEmptySet.of(DetersPests),
           )
           carrotCompanions <- plantService.getCompanionsOfPlant(carrotId)
         yield assertTrue(
@@ -138,7 +139,7 @@ object LivePlantServiceTest extends BaseSpec:
             .createPlant(PlantName("onion"), PlantDetails())
           plantId = PlantId(Ulid.fast())
           result <- plantService
-            .createCompanion(onionId, plantId, Set.empty)
+            .createCompanion(onionId, plantId, NonEmptySet.of(DetersPests))
             .either
         yield assertTrue(
           result == Left(MissingPlantError(plantId)),
@@ -151,7 +152,7 @@ object LivePlantServiceTest extends BaseSpec:
             .createPlant(PlantName("carrot"), PlantDetails())
           plantId = PlantId(Ulid.fast())
           result <- plantService
-            .createCompanion(plantId, carrotId, Set.empty)
+            .createCompanion(plantId, carrotId, NonEmptySet.of(DetersPests))
             .either
         yield assertTrue(
           result == Left(MissingPlantError(plantId)),
@@ -163,7 +164,7 @@ object LivePlantServiceTest extends BaseSpec:
           carrotId <- plantService
             .createPlant(PlantName("carrot"), PlantDetails())
           result <- plantService
-            .createCompanion(carrotId, carrotId, Set.empty)
+            .createCompanion(carrotId, carrotId, NonEmptySet.of(DetersPests))
             .either
         yield assertTrue(result == Left(SelfCompanionError(carrotId)))
       },
@@ -181,10 +182,10 @@ object LivePlantServiceTest extends BaseSpec:
           companionId <- plantService.createCompanion(
             carrotId,
             onionId,
-            Set.empty,
+            NonEmptySet.of(DetersPests),
           )
           result <- plantService
-            .createCompanion(carrotId, onionId, Set.empty)
+            .createCompanion(carrotId, onionId, NonEmptySet.of(DetersPests))
             .either
         yield assertTrue(
           result == Left(CompanionAlreadyExistsError(companionId)),

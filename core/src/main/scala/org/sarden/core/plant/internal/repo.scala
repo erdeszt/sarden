@@ -2,7 +2,7 @@ package org.sarden.core.plant.internal
 
 import scala.io.Source
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, NonEmptySet}
 import doobie.util.fragments
 import io.scalaland.chimney.dsl.*
 import zio.*
@@ -34,7 +34,7 @@ private[plant] trait PlantRepo:
   def createCompanion(
       companionPlantId: PlantId,
       targetPlantId: PlantId,
-      benefits: Set[CompanionBenefit],
+      benefits: NonEmptySet[CompanionBenefit],
   ): URIO[Tx, CompanionId]
   def getCompanionsOfPlant(
       targetPlantId: PlantId,
@@ -129,12 +129,12 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
   override def createCompanion(
       companionPlantId: PlantId,
       targetPlantId: PlantId,
-      benefits: Set[CompanionBenefit],
+      benefits: NonEmptySet[CompanionBenefit],
   ): URIO[Tx, CompanionId] =
     for
       companionId <- idGenerator.next()
       now <- zio.Clock.instant.map(_.getEpochSecond)
-      benefitsDTO = BenefitsDTO.fromBenefits(benefits)
+      benefitsDTO = BenefitsDTO.fromBenefits(benefits.toSortedSet)
       _ <- Tx:
         sql"""INSERT INTO companion
              |(id, companion_plant_id, target_plant_id, benefits, created_at)

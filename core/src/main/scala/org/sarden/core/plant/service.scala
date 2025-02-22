@@ -1,6 +1,6 @@
 package org.sarden.core.plant
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList, NonEmptySet}
 import zio.*
 
 import org.sarden.core.plant.internal.{LivePlantRepo, PlantRepo}
@@ -33,11 +33,10 @@ trait PlantService:
       plantId: PlantId,
   ): IO[MissingPlantError, Vector[Variety[PlantId]]]
   def loadPresetData: UIO[Unit]
-  // TODO: NonEmptySet[CompanionBenefit]
   def createCompanion(
       companionPlantId: PlantId,
       targetPlantId: PlantId,
-      benefits: Set[CompanionBenefit],
+      benefits: NonEmptySet[CompanionBenefit],
   ): IO[
     MissingPlantError | SelfCompanionError | CompanionAlreadyExistsError,
     CompanionId,
@@ -102,7 +101,7 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
   override def createCompanion(
       companionPlantId: PlantId,
       targetPlantId: PlantId,
-      benefits: Set[CompanionBenefit],
+      benefits: NonEmptySet[CompanionBenefit],
   ): IO[
     MissingPlantError | SelfCompanionError | CompanionAlreadyExistsError,
     CompanionId,

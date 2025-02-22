@@ -40,12 +40,15 @@ private[plant] trait PlantRepo:
       targetPlantId: PlantId,
   ): URIO[Tx, Vector[Companion[PlantId]]]
   def getCompanionByPlants(
-      targetPlantId: PlantId,
       companionPlantId: PlantId,
+      targetPlantId: PlantId,
   ): URIO[Tx, Option[Companion[PlantId]]]
   def getCompanionRelations(
       plantId: PlantId,
   ): URIO[Tx, Vector[Companion[PlantId]]]
+  def deleteCompanion(
+      id: CompanionId,
+  ): URIO[Tx, Unit]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
@@ -160,8 +163,8 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
         .to[Vector]
 
   override def getCompanionByPlants(
-      targetPlantId: PlantId,
       companionPlantId: PlantId,
+      targetPlantId: PlantId,
   ): URIO[Tx, Option[Companion[PlantId]]] =
     Tx:
       sql"""SELECT id, companion_plant_id, target_plant_id, benefits
@@ -193,3 +196,10 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
             .transform,
         )
         .to[Vector]
+
+  override def deleteCompanion(
+      id: CompanionId,
+  ): URIO[Tx, Unit] =
+    Tx {
+      sql"DELETE FROM companion WHERE id = ${id}".update.run
+    }.unit

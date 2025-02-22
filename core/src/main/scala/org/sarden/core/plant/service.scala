@@ -24,6 +24,13 @@ case class CantDeletePlantWithCompanionRelationsError(id: PlantId)
       s"Can't delete plant that has companion relations: ${id}",
     ) derives CanEqual
 
+case class CompanionRelationNotFoundError(
+    companionPlantId: PlantId,
+    targetPlantId: PlantId,
+) extends InvalidRequestError(
+      s"Companion relation not found between ${companionPlantId} and ${targetPlantId}",
+    ) derives CanEqual
+
 trait PlantService:
   def createPlant(name: PlantName, details: PlantDetails): UIO[PlantId]
   def deletePlant(
@@ -51,6 +58,10 @@ trait PlantService:
   def getCompanionsOfPlant(
       targetPlantId: PlantId,
   ): IO[MissingPlantError, Vector[Companion[Plant]]]
+  def deleteCompanion(
+      companionPlantId: PlantId,
+      targetPlantId: PlantId,
+  ): IO[MissingPlantError, Unit]
 
 object PlantService:
   val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
@@ -133,8 +144,8 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
               .getPlant(targetPlantId)
               .someOrFail(MissingPlantError(targetPlantId))
         existingCompanion <- repo.getCompanionByPlants(
-          targetPlantId,
           companionPlantId,
+          targetPlantId,
         )
         _ <- ZIO.whenCase(existingCompanion):
           case Some(companion) =>
@@ -177,3 +188,21 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
             )
         }
       yield companionsWithPlants
+
+  override def deleteCompanion(
+      companionPlantId: PlantId,
+      targetPlantId: PlantId,
+  ): IO[MissingPlantError, Unit] =
+    tx.runOrDie:
+      for
+        companion <- repo
+          .getCompanionByPlants(
+            companionPlantId,
+            targetPlantId,
+          )
+          .someOrFail(
+            CompanionRelationNotFoundError(companionPlantId, targetPlantId),
+          )
+          .orDie
+        _ <- repo.deleteCompanion(companion.id)
+      yield ()

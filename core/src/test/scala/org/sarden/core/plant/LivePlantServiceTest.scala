@@ -217,15 +217,36 @@ object LivePlantServiceTest extends BaseSpec:
             PlantDetails(),
           )
           companionId <- plantService.createCompanion(
-            carrotId,
             onionId,
+            carrotId,
             NonEmptySet.of(DetersPests),
           )
           result <- plantService
-            .createCompanion(carrotId, onionId, NonEmptySet.of(DetersPests))
+            .createCompanion(onionId, carrotId, NonEmptySet.of(DetersPests))
             .either
         yield assertTrue(
           result == Left(CompanionAlreadyExistsError(companionId)),
         )
+      },
+      test("Deleted companions are not returned") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService.createPlant(
+            PlantName("carrot"),
+            PlantDetails(),
+          )
+          onionId <- plantService.createPlant(
+            PlantName("onion"),
+            PlantDetails(),
+          )
+          companionId <- plantService.createCompanion(
+            onionId,
+            carrotId,
+            NonEmptySet.of(DetersPests),
+          )
+          _ <- plantService.deleteCompanion(onionId, carrotId)
+          companions <- plantService
+            .getCompanionsOfPlant(carrotId)
+        yield assertTrue(companions.isEmpty)
       },
     ) @@ TestAspect.before(setupDb) @@ TestAspect.sequential

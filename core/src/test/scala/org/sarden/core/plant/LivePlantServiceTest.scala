@@ -10,6 +10,9 @@ import org.sarden.core.mapping.given
 
 object LivePlantServiceTest extends BaseSpec:
 
+  given canEqualUnion[A1, AS](using CanEqual[A1, A1]): CanEqual[A1 | AS, A1] =
+    CanEqual.derived
+
   override def spec =
     suite("Live PlantService Test")(
       test("Created plants should be returned when searching with no filters") {
@@ -152,6 +155,39 @@ object LivePlantServiceTest extends BaseSpec:
             .either
         yield assertTrue(
           result == Left(MissingPlantError(plantId)),
+        )
+      },
+      test("Adding a plant as a companion to itself should be forbidden") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService
+            .createPlant(PlantName("carrot"), PlantDetails())
+          result <- plantService
+            .createCompanion(carrotId, carrotId, Set.empty)
+            .either
+        yield assertTrue(result == Left(SelfCompanionError(carrotId)))
+      },
+      test("Adding a companion twice should be forbidden") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService.createPlant(
+            PlantName("carrot"),
+            PlantDetails(),
+          )
+          onionId <- plantService.createPlant(
+            PlantName("onion"),
+            PlantDetails(),
+          )
+          companionId <- plantService.createCompanion(
+            carrotId,
+            onionId,
+            Set.empty,
+          )
+          result <- plantService
+            .createCompanion(carrotId, onionId, Set.empty)
+            .either
+        yield assertTrue(
+          result == Left(CompanionAlreadyExistsError(companionId)),
         )
       },
     ) @@ TestAspect.before(setupDb) @@ TestAspect.sequential

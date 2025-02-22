@@ -10,6 +10,15 @@ import org.sarden.core.{IdGenerator, InvalidRequestError}
 case class MissingPlantError(id: PlantId)
     extends InvalidRequestError(s"Missing plant: ${id}") derives CanEqual
 
+case class SelfCompanionError(id: PlantId)
+    extends InvalidRequestError(
+      s"Plants can't companions of themselves, attempted with plant: ${id}",
+    ) derives CanEqual
+
+case class CompanionAlreadyExistsError(id: CompanionId)
+    extends InvalidRequestError(s"Companion already exists: ${id}")
+    derives CanEqual
+
 trait PlantService:
   def createPlant(name: PlantName, details: PlantDetails): UIO[PlantId]
   def deletePlant(id: PlantId): UIO[Unit]
@@ -28,7 +37,10 @@ trait PlantService:
       companionPlantId: PlantId,
       targetPlantId: PlantId,
       benefits: Set[CompanionBenefit],
-  ): IO[MissingPlantError, CompanionId]
+  ): IO[
+    MissingPlantError | SelfCompanionError | CompanionAlreadyExistsError,
+    CompanionId,
+  ]
   def getCompanionsOfPlant(
       targetPlantId: PlantId,
   ): IO[MissingPlantError, Vector[Companion[Plant]]]
@@ -90,9 +102,14 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
       companionPlantId: PlantId,
       targetPlantId: PlantId,
       benefits: Set[CompanionBenefit],
-  ): IO[MissingPlantError, CompanionId] =
+  ): IO[
+    MissingPlantError | SelfCompanionError | CompanionAlreadyExistsError,
+    CompanionId,
+  ] =
     tx.runOrDie:
       for
+        _ <- ZIO.when(companionPlantId == targetPlantId):
+          ZIO.fail(SelfCompanionError(companionPlantId))
         _ <- repo
           .getPlant(companionPlantId)
           .someOrFail(MissingPlantError(companionPlantId))
@@ -100,6 +117,13 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
             repo
               .getPlant(targetPlantId)
               .someOrFail(MissingPlantError(targetPlantId))
+        existingCompanion <- repo.getCompanionByPlants(
+          targetPlantId,
+          companionPlantId,
+        )
+        _ <- ZIO.whenCase(existingCompanion):
+          case Some(companion) =>
+            ZIO.fail(CompanionAlreadyExistsError(companion.id))
         companionId <- repo.createCompanion(
           companionPlantId,
           targetPlantId,

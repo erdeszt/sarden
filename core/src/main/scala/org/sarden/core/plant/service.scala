@@ -19,9 +19,16 @@ case class CompanionAlreadyExistsError(id: CompanionId)
     extends InvalidRequestError(s"Companion already exists: ${id}")
     derives CanEqual
 
+case class CantDeletePlantWithCompanionRelationsError(id: PlantId)
+    extends InvalidRequestError(
+      s"Can't delete plant that has companion relations: ${id}",
+    ) derives CanEqual
+
 trait PlantService:
   def createPlant(name: PlantName, details: PlantDetails): UIO[PlantId]
-  def deletePlant(id: PlantId): UIO[Unit]
+  def deletePlant(
+      id: PlantId,
+  ): IO[MissingPlantError | CantDeletePlantWithCompanionRelationsError, Unit]
   def getPlant(id: PlantId): IO[MissingPlantError, Plant]
   def searchPlants(filters: SearchPlantFilters): UIO[Vector[Plant]]
   def getPlantsByIds(ids: NonEmptyList[PlantId]): UIO[Map[PlantId, Plant]]
@@ -60,10 +67,18 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
   ): UIO[PlantId] =
     tx.runOrDie(repo.createPlant(name, details))
 
-  override def deletePlant(id: PlantId): UIO[Unit] =
-    tx.runOrDie(repo.deletePlant(id))
+  override def deletePlant(
+      id: PlantId,
+  ): IO[MissingPlantError | CantDeletePlantWithCompanionRelationsError, Unit] =
+    tx.runOrDie:
+      for
+        _ <- repo.getPlant(id).someOrFail(MissingPlantError(id))
+        companionRelations <- repo.getCompanionRelations(id)
+        _ <- ZIO.when(companionRelations.nonEmpty):
+          ZIO.fail(CantDeletePlantWithCompanionRelationsError(id))
+        _ <- repo.deletePlant(id)
+      yield ()
 
-  // TODO: Use UserNotFoundError instead of option at the service level
   override def getPlant(id: PlantId): IO[MissingPlantError, Plant] =
     tx.runOrDie(repo.getPlant(id)).someOrFail(MissingPlantError(id))
 

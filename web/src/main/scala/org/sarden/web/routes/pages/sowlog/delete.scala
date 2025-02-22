@@ -15,7 +15,7 @@ case class InvalidSowlogEntryIdInputError(raw: String)
     extends InvalidRequestError(s"Invalid sow log entry id format: ${raw}")
 
 val deleteSowlogEntry: AppServerEndpoint = baseEndpoint.post
-  .in("sowlog" / "delete" / path[String]("id"))
+  .in("sowlog" / path[String]("id") / "delete")
   .out(statusCode(StatusCode.Found).and(header[String](HeaderNames.Location)))
   .zServerLogic: rawId =>
     for

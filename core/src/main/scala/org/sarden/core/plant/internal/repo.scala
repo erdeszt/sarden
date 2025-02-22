@@ -43,6 +43,9 @@ private[plant] trait PlantRepo:
       targetPlantId: PlantId,
       companionPlantId: PlantId,
   ): URIO[Tx, Option[Companion[PlantId]]]
+  def getCompanionRelations(
+      plantId: PlantId,
+  ): URIO[Tx, Vector[Companion[PlantId]]]
 
 case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
 
@@ -173,3 +176,20 @@ case class LivePlantRepo(idGenerator: IdGenerator) extends PlantRepo:
             .transform,
         )
         .option
+
+  override def getCompanionRelations(
+      plantId: PlantId,
+  ): URIO[Tx, Vector[Companion[PlantId]]] =
+    Tx:
+      sql"""SELECT id, companion_plant_id, target_plant_id, benefits
+           |FROM companion
+           |WHERE target_plant_id = ${plantId}
+           |   OR companion_plant_id = ${plantId}""".stripMargin
+        .queryTransformPartial[CompanionDTO](
+          _.intoPartial[Companion[PlantId]]
+            .withFieldRenamed(_.companionPlantId, _.companionPlant)
+            .withFieldRenamed(_.targetPlantId, _.targetPlant)
+            .withFieldRenamed(_.benefits.benefits, _.benefits)
+            .transform,
+        )
+        .to[Vector]

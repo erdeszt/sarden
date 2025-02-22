@@ -102,6 +102,15 @@ private def listView(plants: Vector[PlantVM]): TypedTag[String] =
                           cls := "btn btn-primary btn-sm",
                           "Details",
                         ),
+                        form(
+                          action := s"/plants/${plant.id}/delete",
+                          method := "post",
+                          button(
+                            `type` := "submit",
+                            cls := "btn btn-danger btn-sm",
+                            "Delete",
+                          ),
+                        ),
                       ),
                     ),
                   ),

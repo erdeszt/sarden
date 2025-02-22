@@ -58,7 +58,7 @@ private def listView(sowlogEntries: Vector[SowlogEntryVM]): TypedTag[String] =
             td("coming soon..."),
             td(
               form(
-                action := s"/sowlog/delete/${entry.id}",
+                action := s"/sowlog/${entry.id}/delete",
                 method := "post",
                 button(
                   `type` := "submit",

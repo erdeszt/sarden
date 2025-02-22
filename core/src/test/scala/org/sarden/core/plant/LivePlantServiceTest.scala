@@ -78,6 +78,43 @@ object LivePlantServiceTest extends BaseSpec:
           getByIdsResult.isEmpty,
         )
       },
+      test("Can't delete plants that don't exist") {
+        for
+          plantService <- ZIO.service[PlantService]
+          plantId = PlantId(Ulid.fast())
+          result <- plantService.deletePlant(plantId).either
+        yield assertTrue(
+          result == Left(MissingPlantError(plantId)),
+        )
+      },
+      test("Can't delete plants that have companions") {
+        for
+          plantService <- ZIO.service[PlantService]
+          carrotId <- plantService.createPlant(
+            PlantName("carrot"),
+            PlantDetails(),
+          )
+          onionId <- plantService.createPlant(
+            PlantName("onion"),
+            PlantDetails(),
+          )
+          _ <- plantService
+            .createCompanion(
+              onionId,
+              carrotId,
+              NonEmptySet.of(DetersPests),
+            )
+          companionResult <- plantService.deletePlant(onionId).either
+          targetResult <- plantService.deletePlant(carrotId).either
+        yield assertTrue(
+          companionResult == Left(
+            CantDeletePlantWithCompanionRelationsError(onionId),
+          ),
+          targetResult == Left(
+            CantDeletePlantWithCompanionRelationsError(carrotId),
+          ),
+        )
+      },
       test("Load preset data should load some plants") {
         for
           plantService <- ZIO.service[PlantService]

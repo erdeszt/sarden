@@ -3,7 +3,6 @@ package org.sarden.web.routes.pages.plants
 import io.scalaland.chimney.dsl.*
 import scalatags.Text.TypedTag
 import scalatags.Text.all.*
-import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
@@ -11,11 +10,6 @@ import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
-
-private[pages] case class PlantVM(
-    id: String,
-    name: String,
-) derives Schema
 
 val listPlants: AppServerEndpoint = baseEndpoint.get
   .in("plants")
@@ -107,11 +101,6 @@ private def listView(plants: Vector[PlantVM]): TypedTag[String] =
                           href := s"/plants/${plant.id}",
                           cls := "btn btn-primary btn-sm",
                           "Details",
-                        ),
-                        a(
-                          href := s"/plants/${plant.id}/companions",
-                          cls := "btn btn-success btn-sm",
-                          "Companions",
                         ),
                       ),
                     ),

@@ -123,8 +123,8 @@ object LivePlantServiceTest extends BaseSpec:
         yield assertTrue(
           carrotCompanions.length == 1,
           carrotCompanions.head.id == companionId,
-          carrotCompanions.head.companionPlant == onionId,
-          carrotCompanions.head.targetPlant == carrotId,
+          carrotCompanions.head.companionPlant.id == onionId,
+          carrotCompanions.head.targetPlant.id == carrotId,
           carrotCompanions.head.benefits == Set(CompanionBenefit.DetersPests),
         )
       },

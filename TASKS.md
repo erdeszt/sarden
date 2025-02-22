@@ -1,5 +1,6 @@
 ## Task list:
 * Load full plant when getting companions and varieties
+* Upload plant image
 * Deploy
   * Setup PI
   * Create data backup system

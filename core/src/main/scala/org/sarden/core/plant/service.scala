@@ -31,7 +31,7 @@ trait PlantService:
   ): IO[MissingPlantError, CompanionId]
   def getCompanionsOfPlant(
       targetPlantId: PlantId,
-  ): IO[MissingPlantError, Vector[Companion[PlantId]]]
+  ): IO[MissingPlantError, Vector[Companion[Plant]]]
 
 object PlantService:
   val live: URLayer[Tx.Runner & IdGenerator, PlantService] =
@@ -109,11 +109,32 @@ class LivePlantService(repo: PlantRepo, tx: Tx.Runner) extends PlantService:
 
   override def getCompanionsOfPlant(
       targetPlantId: PlantId,
-  ): IO[MissingPlantError, Vector[Companion[PlantId]]] =
+  ): IO[MissingPlantError, Vector[Companion[Plant]]] =
     tx.runOrDie:
       for
-        _ <- repo
-          .getPlant(targetPlantId)
-          .someOrFail(MissingPlantError(targetPlantId))
+        targetPlant <- getPlant(targetPlantId)
         companions <- repo.getCompanionsOfPlant(targetPlantId)
-      yield companions
+        companionPlantLookup <- ZIO
+          .foreach(
+            NonEmptyList.fromFoldable(companions.map(_.companionPlant)),
+          ) { companionIds =>
+            repo.getPlantsByIds(companionIds)
+          }
+          .someOrElse(Vector.empty)
+          .map(
+            _.map(companionPlant => (companionPlant.id, companionPlant)).toMap,
+          )
+        companionsWithPlants <- ZIO.foreach(companions) { companion =>
+          ZIO
+            .fromOption(companionPlantLookup.get(companion.companionPlant))
+            .mapBoth(
+              _ => MissingPlantError(companion.companionPlant),
+              { companionPlant =>
+                companion.copy(
+                  companionPlant = companionPlant,
+                  targetPlant = targetPlant,
+                )
+              },
+            )
+        }
+      yield companionsWithPlants

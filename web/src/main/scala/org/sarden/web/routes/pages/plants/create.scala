@@ -21,7 +21,7 @@ given Schema[CreatePlantForm] = Schema.derived
 
 val createPlantForm: AppServerEndpoint = baseEndpoint.get
   .in("plants" / "new")
-  .out(htmlView[Unit](createView))
+  .out(htmlView[Unit](createPlantView))
   .zServerLogic(_ => ZIO.unit)
 
 val createPlant: AppServerEndpoint = baseEndpoint.post
@@ -41,7 +41,7 @@ val createPlant: AppServerEndpoint = baseEndpoint.post
         .as("/plants")
   }
 
-private def createView(_unit: Unit): TypedTag[String] =
+private def createPlantView(_unit: Unit): TypedTag[String] =
   layout(
     div(
       cls := "container-fluid",

@@ -97,6 +97,14 @@ private def viewPlantView(vm: ViewPlantVM): TypedTag[String] =
                         cls := "list-group-item",
                         s"${companion.companionPlant.name} - ${companion.benefits.mkString(",")}",
                       ),
+                      li(
+                        cls := "list-group-item",
+                        a(
+                          href := s"/plants/${vm.plant.id}/companions/new",
+                          cls := "btn btn-primary btn-sm",
+                          "Add companion",
+                        ),
+                      ),
                     ),
                   ),
                 ),

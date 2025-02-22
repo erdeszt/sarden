@@ -33,6 +33,7 @@ trait PlantService:
       plantId: PlantId,
   ): IO[MissingPlantError, Vector[Variety[PlantId]]]
   def loadPresetData: UIO[Unit]
+  // TODO: NonEmptySet[CompanionBenefit]
   def createCompanion(
       companionPlantId: PlantId,
       targetPlantId: PlantId,

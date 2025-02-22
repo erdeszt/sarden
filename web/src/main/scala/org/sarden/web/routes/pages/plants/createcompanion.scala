@@ -8,14 +8,18 @@ import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
+import org.sarden.core.InvalidRequestError
 import org.sarden.core.mapping.given
 import org.sarden.core.plant.*
+import org.sarden.core.plant.internal.InvalidCompanionBenefitFormatError
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 
 private[pages] case class CreateCompanionFormBody(
     companionId: String,
-    benefits: List[String],
+    benefitAttractsBeneficialBugs: Option[String],
+    benefitAttractsPollinators: Option[String],
+    benefitDetersPests: Option[String],
 ) derives Schema
 
 private[pages] case class CreateCompanionVM(
@@ -23,8 +27,11 @@ private[pages] case class CreateCompanionVM(
     allPlants: Vector[PlantVM],
 ) derives Schema
 
+case class InvalidBenefitFormatError(raw: String)
+    extends InvalidRequestError(s"Invalid benefit format: ${raw}")
+
 val createCompanionForm: AppServerEndpoint = baseEndpoint.get
-  .in("plants" / path[String]("plantId") / "companions" / "new")
+  .in("plants" / path[String]("targetPlantId") / "companions" / "new")
   .out(htmlView[CreateCompanionVM](createCompanionView))
   .zServerLogic: rawTargetPlantId =>
     for
@@ -44,13 +51,51 @@ val createCompanionForm: AppServerEndpoint = baseEndpoint.get
     )
 
 val createCompanion: AppServerEndpoint = baseEndpoint.post
-  .in("plants" / path[String]("plantId") / "companions" / "new")
+  .in("plants" / path[String]("targetPlantId") / "companions" / "new")
   .in(formBody[CreateCompanionFormBody])
   .out(
     statusCode(StatusCode.Found)
       .and(sttp.tapir.header[String](HeaderNames.Location)),
   )
-  .zServerLogic(_ => ZIO.succeed("/plants"))
+  .zServerLogic: (rawTargetPlantId, form) =>
+    for
+      targetPlantId <- ZIO.fromEither {
+        rawTargetPlantId
+          .transformIntoPartial[PlantId]
+          .asEither
+          .left
+          .map(_ => InvalidPlantIdInputError(rawTargetPlantId))
+      }.orDie
+      plantService <- ZIO.service[PlantService]
+      companionPlantId <- ZIO.fromEither {
+        form.companionId
+          .transformIntoPartial[PlantId]
+          .asEither
+          .left
+          .map(_ => InvalidPlantIdInputError(form.companionId))
+      }.orDie
+      rawBenefits = Set(
+        form.benefitAttractsBeneficialBugs,
+        form.benefitAttractsPollinators,
+        form.benefitDetersPests,
+      ).collect { case Some(benefit) => benefit }
+      benefits <- ZIO
+        .foreach(rawBenefits) { benefit =>
+          ZIO.fromEither:
+            benefit match
+              case "attracts_beneficial_bugs" =>
+                Right(CompanionBenefit.AttractsBeneficialBugs)
+              case "attracts_pollinators" =>
+                Right(CompanionBenefit.AttractsPollinators)
+              case "deters_pests" => Right(CompanionBenefit.DetersPests)
+              case _              => Left(InvalidBenefitFormatError(benefit))
+        }
+        .orDie
+      _ = println(s"Form: ${form}")
+      _ <- plantService
+        .createCompanion(companionPlantId, targetPlantId, benefits)
+        .orDie
+    yield s"/plants/${rawTargetPlantId}"
 
 private def createCompanionView(vm: CreateCompanionVM): TypedTag[String] =
   layout(
@@ -91,7 +136,7 @@ private def createCompanionView(vm: CreateCompanionVM): TypedTag[String] =
           input(
             cls := "form-check-input",
             `type` := "checkbox",
-            value := "attracts_beneficial_bugs",
+            value := "attracts_pollinators",
             id := "benefitAttractsPollinators",
             name := "benefitAttractsPollinators",
           ),

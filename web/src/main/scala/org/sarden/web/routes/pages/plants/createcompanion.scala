@@ -123,7 +123,7 @@ private def createCompanionView(vm: CreateCompanionVM): TypedTag[String] =
             id := "companionId",
             name := "companionId",
             `cls` := "form-select",
-            for plant <- vm.allPlants
+            for plant <- vm.allPlants.filterNot(_.id == vm.targetPlant.id)
             yield option(value := plant.id, plant.name),
           ),
         ),

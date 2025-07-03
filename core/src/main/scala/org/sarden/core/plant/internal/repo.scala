@@ -14,10 +14,10 @@ import org.sarden.core.plant.*
 import org.sarden.core.tx.*
 
 private[internal] case class PresetDataFormatError(message: String)
-    extends InvariantViolationError(s"Preset data format error: ${message}")
+    extends InternalError(s"Preset data format error: ${message}")
 
 private[internal] case class InvalidCompanionBenefitFormatError(raw: String)
-    extends InvariantViolationError(s"Invalid CompanioinBenefit format: ${raw}")
+    extends InternalError(s"Invalid CompanioinBenefit format: ${raw}")
 
 private[plant] trait PlantRepo:
   def searchPlants(filter: SearchPlantFilters): URIO[Tx, Vector[Plant]]

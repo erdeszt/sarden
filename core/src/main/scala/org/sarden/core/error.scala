@@ -10,15 +10,7 @@ abstract class InvalidRequestError(
     cause: Option[Throwable] = None,
 ) extends AppError(message, cause)
 
-sealed abstract class InternalError(
-    message: String,
-    cause: Option[Throwable],
-) extends AppError(message, cause)
-
-abstract class InvariantViolationError(
+abstract class InternalError(
     message: String,
     cause: Option[Throwable] = None,
-) extends InternalError(message, cause)
-
-abstract class SystemError(message: String, cause: Throwable)
-    extends InternalError(message, Some(cause))
+) extends AppError(message, cause)

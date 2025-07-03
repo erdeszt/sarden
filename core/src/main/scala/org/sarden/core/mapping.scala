@@ -21,7 +21,7 @@ object mapping:
     newType.unwrap(_)
 
   case class DataTransformationError(errors: Result.Errors)
-      extends InvariantViolationError(
+      extends InternalError(
         s"Data transformation failed with error: ${errors.asErrorPathMessages.mkString(",")}",
       )
 

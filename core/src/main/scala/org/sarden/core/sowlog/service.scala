@@ -13,7 +13,7 @@ import org.sarden.core.tx.*
 case class PlantNotFoundForSowlogError(
     plantId: PlantId,
     sowlogEntryId: SowlogEntryId,
-) extends InvariantViolationError(
+) extends InternalError(
       s"Plant(${plantId}) not found for sowlog: ${sowlogEntryId}",
     )
 

@@ -20,10 +20,10 @@ object time:
   export scala.concurrent.duration.FiniteDuration
 
   case class InvalidLocalDateValueError(raw: String)
-      extends InvariantViolationError(s"Invalid LocalDate format: ${raw}")
+      extends InternalError(s"Invalid LocalDate format: ${raw}")
 
   case class InvalidTimeUnitError(raw: String)
-      extends InvariantViolationError(s"Invalid TimeUnit format: ${raw}")
+      extends InternalError(s"Invalid TimeUnit format: ${raw}")
 
   given JsonDecoder[FiniteDuration] = JsonDecoder[Map[String, Json]].map: raw =>
     FiniteDuration(

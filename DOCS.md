@@ -17,7 +17,4 @@
       and low level system (or driver) errors
   * Every error raised by the system (either directly or indirectly through library calls) should be wrapped in
     one of the above categories.
-  * Unrecoverable errors should not be visible in the types(as they should not be handled at the service level).
-    They should be moved to the failure channel with `.orDie` and handled by the global exception handler
-  * Recoverable errors should only be raised in the service level and they should be propagated in the error channel
-    to a global exception handler.
+  * Unrecoverable errors should not be visible in the types. They should be moved to the failure channel with `.orDie` and handled by the global exception handler

@@ -41,7 +41,6 @@ class LivePasswordHasher(cost: Int) extends PasswordHasher:
       )
     }.orDie
 
-  // TODO: Maybe use IO[InvalidPasswordError, Unit]
   override def isHashValid(
       attempt: Password[PasswordFormat.Plain],
       source: Password[PasswordFormat.Hashed],

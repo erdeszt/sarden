@@ -25,10 +25,11 @@ object time:
   case class InvalidTimeUnitError(raw: String)
       extends InternalError(s"Invalid TimeUnit format: ${raw}")
 
+  // TODO: Use .mapOrFail to properly handle the errors
   given JsonDecoder[FiniteDuration] = JsonDecoder[Map[String, Json]].map: raw =>
     FiniteDuration(
       raw("length").as[Long].toOption.get,
-      TimeUnitCodec.read(raw("unit").as[String].toOption.get).toOption.get,
+      TimeUnitCodec.read(raw("unit").as[String].toOption.get).get,
     )
 
   given JsonEncoder[FiniteDuration] = JsonEncoder[Map[String, Json]].contramap:
@@ -100,12 +101,12 @@ object time:
       case TimeUnit.HOURS        => "HOURS"
       case TimeUnit.DAYS         => "DAYS"
 
-    def read: String => Either[InvalidTimeUnitError, TimeUnit] =
-      case "NANOSECONDS"  => Right(TimeUnit.NANOSECONDS)
-      case "MICROSECONDS" => Right(TimeUnit.MICROSECONDS)
-      case "MILLISECONDS" => Right(TimeUnit.MILLISECONDS)
-      case "SECONDS"      => Right(TimeUnit.SECONDS)
-      case "MINUTES"      => Right(TimeUnit.MINUTES)
-      case "HOURS"        => Right(TimeUnit.HOURS)
-      case "DAYS"         => Right(TimeUnit.DAYS)
-      case other          => Left(InvalidTimeUnitError(other))
+    def read: String => Option[TimeUnit] =
+      case "NANOSECONDS"  => Some(TimeUnit.NANOSECONDS)
+      case "MICROSECONDS" => Some(TimeUnit.MICROSECONDS)
+      case "MILLISECONDS" => Some(TimeUnit.MILLISECONDS)
+      case "SECONDS"      => Some(TimeUnit.SECONDS)
+      case "MINUTES"      => Some(TimeUnit.MINUTES)
+      case "HOURS"        => Some(TimeUnit.HOURS)
+      case "DAYS"         => Some(TimeUnit.DAYS)
+      case _              => None

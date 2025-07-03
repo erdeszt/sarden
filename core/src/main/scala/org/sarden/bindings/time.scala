@@ -1,16 +1,16 @@
-package org.sarden.core
-
-import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneId}
-import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
+package org.sarden.bindings
 
 import doobie.{Get, Put}
 import io.scalaland.chimney.partial.Result
 import io.scalaland.chimney.{PartialTransformer, Transformer}
+import org.sarden.InternalError
 import zio.json.*
 import zio.json.ast.Json
+
+import java.time.*
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 
 object time:
 

@@ -1,4 +1,4 @@
-package org.sarden.core.sowlog.internal
+package org.sarden.domain.sowlog.internal
 
 import doobie.Read
 

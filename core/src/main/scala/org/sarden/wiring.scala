@@ -1,14 +1,14 @@
-package org.sarden.core
-
-import javax.sql.DataSource
+package org.sarden
 
 import io.github.gaelrenoux.tranzactio.doobie.*
+import org.sarden.bindings.{IdGenerator, Migrator, PasswordHasher}
+import org.sarden.domain.plant.PlantService
+import org.sarden.domain.sowlog.SowlogService
+import org.sarden.domain.user.UserService
 import org.sqlite.SQLiteDataSource
 import zio.*
 
-import org.sarden.core.plant.PlantService
-import org.sarden.core.sowlog.SowlogService
-import org.sarden.core.user.UserService
+import javax.sql.DataSource
 
 type CoreServices = PlantService & UserService & SowlogService
 

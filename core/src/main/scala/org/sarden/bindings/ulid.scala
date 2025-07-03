@@ -1,4 +1,4 @@
-package org.sarden.core
+package org.sarden.bindings
 
 import doobie.util.{Get, Put}
 import io.scalaland.chimney.partial.Result

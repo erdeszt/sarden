@@ -1,10 +1,11 @@
-package org.sarden.core.user.internal
+package org.sarden.domain.user.internal
 
 import zio.*
 
-import org.sarden.core.mapping.given
-import org.sarden.core.tx.*
-import org.sarden.core.user.*
+import org.sarden.bindings.tx.*
+import org.sarden.domain.user.*
+import org.sarden.domain.user.{User, UserName}
+import org.sarden.bindings.mapping.given
 
 private[user] trait UserRepo:
   def getUserByName(username: UserName): URIO[Tx, Option[User]]

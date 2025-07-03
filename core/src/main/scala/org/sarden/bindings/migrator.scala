@@ -1,9 +1,12 @@
-package org.sarden.core
+package org.sarden.bindings
+
+import scala.sys.process.*
 
 import org.flywaydb.core.*
 import org.sqlite.SQLiteDataSource
-import sys.process.*
 import zio.*
+
+import org.sarden.CoreConfig
 
 trait Migrator:
   def migrate(): UIO[Unit]

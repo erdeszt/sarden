@@ -1,11 +1,11 @@
 package org.sarden.web.routes.api
 
 import com.github.f4b6a3.ulid.UlidCreator
+import org.sarden.CoreServices
+import org.sarden.bindings.Password
 import sttp.tapir.ztapir.*
 import zio.ZIO
-
-import org.sarden.core.user.*
-import org.sarden.core.{CoreServices, Password}
+import org.sarden.domain.user.{AuthenticationFailedError, User, UserId, UserName}
 import org.sarden.web.ApiAuthConfig
 
 def baseEndpoint(using

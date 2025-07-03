@@ -1,7 +1,9 @@
-package org.sarden.core
+package org.sarden.bindings
 
 import io.scalaland.chimney.dsl.*
 import neotype.*
+import org.sarden.bindings.time
+import org.sarden.InternalError
 import zio.*
 
 object mapping:
@@ -11,8 +13,8 @@ object mapping:
   export neotype.interop.doobie.newtypeGet
   export neotype.interop.doobie.newtypePut
 
-  export org.sarden.core.time.given
-  export org.sarden.core.ulid.given
+  export time.given
+  export ulid.given
 
   given [A, B](using newType: Newtype.WithType[A, B]): Transformer[A, B] =
     newType.unsafeMake(_)

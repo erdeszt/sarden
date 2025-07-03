@@ -4,10 +4,10 @@ import cats.data.{NonEmptyList, NonEmptySet}
 import com.github.f4b6a3.ulid.Ulid
 import zio.*
 import zio.test.*
-
 import org.sarden.core.*
-import org.sarden.core.mapping.given
-import org.sarden.core.plant.CompanionBenefit.DetersPests
+import org.sarden.bindings.mapping.given
+import org.sarden.domain.plant.CompanionBenefit.DetersPests
+import org.sarden.domain.plant.{CantDeletePlantWithCompanionRelationsError, CompanionAlreadyExistsError, CompanionBenefit, MissingPlantError, PlantDetails, PlantId, PlantName, PlantService, SearchPlantFilters, SelfCompanionError, VarietyName}
 
 object LivePlantServiceTest extends BaseSpec:
 

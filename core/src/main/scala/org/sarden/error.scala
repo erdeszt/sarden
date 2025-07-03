@@ -1,4 +1,4 @@
-package org.sarden.core
+package org.sarden
 
 sealed abstract class AppError(message: String, cause: Option[Throwable])
     extends Exception:

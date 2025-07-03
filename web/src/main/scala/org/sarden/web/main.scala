@@ -9,9 +9,11 @@ import sttp.tapir.ztapir.ZServerEndpoint
 import zio.*
 import zio.http.{Response as ZioHttpResponse, Routes, Server}
 
-import org.sarden.core.*
-import org.sarden.core.plant.PlantService
-import org.sarden.core.user.UserService
+import org.sarden.*
+import org.sarden.bindings.Migrator
+import org.sarden.domain.plant.PlantService
+import org.sarden.domain.user.UserService
+import org.sarden.{CoreConfig, CoreServices}
 
 type AppServerEndpoint = ZServerEndpoint[CoreServices, ZioStreams & WebSockets]
 

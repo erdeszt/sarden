@@ -1,12 +1,11 @@
-package org.sarden.core.plant.internal
+package org.sarden.domain.plant.internal
 
 import cats.syntax.all.*
 import doobie.{Get, Put, Read}
 import io.scalaland.chimney.partial.Result
 import io.scalaland.chimney.{PartialTransformer, Transformer}
+import org.sarden.domain.plant.CompanionBenefit
 import zio.json.*
-
-import org.sarden.core.plant.CompanionBenefit
 
 private[internal] case class PlantDTO(
     id: String,

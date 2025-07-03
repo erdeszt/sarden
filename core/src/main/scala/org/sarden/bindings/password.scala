@@ -1,4 +1,4 @@
-package org.sarden.core
+package org.sarden.bindings
 
 import java.nio.charset.StandardCharsets
 

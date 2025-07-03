@@ -1,8 +1,8 @@
-package org.sarden.core
-
-import java.time.ZoneId
+package org.sarden
 
 import zio.*
+
+import java.time.ZoneId
 
 case class CoreConfig(
     zoneId: ZoneId,

@@ -1,9 +1,9 @@
-package org.sarden.core.plant
+package org.sarden.domain.plant
 
 import cats.Order
 import neotype.*
 
-import org.sarden.core.ulid.*
+import org.sarden.bindings.ulid.*
 
 type PlantName = PlantName.Type
 object PlantName extends Newtype[String]:

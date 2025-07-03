@@ -1,4 +1,4 @@
-package org.sarden.core.user.internal
+package org.sarden.domain.user.internal
 
 import doobie.Read
 

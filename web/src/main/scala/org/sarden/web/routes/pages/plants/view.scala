@@ -8,9 +8,9 @@ import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.InvalidRequestError
-import org.sarden.core.mapping.given
-import org.sarden.core.plant.*
+import org.sarden.InvalidRequestError
+import org.sarden.domain.plant.*
+import org.sarden.bindings.mapping.given
 import org.sarden.web.*
 import org.sarden.web.routes.pages.*
 

@@ -1,23 +1,24 @@
-package org.sarden.core.plant.internal
+package org.sarden.domain.plant.internal
 
 import scala.io.Source
 
 import cats.data.{NonEmptyList, NonEmptySet}
 import doobie.util.fragments
 import io.scalaland.chimney.dsl.*
+import org.sarden
 import zio.*
 import zio.json.*
 
-import org.sarden.core.*
-import org.sarden.core.mapping.given
-import org.sarden.core.plant.*
-import org.sarden.core.tx.*
+import org.sarden.bindings.*
+import org.sarden.bindings.tx.*
+import org.sarden.domain.plant.*
+import mapping.given
 
 private[internal] case class PresetDataFormatError(message: String)
-    extends InternalError(s"Preset data format error: ${message}")
+    extends sarden.InternalError(s"Preset data format error: ${message}")
 
 private[internal] case class InvalidCompanionBenefitFormatError(raw: String)
-    extends InternalError(s"Invalid CompanioinBenefit format: ${raw}")
+    extends sarden.InternalError(s"Invalid CompanioinBenefit format: ${raw}")
 
 private[plant] trait PlantRepo:
   def searchPlants(filter: SearchPlantFilters): URIO[Tx, Vector[Plant]]

@@ -1,4 +1,4 @@
-package org.sarden.core
+package org.sarden.bindings
 
 import com.github.f4b6a3.ulid.{Ulid, UlidCreator}
 import zio.*

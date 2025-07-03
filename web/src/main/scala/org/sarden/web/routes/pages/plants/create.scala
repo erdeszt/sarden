@@ -8,8 +8,8 @@ import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
 
-import org.sarden.core.mapping.given
-import org.sarden.core.plant.*
+import org.sarden.domain.plant.*
+import org.sarden.bindings.mapping.given
 import org.sarden.web.AppServerEndpoint
 import org.sarden.web.routes.pages.*
 

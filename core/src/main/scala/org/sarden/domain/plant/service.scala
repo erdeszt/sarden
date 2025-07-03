@@ -1,11 +1,12 @@
-package org.sarden.core.plant
+package org.sarden.domain.plant
 
 import cats.data.{NonEmptyList, NonEmptySet}
 import zio.*
 
-import org.sarden.core.plant.internal.{LivePlantRepo, PlantRepo}
-import org.sarden.core.tx.*
-import org.sarden.core.{IdGenerator, InvalidRequestError}
+import org.sarden.InvalidRequestError
+import org.sarden.bindings.*
+import org.sarden.bindings.tx.*
+import org.sarden.domain.plant.internal.{LivePlantRepo, PlantRepo}
 
 case class MissingPlantError(id: PlantId)
     extends InvalidRequestError(s"Missing plant: ${id}") derives CanEqual

@@ -1,9 +1,10 @@
-package org.sarden.core.user
+package org.sarden.domain.user
 
 import neotype.*
 
-import org.sarden.core.*
-import org.sarden.core.ulid.*
+import org.sarden.*
+import org.sarden.bindings.{Password, PasswordFormat}
+import org.sarden.bindings.ulid.*
 
 case class User(
     id: UserId,

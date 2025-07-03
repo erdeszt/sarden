@@ -1,8 +1,8 @@
-package org.sarden.core.sowlog
+package org.sarden.domain.sowlog
 
 import java.time.LocalDate
 
-import org.sarden.core.ulid.UlidNewtype
+import org.sarden.bindings.ulid.UlidNewtype
 
 type SowlogEntryId = SowlogEntryId.Type
 object SowlogEntryId extends UlidNewtype

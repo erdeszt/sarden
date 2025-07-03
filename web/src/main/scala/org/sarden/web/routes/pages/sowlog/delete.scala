@@ -1,12 +1,11 @@
 package org.sarden.web.routes.pages.sowlog
 
+import org.sarden.InvalidRequestError
 import sttp.model.{HeaderNames, StatusCode}
 import sttp.tapir.ztapir.*
 import zio.*
-
-import org.sarden.core.InvalidRequestError
-import org.sarden.core.mapping.given
-import org.sarden.core.sowlog.*
+import org.sarden.bindings.mapping.given
+import org.sarden.domain.sowlog.{SowlogEntryId, SowlogService}
 import org.sarden.web.*
 import org.sarden.web.routes.pages.*
 

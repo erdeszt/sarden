@@ -1,4 +1,4 @@
-package org.sarden.core
+package org.sarden.bindings
 
 import doobie.util.fragment.Fragment
 import doobie.util.update
@@ -8,9 +8,8 @@ import io.github.gaelrenoux.tranzactio.{ErrorStrategies, ErrorStrategiesRef}
 import io.scalaland.chimney.PartialTransformer
 import io.scalaland.chimney.dsl.*
 import io.scalaland.chimney.partial.Result
+import mapping.DataTransformationError
 import zio.*
-
-import org.sarden.core.mapping.DataTransformationError
 
 object tx:
   type Tx = Connection

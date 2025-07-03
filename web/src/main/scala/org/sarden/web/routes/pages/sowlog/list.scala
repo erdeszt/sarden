@@ -6,9 +6,8 @@ import scalatags.Text.all.*
 import sttp.tapir.Schema
 import sttp.tapir.ztapir.*
 import zio.*
-
-import org.sarden.core.mapping.given
-import org.sarden.core.sowlog.*
+import org.sarden.bindings.mapping.given
+import org.sarden.domain.sowlog.{SowlogDetails, SowlogService}
 import org.sarden.web.*
 import org.sarden.web.routes.pages.*
 import org.sarden.web.routes.pages.plants.PlantVM

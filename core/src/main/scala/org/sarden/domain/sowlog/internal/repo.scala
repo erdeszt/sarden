@@ -1,15 +1,16 @@
-package org.sarden.core.sowlog.internal
+package org.sarden.domain.sowlog.internal
 
 import java.time.LocalDate
 
 import io.scalaland.chimney.dsl.*
 import zio.*
 
-import org.sarden.core.*
-import org.sarden.core.mapping.given
-import org.sarden.core.plant.PlantId
-import org.sarden.core.sowlog.*
-import org.sarden.core.tx.*
+import org.sarden.bindings.*
+import org.sarden.bindings.tx.*
+import org.sarden.domain.plant.PlantId
+import org.sarden.domain.sowlog.*
+import org.sarden.domain.sowlog.{SowlogDetails, SowlogEntry, SowlogEntryId}
+import mapping.given
 
 private[sowlog] trait SowlogRepo:
   def getLog(): URIO[Tx, Vector[SowlogEntry[PlantId]]]

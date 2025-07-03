@@ -1,10 +1,12 @@
-package org.sarden.core.user
+package org.sarden.domain.user
 
 import zio.*
 
-import org.sarden.core.*
-import org.sarden.core.tx.*
-import org.sarden.core.user.internal.{LiveUserRepo, UserRepo}
+import org.sarden.InvalidRequestError
+import org.sarden.bindings.*
+import org.sarden.bindings.tx.*
+import org.sarden.bindings.{Password, PasswordFormat, PasswordHasher}
+import org.sarden.domain.user.internal.{LiveUserRepo, UserRepo}
 
 case class AuthenticationFailedError()
     extends InvalidRequestError("Failed to authenticate the request")

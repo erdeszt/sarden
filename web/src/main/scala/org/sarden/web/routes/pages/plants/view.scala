@@ -30,13 +30,10 @@ val viewPlant: AppServerEndpoint = baseEndpoint.get
   .out(htmlView[ViewPlantVM](viewPlantView))
   .zServerLogic: rawId =>
     for
-      id <- ZIO.fromEither {
-        rawId
-          .transformIntoPartial[PlantId]
-          .asEither
-          .left
-          .map(_ => InvalidPlantIdInputError(rawId))
-      }.orDie
+      id <- ZIO
+        .fromEither(PlantId.fromString(rawId))
+        .orElseFail(InvalidPlantIdInputError(rawId))
+        .orDie
       plantService <- ZIO.service[PlantService]
       plant <- plantService.getPlant(id).orDie
       companions <- plantService

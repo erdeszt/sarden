@@ -1,6 +1,5 @@
 package org.sarden.web.routes.pages.sowlog
 
-import io.scalaland.chimney.dsl.*
 import sttp.model.{HeaderNames, StatusCode}
 import sttp.tapir.ztapir.*
 import zio.*
@@ -20,11 +19,7 @@ val deleteSowlogEntry: AppServerEndpoint = baseEndpoint.post
   .zServerLogic: rawId =>
     for
       id <- ZIO
-        .fromEither {
-          rawId
-            .transformIntoPartial[SowlogEntryId]
-            .asEither
-        }
+        .fromEither(SowlogEntryId.fromString(rawId))
         .orElseFail(InvalidSowlogEntryIdInputError(rawId))
         .orDie
       _ <- ZIO.serviceWithZIO[SowlogService]:

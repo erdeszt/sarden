@@ -1,6 +1,5 @@
 package org.sarden.web.routes.pages.plants
 
-import io.scalaland.chimney.dsl.*
 import sttp.model.{HeaderNames, StatusCode}
 import sttp.tapir.ztapir.*
 import zio.*
@@ -16,11 +15,7 @@ val deletePlant: AppServerEndpoint = baseEndpoint.post
   .zServerLogic: rawId =>
     for
       id <- ZIO
-        .fromEither {
-          rawId
-            .transformIntoPartial[PlantId]
-            .asEither
-        }
+        .fromEither(PlantId.fromString(rawId))
         .orElseFail(InvalidPlantIdInputError(rawId))
         .orDie
       _ <- ZIO.serviceWithZIO[PlantService]:

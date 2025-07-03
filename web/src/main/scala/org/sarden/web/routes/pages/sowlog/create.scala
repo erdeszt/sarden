@@ -64,13 +64,10 @@ val createSowlogEntry: AppServerEndpoint = baseEndpoint.post
           ),
         )
         .orDie
-      plantId <- ZIO.fromEither {
-        formData.plantId
-          .transformIntoPartial[PlantId]
-          .asEither
-          .left
-          .map(_ => InvalidPlantIdInputError(formData.plantId))
-      }.orDie
+      plantId <- ZIO
+        .fromEither(PlantId.fromString(formData.plantId))
+        .orElseFail(InvalidPlantIdInputError(formData.plantId))
+        .orDie
       _ <- ZIO.serviceWithZIO[SowlogService]:
         _.createEntry(plantId, sowingDate, SowlogDetails())
     yield "/sowlog"

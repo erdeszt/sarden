@@ -11,9 +11,7 @@ import zio.http.{Response as ZioHttpResponse, Routes, Server}
 
 import org.sarden.core.*
 import org.sarden.core.plant.PlantService
-import org.sarden.core.todo.TodoService
 import org.sarden.core.user.UserService
-import org.sarden.core.weather.WeatherService
 
 type AppServerEndpoint = ZServerEndpoint[CoreServices, ZioStreams & WebSockets]
 

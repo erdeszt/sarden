@@ -8,12 +8,9 @@ import zio.*
 
 import org.sarden.core.plant.PlantService
 import org.sarden.core.sowlog.SowlogService
-import org.sarden.core.todo.TodoService
 import org.sarden.core.user.UserService
-import org.sarden.core.weather.WeatherService
 
-type CoreServices = TodoService & PlantService & WeatherService & UserService &
-  SowlogService
+type CoreServices = PlantService & UserService & SowlogService
 
 object CoreServices:
   def live: URLayer[
@@ -38,8 +35,6 @@ object CoreServices:
       Migrator.live,
       IdGenerator.live,
       PasswordHasher.live,
-      TodoService.live,
-      WeatherService.live,
       PlantService.live,
       UserService.live,
       SowlogService.live,

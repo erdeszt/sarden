@@ -40,13 +40,10 @@ val createCompanionForm: AppServerEndpoint = baseEndpoint.get
   .out(htmlView[CreateCompanionVM](createCompanionView))
   .zServerLogic: rawTargetPlantId =>
     for
-      targetPlantId <- ZIO.fromEither {
-        rawTargetPlantId
-          .transformIntoPartial[PlantId]
-          .asEither
-          .left
-          .map(_ => InvalidPlantIdInputError(rawTargetPlantId))
-      }.orDie
+      targetPlantId <- ZIO
+        .fromEither(PlantId.fromString(rawTargetPlantId))
+        .orElseFail(InvalidPlantIdInputError(rawTargetPlantId))
+        .orDie
       plantService <- ZIO.service[PlantService]
       targetPlant <- plantService.getPlant(targetPlantId).orDie
       allPlants <- plantService.searchPlants(SearchPlantFilters.empty)
@@ -64,21 +61,15 @@ val createCompanion: AppServerEndpoint = baseEndpoint.post
   )
   .zServerLogic: (rawTargetPlantId, form) =>
     for
-      targetPlantId <- ZIO.fromEither {
-        rawTargetPlantId
-          .transformIntoPartial[PlantId]
-          .asEither
-          .left
-          .map(_ => InvalidPlantIdInputError(rawTargetPlantId))
-      }.orDie
+      targetPlantId <- ZIO
+        .fromEither(PlantId.fromString(rawTargetPlantId))
+        .orElseFail(InvalidPlantIdInputError(rawTargetPlantId))
+        .orDie
       plantService <- ZIO.service[PlantService]
-      companionPlantId <- ZIO.fromEither {
-        form.companionId
-          .transformIntoPartial[PlantId]
-          .asEither
-          .left
-          .map(_ => InvalidPlantIdInputError(form.companionId))
-      }.orDie
+      companionPlantId <- ZIO
+        .fromEither(PlantId.fromString(form.companionId))
+        .orElseFail(InvalidPlantIdInputError(form.companionId))
+        .orDie
       rawBenefits = Set(
         form.benefitAttractsBeneficialBugs,
         form.benefitAttractsPollinators,

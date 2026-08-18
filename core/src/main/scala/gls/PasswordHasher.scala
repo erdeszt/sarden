@@ -18,7 +18,7 @@ trait PasswordHasher {
   
 }
 
-class BcryptPasswordHasher extends PasswordHasher {
+class BCryptPasswordHasher extends PasswordHasher {
   
   private val hasher = BCrypt.withDefaults()
   private val verifier = BCrypt.verifyer()

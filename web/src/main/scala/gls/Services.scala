@@ -10,7 +10,7 @@ object Services {
 
   def create(): Services = {
     val clock = JavaTimeClock()
-    val passwordHasher = BcryptPasswordHasher()
+    val passwordHasher = BCryptPasswordHasher()
 
     val userService = LiveUserService(
       UserRepo.inMemory(),

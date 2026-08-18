@@ -15,3 +15,5 @@ class UlidWrapperIdGenerator[Id](wrap: Ulid => Id) extends IdGenerator[Id] {
   }
   
 }
+
+object UlidIdGenerator extends UlidWrapperIdGenerator(identity)

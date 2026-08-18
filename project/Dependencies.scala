@@ -6,6 +6,7 @@ object Dependencies {
     bcrypt,
     neotype,
     ulid,
+    scalatest,
   )
 
   lazy val web = Seq(
@@ -25,8 +26,8 @@ object Dependencies {
 
   val jte = "gg.jte" % "jte" % "3.2.4"
 
-  val logbackCore = "ch.qos.logback" % "logback-core" % "1.6.3"
-  val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.6.3"
+  val logbackCore = "ch.qos.logback" % "logback-core" % Versions.logback
+  val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
 
   val neotype = "io.github.kitlangton" %% "neotype" % Versions.neotype
 
@@ -34,6 +35,8 @@ object Dependencies {
     "io.github.kitlangton" %% "neotype-pureconfig" % Versions.neotype
 
   val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.9"
+
+  val scalatest = "org.scalatest" %% "scalatest-funspec" % "3.2.20" % Test
 
   val slf4j = "org.slf4j" % "slf4j-api" % "2.0.10"
 
@@ -48,6 +51,7 @@ object Dependencies {
 
 object Versions {
 
+  val logback = "1.6.3"
   val neotype = "0.4.10"
   val vertx = "5.1.6"
 

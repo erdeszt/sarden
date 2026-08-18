@@ -1,7 +1,6 @@
 package gls
 
-import java.nio.file.Path
-
+import gls.controllers.LandingController
 import io.vertx.core.*
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
@@ -9,7 +8,7 @@ import neotype.unwrap
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource
 
-import gls.controllers.LandingController
+import java.nio.file.Path
 
 class AppVerticle(config: AppConfig) extends VerticleBase {
 
@@ -27,10 +26,12 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
       .createHttpServer()
       .requestHandler(router)
       .listen(config.web.port.unwrap)
-      .onSuccess { server =>
+      .onSuccess(server => {
         logger.info(s"HTTP server started at port: ${server.actualPort()}")
-      }
-      .onFailure(error => error.printStackTrace())
+      })
+      .onFailure(error => {
+        logger.error(s"Server failure: ${error.getMessage}", error)
+      })
   }
 
 }

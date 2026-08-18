@@ -3,7 +3,9 @@ import sbt.*
 object Dependencies {
 
   lazy val core = Seq(
+    bcrypt,
     neotype,
+    ulid,
   )
 
   lazy val web = Seq(
@@ -19,6 +21,8 @@ object Dependencies {
     vertxWeb,
   )
 
+  val bcrypt = "at.favre.lib" % "bcrypt" % "0.10.2"
+
   val jte = "gg.jte" % "jte" % "3.2.4"
 
   val logbackCore = "ch.qos.logback" % "logback-core" % "1.6.3"
@@ -32,6 +36,8 @@ object Dependencies {
   val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.9"
 
   val slf4j = "org.slf4j" % "slf4j-api" % "2.0.10"
+
+  val ulid = "com.github.f4b6a3" % "ulid-creator" % "5.2.4"
 
   val upickle = "com.lihaoyi" %% "upickle" % "4.4.2"
 

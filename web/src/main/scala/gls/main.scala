@@ -1,6 +1,6 @@
 package gls
 
-import gls.controllers.LandingController
+import gls.controllers.*
 import io.vertx.core.*
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
@@ -18,20 +18,25 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
     val router = Router.router(vertx)
     val templates = JteTemplates(Path.of("web/src/main/resources/templates"))
 
-    val landingRoutes = LandingController.createRoutes(vertx, templates)
+    val services = Services.create()
 
-    router.route().subRouter(landingRoutes)
+    val landingRoutes = LandingController.createRoutes(vertx, templates)
+    val userRoutes =
+      UserController.createRoutes(vertx, templates, services.user)
+
+    router.route("/*").subRouter(landingRoutes)
+    router.route("/user/*").subRouter(userRoutes)
 
     vertx
       .createHttpServer()
       .requestHandler(router)
       .listen(config.web.port.unwrap)
-      .onSuccess(server => {
+      .onSuccess { server =>
         logger.info(s"HTTP server started at port: ${server.actualPort()}")
-      })
-      .onFailure(error => {
+      }
+      .onFailure { error =>
         logger.error(s"Server failure: ${error.getMessage}", error)
-      })
+      }
   }
 
 }

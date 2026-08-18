@@ -10,6 +10,8 @@ import pureconfig.ConfigSource
 
 import java.nio.file.Path
 
+import scala.language.experimental.saferExceptions
+
 class AppVerticle(config: AppConfig) extends VerticleBase {
 
   private val logger = LoggerFactory.getLogger(classOf[AppVerticle])

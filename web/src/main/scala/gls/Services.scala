@@ -1,6 +1,7 @@
 package gls
 
 import gls.domain.user.*
+import scala.language.experimental.saferExceptions
 
 case class Services(
     user: UserService,

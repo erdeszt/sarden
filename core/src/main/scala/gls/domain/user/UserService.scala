@@ -1,10 +1,17 @@
 package gls.domain.user
 
+import scala.language.experimental.saferExceptions
+
+import neotype.*
+
 import gls.*
 
 trait UserService {
 
-  def createUser(email: Email, password: PlainPassword): User
+  def createUser(
+      email: Email,
+      password: PlainPassword,
+  ): User throws EmailFormatError | WeakPasswordError
 
   def login(email: Email, password: PlainPassword): Option[User]
 
@@ -17,7 +24,13 @@ class LiveUserService(
     passwordHasher: PasswordHasher,
 ) extends UserService {
 
-  override def createUser(email: Email, password: PlainPassword): User = {
+  override def createUser(
+      email: Email,
+      password: PlainPassword,
+  ): User throws EmailFormatError | WeakPasswordError = {
+    check(email.unwrap.contains('@'), EmailFormatError())
+    check(password.unwrap.length >= 8, WeakPasswordError())
+
     val id = idGenerator.generate()
     val now = clock.now()
     val hashedPassword = passwordHasher.hashPassword(password)

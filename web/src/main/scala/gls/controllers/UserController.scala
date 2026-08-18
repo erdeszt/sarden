@@ -5,6 +5,8 @@ import gls.domain.user.UserService
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 
+import scala.language.experimental.saferExceptions
+
 object UserController {
 
   def createRoutes(

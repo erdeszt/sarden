@@ -10,7 +10,8 @@ object Dependencies {
   )
 
   lazy val web = Seq(
-    jte,
+    contextualLogging,
+    handlebars,
     logbackCore,
     logbackClassic,
     neotype,
@@ -24,7 +25,10 @@ object Dependencies {
 
   val bcrypt = "at.favre.lib" % "bcrypt" % "0.10.2"
 
-  val jte = "gg.jte" % "jte" % "3.2.4"
+  val contextualLogging =
+    "io.reactiverse" % "reactiverse-contextual-logging-logback" % "2.1.0"
+
+  val handlebars = "com.github.jknack" % "handlebars" % "4.5.4"
 
   val logbackCore = "ch.qos.logback" % "logback-core" % Versions.logback
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback

@@ -1,25 +1,39 @@
 package gls
 
-import java.nio.file.Path
-
-import gg.jte.output.StringOutput
-import gg.jte.resolve.DirectoryCodeResolver
-import gg.jte.{ContentType, TemplateEngine}
+import com.github.jknack.handlebars.Handlebars
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader
 
 trait Templates {
   def render(template: String): String
+  def render[T](template: String, payload: T): String
 }
 
-class JteTemplates(templateDirectory: Path) extends Templates {
-
-  private val resolver = DirectoryCodeResolver(templateDirectory)
-  private val engine = TemplateEngine.create(resolver, ContentType.Html)
+// TODO: Caching option
+class HandlebarsTemplates private (handlebars: Handlebars) extends Templates {
 
   override def render(template: String): String = {
-    val output = StringOutput()
-
-    engine.render(template, Map.empty, output)
-
-    output.toString
+    render(template, null)
   }
+
+  override def render[T](template: String, payload: T): String = {
+    val compiledTemplate = handlebars.compile(template)
+
+    compiledTemplate.apply(payload)
+  }
+
+}
+
+object HandlebarsTemplates {
+
+  def create(): HandlebarsTemplates = {
+    val loader = ClassPathTemplateLoader()
+
+    loader.setPrefix("/templates")
+    loader.setSuffix(".hbs")
+
+    val handlebars = Handlebars(loader)
+
+    HandlebarsTemplates(handlebars)
+  }
+
 }

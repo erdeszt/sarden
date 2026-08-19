@@ -1,16 +1,17 @@
 package gls
 
-import gls.controllers.*
-import io.vertx.core.*
-import io.vertx.core.http.HttpServer
-import io.vertx.ext.web.Router
-import neotype.unwrap
-import org.slf4j.LoggerFactory
-import pureconfig.ConfigSource
-
 import java.nio.file.Path
 
 import scala.language.experimental.saferExceptions
+
+import io.vertx.core.*
+import io.vertx.core.http.HttpServer
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.handler.LoggerHandler
+import neotype.unwrap
+import org.slf4j.LoggerFactory
+
+import gls.controllers.*
 
 class AppVerticle(config: AppConfig) extends VerticleBase {
 
@@ -18,7 +19,8 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
 
   override def start(): Future[HttpServer] = {
     val router = Router.router(vertx)
-    val templates = JteTemplates(Path.of("web/src/main/resources/templates"))
+//    val templates = JteTemplates(Path.of("web/src/main/resources/templates"))
+    val templates = HandlebarsTemplates.create()
 
     val services = Services.create()
 
@@ -26,6 +28,7 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
     val userRoutes =
       UserController.createRoutes(vertx, templates, services.user)
 
+    router.route().handler(LoggerHandler.create())
     router.route("/*").subRouter(landingRoutes)
     router.route("/user/*").subRouter(userRoutes)
 
@@ -39,27 +42,6 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
       .onFailure { error =>
         logger.error(s"Server failure: ${error.getMessage}", error)
       }
-  }
-
-}
-
-@main
-def main(): Unit = {
-  val logger = LoggerFactory.getLogger("main")
-
-  ConfigSource.default.load[AppConfig] match {
-    case Left(error) =>
-      logger.error(s"Failed to load configuration ${error}")
-    case Right(appConfig) =>
-      val vertx = Vertx.vertx()
-      val app = AppVerticle(appConfig)
-
-      vertx
-        .deployVerticle(
-          app,
-          DeploymentOptions().setThreadingModel(ThreadingModel.VIRTUAL_THREAD),
-        )
-        .await()
   }
 
 }

@@ -11,7 +11,7 @@ object LandingController {
     val router = Router.router(vertx)
 
     router.get("/").handler { context =>
-      context.end(templates.render("index.jte"))
+      context.end(templates.render("index"))
     }
 
     router

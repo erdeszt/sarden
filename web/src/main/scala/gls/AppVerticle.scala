@@ -1,17 +1,15 @@
 package gls
 
 import java.nio.file.Path
-
 import scala.language.experimental.saferExceptions
-
 import io.vertx.core.*
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.LoggerHandler
+import io.vertx.ext.web.handler.{LoggerHandler, SessionHandler}
 import neotype.unwrap
 import org.slf4j.LoggerFactory
-
 import gls.controllers.*
+import io.vertx.ext.web.sstore.LocalSessionStore
 
 class AppVerticle(config: AppConfig) extends VerticleBase {
 
@@ -19,10 +17,11 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
 
   override def start(): Future[HttpServer] = {
     val router = Router.router(vertx)
-//    val templates = JteTemplates(Path.of("web/src/main/resources/templates"))
     val templates = HandlebarsTemplates.create()
 
     val services = Services.create()
+    
+    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)))
 
     val landingRoutes = LandingController.createRoutes(vertx, templates)
     val userRoutes =

@@ -1,1 +1,25 @@
-LOGIN
+{{#partial "content"}}
+    <h1>Login</h1>
+    
+    {{#if formErrors}}
+        <h3>Login failed</h3>
+    {{/if}}
+    
+    {{#each formErrors}}
+        <h3>{{this}}</h3>
+    {{/each}}
+    
+    <form action="/user/login" method="POST">
+        <label for="email">Email:</label>
+        <br>
+        <input type="email" id="email" name="email">
+        <br>
+        <label for="password">Password:</label>
+        <br>
+        <input type="password" id="password" name="password">
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+{{/partial}}
+
+{{>layout}}

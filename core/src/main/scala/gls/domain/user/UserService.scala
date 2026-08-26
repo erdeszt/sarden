@@ -13,7 +13,7 @@ trait UserService {
       password: PlainPassword,
   ): User throws EmailFormatError | WeakPasswordError
 
-  def login(email: Email, password: PlainPassword): Option[User]
+  def getByCredentials(email: Email, password: PlainPassword): Option[User]
 
 }
 
@@ -41,7 +41,7 @@ class LiveUserService(
     user
   }
 
-  def login(email: Email, password: PlainPassword): Option[User] = {
+  def getByCredentials(email: Email, password: PlainPassword): Option[User] = {
     repo
       .getByEmail(email)
       .filter(user =>

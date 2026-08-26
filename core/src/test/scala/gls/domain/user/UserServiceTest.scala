@@ -28,7 +28,7 @@ class UserServiceTest extends AnyFunSpec {
         val password = PlainPassword("validpassword")
         val user = yolo(service.createUser(Email("test@test.test"), password))
 
-        val loggedInUser = service.login(user.email, password)
+        val loggedInUser = service.getByCredentials(user.email, password)
 
         assert(loggedInUser.isDefined)
         assert(loggedInUser.exists(_.email == user.email))
@@ -37,7 +37,7 @@ class UserServiceTest extends AnyFunSpec {
 
       it("should prevent login for non existing accounts") {
         val service = createUserService()
-        val user = service.login(
+        val user = service.getByCredentials(
           Email("non@existing.email"),
           PlainPassword("irrelevant"),
         )
@@ -55,7 +55,7 @@ class UserServiceTest extends AnyFunSpec {
         )
 
         val loggedInUser =
-          service.login(user.email, PlainPassword("invalidpassword"))
+          service.getByCredentials(user.email, PlainPassword("invalidpassword"))
 
         assert(loggedInUser.isEmpty)
       }

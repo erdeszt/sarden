@@ -8,9 +8,9 @@ import pureconfig.ConfigSource
 
 object Main {
 
-  def main(args: Array[String]): Unit = {
-    val logger = LoggerFactory.getLogger(Main.getClass)
+  private val logger = LoggerFactory.getLogger(getClass)
 
+  def main(args: Array[String]): Unit = {
     ConfigSource.default.load[AppConfig] match {
       case Left(error) =>
         logger.error(s"Failed to load configuration ${error}")
@@ -24,6 +24,7 @@ object Main {
             DeploymentOptions().setThreadingModel(ThreadingModel.VIRTUAL_THREAD),
           )
           .await()
+        ()
     }
   }
 

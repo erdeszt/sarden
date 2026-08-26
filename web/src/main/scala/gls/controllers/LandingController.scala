@@ -12,6 +12,7 @@ object LandingController {
 
     router.get("/").handler { context =>
       context.end(templates.render("index"))
+      ()
     }
 
     router

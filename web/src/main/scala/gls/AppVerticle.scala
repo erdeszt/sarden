@@ -14,12 +14,9 @@ import gls.controllers.*
 import gls.domain.user.Email
 
 class AppRouter(
-    config: AppConfig,
     vertx: Vertx,
     services: Services,
 ) {
-
-  private val logger = LoggerFactory.getLogger(classOf[AppRouter])
 
   private val userRoutesPrefix = "/user"
 
@@ -60,12 +57,13 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
 
   override def start(): Future[HttpServer] = {
     val services = Services.create()
-    val appRouter = AppRouter(config, vertx, services)
+    val appRouter = AppRouter(vertx, services)
 
     // TODO: Make this nicer/safer
     if (config.env == "dev") {
       try {
-        services.user.createUser(Email("asd@asd"), PlainPassword("12345678"))
+        val _ =
+          services.user.createUser(Email("asd@asd"), PlainPassword("12345678"))
       } catch {
         case error: Exception =>
           logger.error("Failed to create demo user", error)

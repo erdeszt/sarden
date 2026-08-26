@@ -1,8 +1,8 @@
 package gls.domain.user
 
-import gls.*
-
 import scala.collection.concurrent.TrieMap
+
+import gls.*
 
 trait UserRepo {
   def create(user: User): Unit
@@ -15,7 +15,7 @@ object UserRepo {
 }
 
 private[user] class InMemoryUserRepo() extends UserRepo {
-  
+
   private val repo = GenericInMemoryRepo[User, UserId](_.id)
 
   override def create(user: User): Unit = {
@@ -25,27 +25,28 @@ private[user] class InMemoryUserRepo() extends UserRepo {
   override def getByEmail(email: Email): Option[User] = {
     repo.query(_.email == email).headOption
   }
-  
+
   override def getById(id: UserId): Option[User] = {
     repo.getById(id)
   }
-  
+
 }
 
 // TODO: Move
 class GenericInMemoryRepo[Entity, Id](getId: Entity => Id) {
   private val store = TrieMap.empty[Id, Entity]
-  
+
   def store(entity: Entity): Unit = {
-    store.put(getId(entity), entity)
+    val _ = store.put(getId(entity), entity)
+    ()
   }
-  
+
   def getById(id: Id): Option[Entity] = {
     store.get(id)
   }
-  
+
   def query(matcher: Entity => Boolean): Vector[Entity] = {
     store.filter { (_, entity) => matcher(entity) }.values.toVector
   }
-  
+
 }

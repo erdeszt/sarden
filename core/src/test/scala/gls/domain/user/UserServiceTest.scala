@@ -25,13 +25,14 @@ class UserServiceTest extends AnyFunSpec {
 
       it("should login after creating a user") {
         val service = createUserService()
+        val email = Email("ok@ok")
         val password = PlainPassword("validpassword")
-        val user = yolo(service.createUser(Email("test@test.test"), password))
+        val user = yolo(service.createUser(email, password))
 
-        val loggedInUser = service.getByCredentials(user.email, password)
+        val loggedInUser = service.getByCredentials(email, password)
 
-        assert(loggedInUser.isDefined)
-        assert(loggedInUser.exists(_.email == user.email))
+        val _ = assert(loggedInUser.isDefined)
+        val _ = assert(loggedInUser.exists(_.email == user.email))
         assert(loggedInUser.exists(_.password == user.password))
       }
 
@@ -78,6 +79,7 @@ class UserServiceTest extends AnyFunSpec {
           service.createUser(Email("test@test.test"), PlainPassword("short"))
         }
       }
+
     }
 
   }

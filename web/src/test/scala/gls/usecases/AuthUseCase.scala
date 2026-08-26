@@ -2,11 +2,8 @@ package gls.usecases
 
 import java.util.concurrent.TimeUnit
 
-import scala.jdk.CollectionConverters.*
-import scala.language.experimental.saferExceptions
-
 import io.vertx.core.http.{HttpClientRequest, HttpClientResponse, HttpMethod}
-import io.vertx.core.{Future, Handler, Promise, Vertx}
+import io.vertx.core.{Future, Vertx}
 import io.vertx.junit5.VertxTestContext
 import org.scalatest.funspec.AnyFunSpec
 
@@ -30,14 +27,13 @@ class AuthUseCase extends AnyFunSpec {
 
   // TODO: Extract magic constants
   // TODO: Fix 302 on unauthorized
-  describe("Auth flow(FCTMP)") {
-    it("Should authenticate, authorize, support login, signup, logout") {
+  describe("Auth flow") {
+    it("Should authenticate, authorize, login, signup, logout") {
       val port = 9999
       val vertx = Vertx.vertx()
       val testContext = new VertxTestContext()
       val services = Services.create()
-      val appConfig = AppConfig("dev", WebConfig(Port.unsafeMake(port)))
-      val appRouter = AppRouter(appConfig, vertx, services)
+      val appRouter = AppRouter(vertx, services)
       val sessionCookieValueRegex =
         "vertx-web.session=([^;]+)".r
 
@@ -223,7 +219,7 @@ class AuthUseCase extends AnyFunSpec {
         _ <- testContext.complete()
       } yield ()
 
-      assert(testContext.awaitCompletion(5, TimeUnit.SECONDS))
+      val _ = assert(testContext.awaitCompletion(5, TimeUnit.SECONDS))
 
       if (testContext.failed()) {
         throw testContext.causeOfFailure()
@@ -267,7 +263,7 @@ class AuthUseCase extends AnyFunSpec {
       requestBuilder.compose { request =>
         payload match {
           case body: String => request.send(body)
-          case _            => request.send()
+          case null         => request.send()
         }
       }
     }

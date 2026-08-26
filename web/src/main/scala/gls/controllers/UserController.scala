@@ -6,7 +6,6 @@ import io.vertx.core.{Handler, Vertx}
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import neotype.*
-import org.slf4j.LoggerFactory
 
 import gls.*
 import gls.domain.user.*
@@ -14,8 +13,6 @@ import gls.domain.user.*
 // TODO: Localization
 class UserController(private val routePrefix: String)
     extends RouteHelper(routePrefix) {
-
-  private val logger = LoggerFactory.getLogger(getClass)
 
   def createRoutes(
       vertx: Vertx,
@@ -27,7 +24,8 @@ class UserController(private val routePrefix: String)
 
     router.get("/login").handler(auth.loggedInRedirectHandler).handler {
       context =>
-        context.end(templates.render("user/login"))
+        context.end(templates.render("user/login"));
+        ()
     }
 
     router
@@ -49,21 +47,25 @@ class UserController(private val routePrefix: String)
             context.end(
               templates
                 .render("user/login", LoginPage(Array("Invalid credentials"))),
-            )
+            );
+            ()
           case Some(loggedInUser) =>
             auth.login(loggedInUser.id)
-            context.redirect(route("me"))
+            context.redirect(route("me"));
+            ()
         }
       }
 
     router.get("/logout").handler { implicit context =>
       auth.logout()
-      context.redirect(route("login"))
+      context.redirect(route("login"));
+      ()
     }
 
     router.get("/signup").handler(auth.loggedInRedirectHandler).handler {
       context =>
-        context.end(templates.render("user/signup"))
+        context.end(templates.render("user/signup"));
+        ()
     }
 
     router
@@ -83,7 +85,8 @@ class UserController(private val routePrefix: String)
               "user/signup",
               SignupPage(Array("Passwords don't match")),
             ),
-          )
+          );
+          ()
         } else {
           try {
             val user = userService.createUser(
@@ -93,7 +96,8 @@ class UserController(private val routePrefix: String)
 
             auth.login(user.id)
 
-            context.redirect(route("me"))
+            context.redirect(route("me"));
+            ()
           } catch {
             case _: EmailFormatError =>
               context.response().setStatusCode(400)
@@ -102,7 +106,8 @@ class UserController(private val routePrefix: String)
                   "user/signup",
                   SignupPage(Array("Email format invalid")),
                 ),
-              )
+              );
+              ()
             case _: WeakPasswordError =>
               context.response().setStatusCode(400)
               context.end(
@@ -110,12 +115,13 @@ class UserController(private val routePrefix: String)
                   "user/signup",
                   SignupPage(Array("Password is too weak")),
                 ),
-              )
+              );
+              ()
           }
         }
       }
 
-    auth.route[UserRole.Basic](_.get("/me")) { (context, userCtx) =>
+    val _ = auth.route[UserRole.Basic](_.get("/me")) { (context, userCtx) =>
       val me = userService.getSelf(using userCtx)
 
       context.end(
@@ -123,10 +129,11 @@ class UserController(private val routePrefix: String)
           "user/me",
           MePage(me.id.unwrap.toString, me.email.unwrap),
         ),
-      )
+      );
+      ()
     }
 
-    auth.route[UserRole.Admin](_.get("/admin")) { (context, userCtx) =>
+    val _ = auth.route[UserRole.Admin](_.get("/admin")) { (context, userCtx) =>
       val me = userService.getSelf(using userCtx)
 
       context.end(
@@ -134,7 +141,8 @@ class UserController(private val routePrefix: String)
           "user/me",
           MePage(s"${me.id.unwrap}[Admin]", me.email.unwrap),
         ),
-      )
+      );
+      ()
     }
 
     router

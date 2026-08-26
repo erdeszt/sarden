@@ -7,6 +7,7 @@ import scala.collection.concurrent.TrieMap
 trait UserRepo {
   def create(user: User): Unit
   def getByEmail(email: Email): Option[User]
+  def getById(id: UserId): Option[User]
 }
 
 object UserRepo {
@@ -23,6 +24,10 @@ private[user] class InMemoryUserRepo() extends UserRepo {
 
   override def getByEmail(email: Email): Option[User] = {
     repo.query(_.email == email).headOption
+  }
+  
+  override def getById(id: UserId): Option[User] = {
+    repo.getById(id)
   }
   
 }

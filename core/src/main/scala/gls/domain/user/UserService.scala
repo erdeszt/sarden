@@ -1,9 +1,7 @@
 package gls.domain.user
 
 import scala.language.experimental.saferExceptions
-
 import neotype.*
-
 import gls.*
 
 trait UserService {
@@ -14,6 +12,10 @@ trait UserService {
   ): User throws EmailFormatError | WeakPasswordError
 
   def getByCredentials(email: Email, password: PlainPassword): Option[User]
+  
+  def getById(id: UserId)(using userCtx: UserCtx[UserRole.Admin]): Option[User]
+  
+  def getSelf[Role <: UserRole.Basic](using userCtx: UserCtx[Role]): User
 
 }
 
@@ -32,21 +34,35 @@ class LiveUserService(
     check(password.unwrap.length >= 8, WeakPasswordError())
 
     val id = idGenerator.generate()
-    val now = clock.now()
+    val _ = clock.now()
     val hashedPassword = passwordHasher.hashPassword(password)
-    val user = User(id, email, hashedPassword)
+    val user = User(id, email, hashedPassword, UserRole.Basic())
 
     repo.create(user)
 
     user
   }
 
-  def getByCredentials(email: Email, password: PlainPassword): Option[User] = {
+  override def getByCredentials(email: Email, password: PlainPassword): Option[User] = {
     repo
       .getByEmail(email)
       .filter(user =>
         passwordHasher.isPasswordHashMatching(user.password, password),
       )
+  }
+
+  override def getById(id: UserId)(using UserCtx[UserRole.Admin]): Option[User] = {
+    repo.getById(id)
+  }
+
+  override def getSelf[Role <: UserRole.Basic](using userCtx: UserCtx[Role]): User = {
+    repo.getById(userCtx.userId) match  {
+      case None =>
+        throw SelfNotFoundError(userCtx.userId)
+      case Some(user) =>
+        user
+    }
+      
   }
 
 }

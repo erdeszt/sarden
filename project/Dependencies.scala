@@ -17,9 +17,11 @@ object Dependencies {
     neotype,
     neotypePureconfig,
     pureconfig,
+    scalatest,
     slf4j,
     upickle,
     vertx,
+    vertxJunit,
     vertxWeb,
   )
 
@@ -49,6 +51,7 @@ object Dependencies {
   val upickle = "com.lihaoyi" %% "upickle" % "4.4.2"
 
   val vertx = "io.vertx" % "vertx-core" % Versions.vertx
+  val vertxJunit = "io.vertx" % "vertx-junit5" % Versions.vertx
   val vertxWeb = "io.vertx" % "vertx-web" % Versions.vertx
 
 }

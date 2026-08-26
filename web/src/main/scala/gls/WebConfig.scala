@@ -14,5 +14,6 @@ case class WebConfig(
 ) derives ConfigReader
 
 case class AppConfig(
+    env: String, // TODO: Enum + proper parsing
     web: WebConfig,
 ) derives ConfigReader

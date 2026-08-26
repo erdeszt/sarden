@@ -12,56 +12,29 @@ import gls.*
 import gls.domain.user.*
 
 // TODO: Localization
-// TODO: Auth session(login page, me page)
-class UserController(private val routePrefix: String) {
+class UserController(private val routePrefix: String)
+    extends RouteHelper(routePrefix) {
 
   private val logger = LoggerFactory.getLogger(getClass)
-
-  private val userIdSessionTag = "user_id"
-
-  class LoggedInRedirectHandler(userIdSessionTag: String, target: String)
-      extends Handler[RoutingContext] {
-
-    override def handle(context: RoutingContext): Unit = {
-      if (context.session().get(userIdSessionTag) != null) {
-        context.redirect(target)
-      } else {
-        context.next()
-      }
-    }
-  }
-
-  class SessionAuthHandler(userIdSessionTag: String, loginRoute: String)
-      extends Handler[RoutingContext] {
-    override def handle(context: RoutingContext): Unit = {
-      if (context.session().get(userIdSessionTag) == null) {
-        context.redirect(loginRoute)
-      } else {
-        context.next()
-      }
-    }
-  }
 
   def createRoutes(
       vertx: Vertx,
       templates: Templates,
       userService: UserService,
+      auth: SessionAuthManager,
   ): Router = {
-    val router = Router.router(vertx)
-    val loggedInRedirect =
-      LoggedInRedirectHandler(userIdSessionTag, s"${routePrefix}/me")
-    val sessionAuth =
-      SessionAuthHandler(userIdSessionTag, s"${routePrefix}/login")
+    given router: Router = Router.router(vertx)
 
-    router.get("/login").handler(loggedInRedirect).handler { context =>
-      context.end(templates.render("user/login"))
+    router.get("/login").handler(auth.loggedInRedirectHandler).handler {
+      context =>
+        context.end(templates.render("user/login"))
     }
 
     router
       .post("/login")
       .handler(BodyHandler.create())
-      .handler(loggedInRedirect)
-      .handler { context =>
+      .handler(auth.loggedInRedirectHandler)
+      .handler { implicit context =>
         val rawEmail = context.request().getFormAttribute("email")
         val rawPassword = context.request().getFormAttribute("password")
 
@@ -77,19 +50,25 @@ class UserController(private val routePrefix: String) {
                 .render("user/login", LoginPage(Array("Invalid credentials"))),
             )
           case Some(loggedInUser) =>
-            context.session.put("user_id", loggedInUser.id.unwrap)
-            context.redirect(s"${routePrefix}/me")
+            auth.login(loggedInUser.id)
+            context.redirect(route("me"))
         }
       }
 
-    router.get("/signup").handler(loggedInRedirect).handler { context =>
-      context.end(templates.render("user/signup"))
+    router.get("/logout").handler { implicit context =>
+      auth.logout()
+      context.redirect(route("login"))
+    }
+
+    router.get("/signup").handler(auth.loggedInRedirectHandler).handler {
+      context =>
+        context.end(templates.render("user/signup"))
     }
 
     router
       .post("/signup")
       .handler(BodyHandler.create())
-      .handler(loggedInRedirect)
+      .handler(auth.loggedInRedirectHandler)
       .handler { context =>
         val rawEmail = context.request().getFormAttribute("email")
         val rawPassword = context.request().getFormAttribute("password")
@@ -107,7 +86,7 @@ class UserController(private val routePrefix: String) {
           try {
             userService.createUser(Email(rawEmail), PlainPassword(rawPassword))
 
-            context.redirect(s"${routePrefix}/login")
+            context.redirect(route("login"))
           } catch {
             case _: EmailFormatError =>
               context.end(
@@ -127,8 +106,23 @@ class UserController(private val routePrefix: String) {
         }
       }
 
-    router.get("/me").handler(sessionAuth) handler { context =>
-      context.end(templates.render("user/me"))
+    auth.route[UserRole.Basic](_.get("/me")) { (context, userCtx) =>
+      val me = userService.getSelf(using userCtx)
+
+      context.end(
+        templates.render(
+          "user/me",
+          MePage(me.id.unwrap.toString, me.email.unwrap),
+        ),
+      )
+    }
+
+    auth.route[UserRole.Admin](_.get("/admin")) { (context, userCtx) =>
+      val me = userService.getSelf(using userCtx)
+
+      context.end(
+        templates.render("user/me", MePage("Admin", "Admin@Admin.Admin")),
+      )
     }
 
     router
@@ -138,3 +132,4 @@ class UserController(private val routePrefix: String) {
 
 case class SignupPage(formErrors: Array[String])
 case class LoginPage(formErrors: Array[String])
+case class MePage(userId: String, email: String)

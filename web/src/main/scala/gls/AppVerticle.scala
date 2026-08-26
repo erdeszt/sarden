@@ -14,6 +14,8 @@ import io.vertx.ext.web.sstore.LocalSessionStore
 class AppVerticle(config: AppConfig) extends VerticleBase {
 
   private val logger = LoggerFactory.getLogger(classOf[AppVerticle])
+  
+  private val userRoutesPrefix = "/user"
 
   override def start(): Future[HttpServer] = {
     val router = Router.router(vertx)
@@ -25,11 +27,11 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
 
     val landingRoutes = LandingController.createRoutes(vertx, templates)
     val userRoutes =
-      UserController.createRoutes(vertx, templates, services.user)
+      UserController(userRoutesPrefix).createRoutes(vertx, templates, services.user)
 
     router.route().handler(LoggerHandler.create())
     router.route("/*").subRouter(landingRoutes)
-    router.route("/user/*").subRouter(userRoutes)
+    router.route(s"${userRoutesPrefix}/*").subRouter(userRoutes)
 
     vertx
       .createHttpServer()

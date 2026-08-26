@@ -12,9 +12,9 @@ trait UserService {
   ): User throws EmailFormatError | WeakPasswordError
 
   def getByCredentials(email: Email, password: PlainPassword): Option[User]
-  
+
   def getById(id: UserId)(using userCtx: UserCtx[UserRole.Admin]): Option[User]
-  
+
   def getSelf[Role <: UserRole.Basic](using userCtx: UserCtx[Role]): User
 
 }
@@ -62,7 +62,7 @@ class LiveUserService(
       case Some(user) =>
         user
     }
-      
+
   }
 
 }

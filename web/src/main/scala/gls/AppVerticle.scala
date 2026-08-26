@@ -1,7 +1,5 @@
 package gls
 
-import java.nio.file.Path
-
 import scala.language.experimental.saferExceptions
 
 import io.vertx.core.*
@@ -18,7 +16,6 @@ import gls.domain.user.Email
 class AppRouter(
     config: AppConfig,
     vertx: Vertx,
-    templates: Templates,
     services: Services,
 ) {
 
@@ -28,6 +25,7 @@ class AppRouter(
 
   def createRouter(): Router = {
     val router = Router.router(vertx)
+    val templates = HandlebarsTemplates.create()
 
     val authManager = SessionAuthManager(
       services.user,
@@ -61,9 +59,8 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
   private val logger = LoggerFactory.getLogger(classOf[AppVerticle])
 
   override def start(): Future[HttpServer] = {
-    val templates = HandlebarsTemplates.create()
     val services = Services.create()
-    val appRouter = AppRouter(config, vertx, templates, services)
+    val appRouter = AppRouter(config, vertx, services)
 
     // TODO: Make this nicer/safer
     if (config.env == "dev") {

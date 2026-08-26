@@ -3,8 +3,8 @@ package gls.controllers
 import scala.language.experimental.saferExceptions
 
 import io.vertx.core.{Handler, Vertx}
+import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
-import io.vertx.ext.web.{Router, RoutingContext}
 import neotype.*
 import org.slf4j.LoggerFactory
 
@@ -45,6 +45,7 @@ class UserController(private val routePrefix: String)
 
         user match {
           case None =>
+            context.response().setStatusCode(400) // TODO: Use enum
             context.end(
               templates
                 .render("user/login", LoginPage(Array("Invalid credentials"))),
@@ -76,6 +77,7 @@ class UserController(private val routePrefix: String)
           context.request().getFormAttribute("repeat_password")
 
         if (rawPassword != rawRepeatPassword) {
+          context.response().setStatusCode(400)
           context.end(
             templates.render(
               "user/signup",
@@ -89,6 +91,7 @@ class UserController(private val routePrefix: String)
             context.redirect(route("login"))
           } catch {
             case _: EmailFormatError =>
+              context.response().setStatusCode(400)
               context.end(
                 templates.render(
                   "user/signup",
@@ -96,6 +99,7 @@ class UserController(private val routePrefix: String)
                 ),
               )
             case _: WeakPasswordError =>
+              context.response().setStatusCode(400)
               context.end(
                 templates.render(
                   "user/signup",
@@ -121,7 +125,10 @@ class UserController(private val routePrefix: String)
       val me = userService.getSelf(using userCtx)
 
       context.end(
-        templates.render("user/me", MePage("Admin", "Admin@Admin.Admin")),
+        templates.render(
+          "user/me",
+          MePage(s"${me.id.unwrap}[Admin]", me.email.unwrap),
+        ),
       )
     }
 

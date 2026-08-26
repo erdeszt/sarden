@@ -1,6 +1,5 @@
 package gls.controllers
 
-import scala.language.experimental.saferExceptions
 import scala.reflect.ClassTag
 
 import com.github.f4b6a3.ulid.Ulid

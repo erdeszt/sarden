@@ -1,7 +1,5 @@
 package gls.domain.user
 
-import scala.language.experimental.saferExceptions
-
 import org.scalatest.funspec.AnyFunSpec
 
 import gls.*
@@ -11,8 +9,7 @@ import gls.domain.user.*
 class UserServiceTest extends AnyFunSpec {
 
   def createUserService(): UserService = {
-    LiveUserService(
-      UserRepo.inMemory(),
+    UserService.live(
       UlidWrapperIdGenerator(UserId(_)),
       JavaTimeClock(),
       IdentityPasswordHasher(),

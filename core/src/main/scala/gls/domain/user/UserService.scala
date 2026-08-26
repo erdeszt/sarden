@@ -1,7 +1,9 @@
 package gls.domain.user
 
 import scala.language.experimental.saferExceptions
+
 import neotype.*
+
 import gls.*
 
 trait UserService {
@@ -19,7 +21,22 @@ trait UserService {
 
 }
 
-class LiveUserService(
+object UserService {
+  def live(
+      idGenerator: IdGenerator[UserId],
+      clock: Clock,
+      passwordHasher: PasswordHasher,
+  ): UserService = {
+    LiveUserService(
+      InMemoryUserRepo(),
+      idGenerator,
+      clock,
+      passwordHasher,
+    )
+  }
+}
+
+private[user] class LiveUserService(
     repo: UserRepo,
     idGenerator: IdGenerator[UserId],
     clock: Clock,
@@ -43,7 +60,10 @@ class LiveUserService(
     user
   }
 
-  override def getByCredentials(email: Email, password: PlainPassword): Option[User] = {
+  override def getByCredentials(
+      email: Email,
+      password: PlainPassword,
+  ): Option[User] = {
     repo
       .getByEmail(email)
       .filter(user =>
@@ -51,12 +71,16 @@ class LiveUserService(
       )
   }
 
-  override def getById(id: UserId)(using UserCtx[UserRole.Admin]): Option[User] = {
+  override def getById(
+      id: UserId,
+  )(using UserCtx[UserRole.Admin]): Option[User] = {
     repo.getById(id)
   }
 
-  override def getSelf[Role <: UserRole.Basic](using userCtx: UserCtx[Role]): User = {
-    repo.getById(userCtx.userId) match  {
+  override def getSelf[Role <: UserRole.Basic](using
+      userCtx: UserCtx[Role],
+  ): User = {
+    repo.getById(userCtx.userId) match {
       case None =>
         throw SelfNotFoundError(userCtx.userId)
       case Some(user) =>

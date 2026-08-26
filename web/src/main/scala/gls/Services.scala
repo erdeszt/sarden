@@ -1,7 +1,6 @@
 package gls
 
 import gls.domain.user.*
-import scala.language.experimental.saferExceptions
 
 case class Services(
     user: UserService,
@@ -13,8 +12,7 @@ object Services {
     val clock = JavaTimeClock()
     val passwordHasher = BCryptPasswordHasher()
 
-    val userService = LiveUserService(
-      UserRepo.inMemory(),
+    val userService = UserService.live(
       UlidWrapperIdGenerator(UserId(_)),
       clock,
       passwordHasher,

@@ -4,14 +4,10 @@ import scala.collection.concurrent.TrieMap
 
 import gls.*
 
-trait UserRepo {
+private[user] trait UserRepo {
   def create(user: User): Unit
   def getByEmail(email: Email): Option[User]
   def getById(id: UserId): Option[User]
-}
-
-object UserRepo {
-  def inMemory(): UserRepo = InMemoryUserRepo()
 }
 
 private[user] class InMemoryUserRepo() extends UserRepo {

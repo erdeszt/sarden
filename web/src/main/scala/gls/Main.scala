@@ -1,7 +1,5 @@
 package gls
 
-import scala.language.experimental.saferExceptions
-
 import io.vertx.core.*
 import org.slf4j.LoggerFactory
 import pureconfig.ConfigSource

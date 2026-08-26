@@ -12,7 +12,7 @@ import gls.domain.user.*
 
 // TODO: Localization
 class UserController(private val routePrefix: String)
-    extends RouteHelper(routePrefix) {
+    extends BaseController(routePrefix) {
 
   def createRoutes(
       vertx: Vertx,
@@ -23,9 +23,8 @@ class UserController(private val routePrefix: String)
     given router: Router = Router.router(vertx)
 
     router.get("/login").handler(auth.loggedInRedirectHandler).handler {
-      context =>
-        context.end(templates.render("user/login"));
-        ()
+      implicit context =>
+        respond(templates.render("user/login"))
     }
 
     router
@@ -43,29 +42,25 @@ class UserController(private val routePrefix: String)
 
         user match {
           case None =>
-            context.response().setStatusCode(400) // TODO: Use enum
-            context.end(
+            respond(
               templates
                 .render("user/login", LoginPage(Array("Invalid credentials"))),
-            );
-            ()
+              statusCode = 400,
+            )
           case Some(loggedInUser) =>
             auth.login(loggedInUser.id)
-            context.redirect(route("me"));
-            ()
+            redirect(route("me"))
         }
       }
 
     router.get("/logout").handler { implicit context =>
       auth.logout()
-      context.redirect(route("login"));
-      ()
+      redirect(route("login"))
     }
 
     router.get("/signup").handler(auth.loggedInRedirectHandler).handler {
-      context =>
-        context.end(templates.render("user/signup"));
-        ()
+      implicit context =>
+        respond(templates.render("user/signup"))
     }
 
     router
@@ -79,14 +74,13 @@ class UserController(private val routePrefix: String)
           context.request().getFormAttribute("repeat_password")
 
         if (rawPassword != rawRepeatPassword) {
-          context.response().setStatusCode(400)
-          context.end(
+          respond(
             templates.render(
               "user/signup",
               SignupPage(Array("Passwords don't match")),
             ),
-          );
-          ()
+            statusCode = 400,
+          )
         } else {
           try {
             val user = userService.createUser(
@@ -96,53 +90,48 @@ class UserController(private val routePrefix: String)
 
             auth.login(user.id)
 
-            context.redirect(route("me"));
-            ()
+            redirect(route("me"))
           } catch {
             case _: EmailFormatError =>
-              context.response().setStatusCode(400)
-              context.end(
+              respond(
                 templates.render(
                   "user/signup",
                   SignupPage(Array("Email format invalid")),
                 ),
-              );
-              ()
+                statusCode = 400,
+              )
             case _: WeakPasswordError =>
-              context.response().setStatusCode(400)
-              context.end(
+              respond(
                 templates.render(
                   "user/signup",
                   SignupPage(Array("Password is too weak")),
                 ),
-              );
-              ()
+                statusCode = 400,
+              )
           }
         }
       }
 
-    val _ = auth.route[UserRole.Basic](_.get("/me")) { (context, userCtx) =>
+    val _ = auth.route[UserRole.Basic](_.get("/me")) { implicit (context, userCtx) =>
       val me = userService.getSelf(using userCtx)
 
-      context.end(
+      respond(
         templates.render(
           "user/me",
           MePage(me.id.unwrap.toString, me.email.unwrap),
         ),
-      );
-      ()
+      )
     }
 
-    val _ = auth.route[UserRole.Admin](_.get("/admin")) { (context, userCtx) =>
+    val _ = auth.route[UserRole.Admin](_.get("/admin")) { implicit (context, userCtx) =>
       val me = userService.getSelf(using userCtx)
 
-      context.end(
+      respond(
         templates.render(
           "user/me",
           MePage(s"${me.id.unwrap}[Admin]", me.email.unwrap),
         ),
-      );
-      ()
+      )
     }
 
     router

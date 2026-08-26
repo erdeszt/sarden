@@ -75,10 +75,26 @@ class SessionAuthManager(
 
 }
 
-trait RouteHelper(private val routePrefix: String) {
+trait BaseController(private val routePrefix: String) {
 
   def route(path: String): String = {
     s"${routePrefix}/${path}"
+  }
+
+  def respond(body: String, statusCode: Int = 200)(using
+      context: RoutingContext,
+  ): Unit = {
+    context.response().setStatusCode(statusCode)
+    context.end(body)
+    ()
+  }
+
+  def redirect(target: String, statusCode: Int = 302)(using
+      context: RoutingContext,
+  ): Unit = {
+    context.response().setStatusCode(statusCode)
+    context.redirect(target)
+    ()
   }
 
 }

@@ -70,7 +70,7 @@ class UserController(private val routePrefix: String)
       .post("/signup")
       .handler(BodyHandler.create())
       .handler(auth.loggedInRedirectHandler)
-      .handler { context =>
+      .handler { implicit context =>
         val rawEmail = context.request().getFormAttribute("email")
         val rawPassword = context.request().getFormAttribute("password")
         val rawRepeatPassword =
@@ -86,9 +86,14 @@ class UserController(private val routePrefix: String)
           )
         } else {
           try {
-            userService.createUser(Email(rawEmail), PlainPassword(rawPassword))
+            val user = userService.createUser(
+              Email(rawEmail),
+              PlainPassword(rawPassword),
+            )
 
-            context.redirect(route("login"))
+            auth.login(user.id)
+
+            context.redirect(route("me"))
           } catch {
             case _: EmailFormatError =>
               context.response().setStatusCode(400)

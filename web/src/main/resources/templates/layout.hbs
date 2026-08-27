@@ -1,11 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Green Life</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Green Life</title>
+    <meta name="description" content="TODO">
+
+    <link rel="stylesheet" href="/assets/css/tokens.css"/>
+    <link rel="stylesheet" href="/assets/css/shop.css"/>
 </head>
 <body>
-    {{#block "content"}}
-    {{/block}}
+<!-- TOP AD BANNER
+<div class="announce">
+    <p>Free delivery on orders over £40 — <a href="shop.html">shop the nursery</a></p>
+</div>
+-->
+
+<header class="masthead">
+    <div class="wrap masthead__inner">
+        <a class="brand" href="index.html" aria-label="Fernwick — home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 21V9"/>
+                <path d="M12 13c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6Z"/>
+                <path d="M12 16c0-2.8-2.2-5-5-5 0 2.8 2.2 5 5 5Z"/>
+            </svg>
+            <span class="brand__word">Green Life</span>
+        </a>
+
+        <nav class="shopnav" aria-label="Main" data-open="false">
+            <a href="shop.html">Shop</a>
+            <a href="care.html">Care guides</a>
+            <a href="about.html">Our nursery</a>
+            <a href="cart.html">Basket</a>
+        </nav>
+
+        <div class="masthead__tools">
+            <label class="searchbox">
+                <span class="sr-only">Search plants</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                     aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"/>
+                    <path d="m20 20-3.5-3.5"/>
+                </svg>
+                <input class="input" type="search" placeholder="Search plants…"/>
+            </label>
+
+            <button class="btn btn--icon" type="button" data-toast="Accounts are a demo in this template"
+                    aria-label="Your account">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="8" r="3.4"/>
+                    <path d="M5 20a7 7 0 0 1 14 0"/>
+                </svg>
+            </button>
+
+            <button class="btn btn--icon burger" type="button" aria-expanded="false" aria-label="Menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                     aria-hidden="true">
+                    <path d="M4 7h16M4 12h16M4 17h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+<body>
+
+{{#block "content"}}
+{{/block}}
+
+<footer class="foot">
+    <div class="wrap">
+        <div class="foot__grid">
+            <div>
+                <a class="brand" href="index.html" style="margin-bottom:var(--s-3)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 21V9"/>
+                        <path d="M12 13c0-3.3 2.7-6 6-6 0 3.3-2.7 6-6 6Z"/>
+                        <path d="M12 16c0-2.8-2.2-5-5-5 0 2.8 2.2 5 5 5Z"/>
+                    </svg>
+                    <span class="brand__word">Green Life</span>
+                </a>
+                <p class="muted" style="font-size:var(--text-sm);max-width:34ch;margin-bottom:var(--s-4)">
+                    Intro/about section
+                </p>
+                <form class="newsletter" data-demo-form="Thanks — check your inbox for a welcome note">
+                    <label class="sr-only" for="nl">Email address</label>
+                    <input class="input" id="nl" type="email" placeholder="Email address" required/>
+                    <button class="btn btn--primary" type="submit">Join</button>
+                </form>
+            </div>
+
+            <div>
+                <h3>Shop</h3>
+                <ul>
+                    <li><a href="shop.html">All plants</a></li>
+                    <li><a href="shop.html">Easy care</a></li>
+                    <li><a href="shop.html">Pet safe</a></li>
+                    <li><a href="shop.html">Low light</a></li>
+                    <li><a href="shop.html">Sale</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3>Help</h3>
+                <ul>
+                    <li><a href="care.html">Care guides</a></li>
+                    <li><a href="care.html">Watering advice</a></li>
+                    <li><a href="about.html">Delivery &amp; returns</a></li>
+                    <li><a href="about.html">Plant guarantee</a></li>
+                    <li><a href="about.html">Contact us</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3>Nursery</h3>
+                <ul>
+                    <li><a href="about.html">Our story</a></li>
+                    <li><a href="about.html">Visit us</a></li>
+                    <li><a href="about.html">Wholesale</a></li>
+                    <li><a href="about.html">Sustainability</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="foot__bottom">
+            <p class="label">© 2026 Green Life</p>
+            <!--            <p class="label">A free template from <a href="https://html.design/" class="tlink">html.design</a></p>-->
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>

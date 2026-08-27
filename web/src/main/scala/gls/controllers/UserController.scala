@@ -112,7 +112,7 @@ class UserController(private val routePrefix: String)
         }
       }
 
-    val _ = auth.route[UserRole.Basic](_.get("/me")) { implicit (context, userCtx) =>
+    val _ = auth.route[UserRole.Basic](_.get("/me")) { implicit (_, userCtx) =>
       val me = userService.getSelf(using userCtx)
 
       respond(
@@ -123,7 +123,7 @@ class UserController(private val routePrefix: String)
       )
     }
 
-    val _ = auth.route[UserRole.Admin](_.get("/admin")) { implicit (context, userCtx) =>
+    val _ = auth.route[UserRole.Admin](_.get("/admin")) { implicit (_, userCtx) =>
       val me = userService.getSelf(using userCtx)
 
       respond(

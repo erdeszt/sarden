@@ -2,14 +2,14 @@ import sbt.*
 
 object Dependencies {
 
-  lazy val core = Seq(
+  lazy val core: Seq[ModuleID] = Seq(
     bcrypt,
     neotype,
     ulid,
     scalatest,
   )
 
-  lazy val web = Seq(
+  lazy val web: Seq[ModuleID] = Seq(
     contextualLogging,
     handlebars,
     logbackCore,
@@ -40,15 +40,15 @@ object Dependencies {
   val neotypePureconfig =
     "io.github.kitlangton" %% "neotype-pureconfig" % Versions.neotype
 
-  val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.9"
+  val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.10"
 
   val scalatest = "org.scalatest" %% "scalatest-funspec" % "3.2.20" % Test
 
-  val slf4j = "org.slf4j" % "slf4j-api" % "2.0.10"
+  val slf4j = "org.slf4j" % "slf4j-api" % "2.0.18"
 
   val ulid = "com.github.f4b6a3" % "ulid-creator" % "5.2.4"
 
-  val upickle = "com.lihaoyi" %% "upickle" % "4.4.2"
+  val upickle = "com.lihaoyi" %% "upickle" % "4.4.3"
 
   val vertx = "io.vertx" % "vertx-core" % Versions.vertx
   val vertxJunit = "io.vertx" % "vertx-junit5" % Versions.vertx
@@ -59,7 +59,7 @@ object Dependencies {
 object Versions {
 
   val logback = "1.6.3"
-  val neotype = "0.4.10"
+  val neotype = "0.7.0"
   val vertx = "5.1.6"
 
 }

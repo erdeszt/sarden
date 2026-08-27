@@ -10,7 +10,7 @@ private[user] trait UserRepo {
   def getById(id: UserId): Option[User]
 }
 
-private[user] class InMemoryUserRepo() extends UserRepo {
+private[user] class InMemoryUserRepo extends UserRepo {
 
   private val repo = GenericInMemoryRepo[User, UserId](_.id)
 

@@ -20,17 +20,15 @@ class SessionAuthManager(
 
   private val userIdSessionTag = "user_id"
 
-  val loggedInRedirectHandler: Handler[RoutingContext] =
-    new Handler[RoutingContext] {
-      override def handle(context: RoutingContext): Unit = {
-        if (context.session().get(userIdSessionTag) != null) {
-          context.redirect(loggedInHomeRoute);
-          ()
-        } else {
-          context.next()
-        }
+  val loggedInRedirectHandler: Handler[RoutingContext] = {
+    (context: RoutingContext) =>
+      if (context.session().get(userIdSessionTag) != null) {
+        context.redirect(loggedInHomeRoute)
+        ()
+      } else {
+        context.next()
       }
-    }
+  }
 
   def route[Role <: UserRole: ClassTag](routeBuilder: Router => Route)(
       routeHandler: (RoutingContext, UserCtx[Role]) => Unit,
@@ -40,7 +38,7 @@ class SessionAuthManager(
 
       sessionUserId match {
         case None =>
-          context.redirect(loginRoute);
+          context.redirect(loginRoute)
           ()
         case Some(userId) =>
           val user =
@@ -56,7 +54,7 @@ class SessionAuthManager(
             )
             routeHandler(context, UserCtx[Role](UserId(userId)))
           } else {
-            context.redirect(loggedInHomeRoute);
+            context.redirect(loggedInHomeRoute)
             ()
           }
       }
@@ -64,7 +62,7 @@ class SessionAuthManager(
   }
 
   def login(userId: UserId)(using context: RoutingContext): Unit = {
-    context.session().put(userIdSessionTag, userId.unwrap);
+    context.session().put(userIdSessionTag, userId.unwrap)
     ()
   }
 

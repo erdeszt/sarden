@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/assets/css/shop.css"/>
 </head>
 <body>
+
 <!-- TOP AD BANNER
 <div class="announce">
     <p>Free delivery on orders over £40 — <a href="shop.html">shop the nursery</a></p>
@@ -18,7 +19,7 @@
 
 <header class="masthead">
     <div class="wrap masthead__inner">
-        <a class="brand" href="index.html" aria-label="Fernwick — home">
+        <a class="brand" href="/" aria-label="Fernwick — home">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
                  stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 21V9"/>
@@ -29,10 +30,9 @@
         </a>
 
         <nav class="shopnav" aria-label="Main" data-open="false">
-            <a href="shop.html">Shop</a>
-            <a href="care.html">Care guides</a>
-            <a href="about.html">Our nursery</a>
-            <a href="cart.html">Basket</a>
+            <a href="/shop">Shop</a>
+            <a href="/shop/cart">Cart</a>
+            <a href="/aboutus">About Us</a>
         </nav>
 
         <div class="masthead__tools">
@@ -46,14 +46,23 @@
                 <input class="input" type="search" placeholder="Search plants…"/>
             </label>
 
-            <button class="btn btn--icon" type="button" data-toast="Accounts are a demo in this template"
-                    aria-label="Your account">
+            <a href="/user/login" class="btn btn--icon" type="button" data-toast="Accounts are a demo in this template"
+               aria-label="Your account">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                      stroke-linejoin="round" aria-hidden="true">
                     <circle cx="12" cy="8" r="3.4"/>
                     <path d="M5 20a7 7 0 0 1 14 0"/>
                 </svg>
-            </button>
+            </a>
+
+            <a href="/shop/cart" class="btn btn--icon" type="button" data-action="open-drawer" aria-label="Open basket">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true">
+                    <path d="M6 7h12l-1 13H7L6 7Z"/>
+                    <path d="M9 7a3 3 0 0 1 6 0"/>
+                </svg>
+                <span class="cartbtn__count" data-cart-count hidden>0</span>
+            </a>
 
             <button class="btn btn--icon burger" type="button" aria-expanded="false" aria-label="Menu">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -64,7 +73,6 @@
         </div>
     </div>
 </header>
-<body>
 
 {{#block "content"}}
 {{/block}}
@@ -73,7 +81,7 @@
     <div class="wrap">
         <div class="foot__grid">
             <div>
-                <a class="brand" href="index.html" style="margin-bottom:var(--s-3)">
+                <a class="brand" href="/" style="margin-bottom:var(--s-3)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
                          stroke-linejoin="round" aria-hidden="true">
                         <path d="M12 21V9"/>
@@ -95,32 +103,29 @@
             <div>
                 <h3>Shop</h3>
                 <ul>
-                    <li><a href="shop.html">All plants</a></li>
-                    <li><a href="shop.html">Easy care</a></li>
-                    <li><a href="shop.html">Pet safe</a></li>
-                    <li><a href="shop.html">Low light</a></li>
-                    <li><a href="shop.html">Sale</a></li>
+                    <li><a href="/shop">All plants</a></li>
+                    <li><a href="/shop/sale">Sale</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3>Help</h3>
                 <ul>
-                    <li><a href="care.html">Care guides</a></li>
-                    <li><a href="care.html">Watering advice</a></li>
-                    <li><a href="about.html">Delivery &amp; returns</a></li>
-                    <li><a href="about.html">Plant guarantee</a></li>
-                    <li><a href="about.html">Contact us</a></li>
+                    <li><a href="/">Care guides</a></li>
+                    <li><a href="/">Watering advice</a></li>
+                    <li><a href="/">Delivery &amp; returns</a></li>
+                    <li><a href="/">Plant guarantee</a></li>
+                    <li><a href="/">Contact us</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3>Nursery</h3>
                 <ul>
-                    <li><a href="about.html">Our story</a></li>
-                    <li><a href="about.html">Visit us</a></li>
-                    <li><a href="about.html">Wholesale</a></li>
-                    <li><a href="about.html">Sustainability</a></li>
+                    <li><a href="/">Our story</a></li>
+                    <li><a href="/">Visit us</a></li>
+                    <li><a href="/">Wholesale</a></li>
+                    <li><a href="/">Sustainability</a></li>
                 </ul>
             </div>
         </div>

@@ -1,9 +1,15 @@
 {{#partial "content"}}
-    
-    <h1>Personal home page</h1>
-    
-    <h3>Hi! I'm {{userId}} from {{email}}</h3>
-    
+
+    <main class="wrap section--tight">
+
+        <nav class="label" aria-label="Breadcrumb" style="margin-bottom:var(--s-4)">
+            <a href="index.html">User</a> / <span>Profile</span>
+        </nav>
+
+        <h3>Hi! I'm {{userId}} from {{email}}</h3>
+
+    </main>
+
 {{/partial}}
 
 {{>layout}}

@@ -1,29 +1,38 @@
 {{#partial "content"}}
-    <h1>Signup</h1>
+    <main class="wrap section--tight">
 
-    {{#if formErrors}}
-        <h3>Signup failed</h3>
-    {{/if}}
+        <nav class="label" aria-label="Breadcrumb" style="margin-bottom:var(--s-4)">
+            <a href="index.html">User</a> / <span>Signup</span>
+        </nav>
 
-    {{#each formErrors}}
-        <h3>{{this}}</h3>
-    {{/each}}
+        {{#if formErrors}}
+            <h3>Signup failed</h3>
+        {{/if}}
 
-    <form action="/user/signup" method="POST">
-        <label for="email">Email:</label>
-        <br>
-        <input type="email" id="email" name="email">
-        <br>
-        <label for="password">Password:</label>
-        <br>
-        <input type="password" id="password" name="password">
-        <br>
-        <label for="repeat_password">Repeat password:</label>
-        <br>
-        <input type="password" id="repeat_password" name="repeat_password">
-        <br>
-        <input type="submit" value="Submit">
-    </form>
+        {{#each formErrors}}
+            <h3>{{this}}</h3>
+        {{/each}}
+
+        <form action="/user/signup" method="POST" class="grid">
+            <div class="field">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="input" required placeholder="you@example.com">
+            </div>
+            <div class="field">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="input" required>
+            </div>
+            <div class="field">
+                <label for="repeat_password">Repeat password:</label>
+                <input type="password" id="repeat_password" name="repeat_password" class="input" required>
+            </div>
+            <div class="field">
+                <button type="submit" class="btn btn--primary">Signup</button>
+            </div>
+        </form>
+
+    </main>
+
 {{/partial}}
 
 {{>layout}}

@@ -1,25 +1,33 @@
 {{#partial "content"}}
-    <h1>Login</h1>
-    
-    {{#if formErrors}}
-        <h3>Login failed</h3>
-    {{/if}}
-    
-    {{#each formErrors}}
-        <h3>{{this}}</h3>
-    {{/each}}
-    
-    <form action="/user/login" method="POST">
-        <label for="email">Email:</label>
-        <br>
-        <input type="email" id="email" name="email">
-        <br>
-        <label for="password">Password:</label>
-        <br>
-        <input type="password" id="password" name="password">
-        <br>
-        <input type="submit" value="Submit">
-    </form>
+
+    <main class="wrap section--tight">
+
+        <nav class="label" aria-label="Breadcrumb" style="margin-bottom:var(--s-4)">
+            <a href="index.html">User</a> / <span>Login</span>
+        </nav>
+
+        {{#if formErrors}}
+            <h3>Login failed</h3>
+        {{/if}}
+
+        {{#each formErrors}}
+            <h3>{{this}}</h3>
+        {{/each}}
+
+        <form action="/user/login" method="POST" class="grid">
+            <div class="field">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="input" required placeholder="you@example.com">
+            </div>
+            <div class="field">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="input" required>
+            </div>
+            <button type="submit" class="btn btn--primary">Login</button>
+        </form>
+
+    </main>
+
 {{/partial}}
 
 {{>layout}}

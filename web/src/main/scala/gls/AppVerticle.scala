@@ -19,6 +19,7 @@ class AppRouter(
 ) {
 
   private val userRoutesPrefix = "/user"
+  private val shopRoutesPrefix = "/shop"
 
   def createRouter(): Router = {
     val router = Router.router(vertx)
@@ -42,11 +43,18 @@ class AppRouter(
         services.user,
         authManager,
       )
+    val shopRoutes = ShopController(shopRoutesPrefix).createRoutes(
+      vertx,
+      templates,
+      services.shop,
+      authManager,
+    )
 
     router.route("/assets/*").handler(StaticHandler.create("assets"))
     router.route().handler(LoggerHandler.create())
     router.route("/*").subRouter(landingRoutes)
     router.route(s"${userRoutesPrefix}/*").subRouter(userRoutes)
+    router.route(s"${shopRoutesPrefix}/*").subRouter(shopRoutes)
 
     router
   }

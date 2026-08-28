@@ -1,9 +1,11 @@
 package gls
 
+import gls.domain.shop.ShopService
 import gls.domain.user.*
 
 case class Services(
     user: UserService,
+    shop: ShopService,
 )
 
 object Services {
@@ -18,7 +20,12 @@ object Services {
       passwordHasher,
     )
 
-    Services(userService)
+    val shopService = ShopService.live(
+      UlidIdGenerator,
+      clock,
+    )
+
+    Services(userService, shopService)
   }
 
 }

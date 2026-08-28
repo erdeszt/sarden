@@ -22,3 +22,6 @@
         * test
         * package
     * Deploy
+
+* V2:
+    * Favorite products

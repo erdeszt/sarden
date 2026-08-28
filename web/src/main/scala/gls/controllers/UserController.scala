@@ -44,7 +44,7 @@ class UserController(private val routePrefix: String)
           case None =>
             respond(
               templates
-                .render("user/login", LoginPage(Array("Invalid credentials"))),
+                .render("user/login", LoginVM(Array("Invalid credentials"))),
               statusCode = 400,
             )
           case Some(loggedInUser) =>
@@ -77,7 +77,7 @@ class UserController(private val routePrefix: String)
           respond(
             templates.render(
               "user/signup",
-              SignupPage(Array("Passwords don't match")),
+              SignupVM(Array("Passwords don't match")),
             ),
             statusCode = 400,
           )
@@ -96,7 +96,7 @@ class UserController(private val routePrefix: String)
               respond(
                 templates.render(
                   "user/signup",
-                  SignupPage(Array("Email format invalid")),
+                  SignupVM(Array("Email format invalid")),
                 ),
                 statusCode = 400,
               )
@@ -104,7 +104,7 @@ class UserController(private val routePrefix: String)
               respond(
                 templates.render(
                   "user/signup",
-                  SignupPage(Array("Password is too weak")),
+                  SignupVM(Array("Password is too weak")),
                 ),
                 statusCode = 400,
               )
@@ -118,7 +118,7 @@ class UserController(private val routePrefix: String)
       respond(
         templates.render(
           "user/me",
-          MePage(me.id.unwrap.toString, me.email.unwrap),
+          MeVM(me.id.unwrap.toString, me.email.unwrap),
         ),
       )
     }
@@ -129,7 +129,7 @@ class UserController(private val routePrefix: String)
       respond(
         templates.render(
           "user/me",
-          MePage(s"${me.id.unwrap}[Admin]", me.email.unwrap),
+          MeVM(s"${me.id.unwrap}[Admin]", me.email.unwrap),
         ),
       )
     }
@@ -139,6 +139,6 @@ class UserController(private val routePrefix: String)
 
 }
 
-case class SignupPage(formErrors: Array[String])
-case class LoginPage(formErrors: Array[String])
-case class MePage(userId: String, email: String)
+case class SignupVM(formErrors: Array[String])
+case class LoginVM(formErrors: Array[String])
+case class MeVM(userId: String, email: String)

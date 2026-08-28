@@ -4,7 +4,9 @@ import com.github.f4b6a3.ulid.Ulid
 
 import gls.{Clock, IdGenerator}
 
-trait ShopService {}
+trait ShopService {
+  def listProducts(query: ProductQuery): Vector[Product]
+}
 
 object ShopService {
   def live(
@@ -23,4 +25,10 @@ class LiveShopService(
     shopRepo: ShopRepo,
     idGenerator: IdGenerator[Ulid],
     clock: Clock,
-) extends ShopService {}
+) extends ShopService {
+
+  override def listProducts(query: ProductQuery): Vector[Product] = {
+    Vector(Product(ProductId(idGenerator.generate())))
+  }
+
+}

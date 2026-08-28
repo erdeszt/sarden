@@ -1,0 +1,74 @@
+{{#partial "content"}}
+
+    <main class="wrap section--tight">
+
+        <nav class="label" aria-label="Breadcrumb" style="margin-bottom:var(--s-4)">
+            <a href="/shop/products">Shop</a> / <span>Cart</span>
+        </nav>
+
+        {{#unless items}}
+
+            <div data-cart-empty>
+                <div class="empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M6 7h12l-1 13H7L6 7Z"/>
+                        <path d="M9 7a3 3 0 0 1 6 0"/>
+                    </svg>
+                    <h2>Nothing in the basket yet</h2>
+                    <p>Add a plant and it will appear here. Your basket is kept in this browser, so it survives a
+                        refresh.</p>
+                    <a class="btn btn--primary" href="shop.html">Shop the nursery</a>
+                </div>
+            </div>
+
+        {{/unless}}
+
+        {{#if items}}
+
+            <div data-cart-filled>
+                <div class="grid"
+                     style="grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:var(--s-6);align-items:start">
+                    <div>
+                        <div data-cart-lines="page" style="display:grid;gap:var(--s-5)"></div>
+                        {{#each items}}
+                            <h3>{{product.name}}: {{quantity}}</h3>
+                        {{/each}}
+                        <div style="margin-top:var(--s-5);padding-top:var(--s-5);border-top:1px solid var(--hairline)">
+                            <a class="tlink" href="shop.html">← Continue shopping</a>
+                        </div>
+                    </div>
+
+                    <aside style="background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:var(--s-5);display:grid;gap:var(--s-3);position:sticky;top:90px">
+                        <h2 style="font-size:var(--text-md)">Order summary</h2>
+                        <div class="totalrow"><span>Subtotal</span><span class="num" data-cart-subtotal>£0</span></div>
+                        <div class="totalrow"><span>Delivery</span><span class="num" data-cart-delivery>Free</span>
+                        </div>
+                        <p class="label">Free over £40 — dispatched Tuesday to Friday</p>
+                        <div class="totalrow totalrow--grand"><span>Total</span><span class="num"
+                                                                                      data-cart-total>£0</span>
+                        </div>
+
+                        <form class="newsletter" style="margin-top:var(--s-2)"
+                              data-demo-form="Promo codes are a demo in this template">
+                            <label class="sr-only" for="promo">Promo code</label>
+                            <input class="input" id="promo" type="text" placeholder="Promo code"/>
+                            <button class="btn btn--ghost" type="submit">Apply</button>
+                        </form>
+
+                        <button class="btn btn--primary btn--block" type="button"
+                                data-toast="Checkout is where you wire in your own payment provider">
+                            Checkout securely
+                        </button>
+                        <p class="label" style="text-align:center">This template ships without a payment backend</p>
+                    </aside>
+                </div>
+            </div>
+
+        {{/if}}
+
+    </main>
+
+{{/partial}}
+
+{{>layout}}

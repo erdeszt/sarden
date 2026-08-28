@@ -18,6 +18,17 @@ object Price extends Newtype[Int]
 type ProductImageUrl = ProductImageUrl.Type
 object ProductImageUrl extends Newtype[String]
 
+type ProductDescription = ProductDescription.Type
+object ProductDescription extends Newtype[String]
+
+type Quantity = Quantity.Type
+object Quantity extends Newtype[Int]
+
+extension (quantity: Quantity)
+  def +(other: Quantity): Quantity = {
+    Quantity(quantity.unwrap + other.unwrap)
+  }
+
 enum SaleUnit {
   case Kg
   case Bag250
@@ -39,6 +50,7 @@ object ProductCategory {
 case class Product(
     id: ProductId,
     name: ProductName,
+    description: ProductDescription,
     scientificName: ScientificName,
     price: Price,
     saleUnit: SaleUnit,
@@ -56,3 +68,12 @@ object ProductQuery {
     new ProductQuery {}
   }
 }
+
+case class CartItem(
+    product: Product,
+    quantity: Quantity,
+)
+
+case class Cart(
+    items: Vector[CartItem],
+)

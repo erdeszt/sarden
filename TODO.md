@@ -1,10 +1,9 @@
 * Functionality:
     * Shop:
-        * List products
-        * View product page
         * Add to cart
         * Remove from cart
         * Checkout
+        * View orders
     * Admin:
         * Add product
         * View orders

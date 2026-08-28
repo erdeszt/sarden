@@ -78,11 +78,11 @@ private[user] class LiveUserService(
   }
 
   override def getSelf[Role <: UserRole.Basic](using
-      userCtx: UserCtx[Role],
+      ctx: UserCtx[Role],
   ): User = {
-    repo.getById(userCtx.userId) match {
+    repo.getById(ctx.userId) match {
       case None =>
-        throw SelfNotFoundError(userCtx.userId)
+        throw SelfNotFoundError(ctx.userId)
       case Some(user) =>
         user
     }

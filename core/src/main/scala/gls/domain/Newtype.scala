@@ -1,8 +1,6 @@
 package gls.domain
 
-trait Newtype[Wrapped, Raw](using ev: Wrapped =:= Raw)
-    extends NewtypeWrap[Wrapped, Raw]
-    with NewtypeUnwrap[Wrapped, Raw]
+trait Newtype[Wrapped, Raw](using Wrapped =:= Raw) extends NewtypeWrap[Wrapped, Raw] with NewtypeUnwrap[Wrapped, Raw]
 
 trait NewtypeWrap[Wrapped, Raw](using ev: Wrapped =:= Raw) {
   def apply(raw: Raw): Wrapped = ev.flip(raw)

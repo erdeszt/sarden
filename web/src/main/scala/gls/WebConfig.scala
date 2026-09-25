@@ -1,13 +1,26 @@
 package gls
 
-import neotype.Newtype
-import neotype.interop.pureconfig.given
 import pureconfig.ConfigReader
+import pureconfig.error.CannotConvert
 
-type Port = Port.Type
-object Port extends Newtype[Int]:
-  override inline def validate(input: Int): Boolean =
-    input > 0 && input < 65535
+import gls.domain.*
+
+opaque type Port = Int
+object Port extends NewtypeUnwrap[Port, Int] {
+  def apply(raw: Int): Option[Port] = {
+    if (raw > 0 && raw <= 65535) {
+      Some(raw)
+    } else {
+      None
+    }
+  }
+  given ConfigReader[Port] = ConfigReader[Port].emap { raw =>
+    Port(raw) match {
+      case None       => Left(CannotConvert(raw.toString, "Port", "Outside of valid range"))
+      case Some(port) => Right(port)
+    }
+  }
+}
 
 case class WebConfig(
     port: Port,

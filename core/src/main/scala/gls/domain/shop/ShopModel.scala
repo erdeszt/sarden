@@ -1,33 +1,36 @@
 package gls.domain.shop
 
 import com.github.f4b6a3.ulid.Ulid
-import neotype.*
+import gls.domain.*
 
-type ProductId = ProductId.Type
-object ProductId extends Newtype[Ulid]
+opaque type ProductId = Ulid
+object ProductId extends Newtype[ProductId, Ulid]
 
-type ProductName = ProductName.Type
-object ProductName extends Newtype[String]
+opaque type ProductName = String
+object ProductName extends Newtype[ProductName, String]
 
-type ScientificName = ScientificName.Type
-object ScientificName extends Newtype[String]
+// TODO: Binomial name
+opaque type ScientificName = String
+object ScientificName extends Newtype[ScientificName, String]
 
-type Price = Price.Type
-object Price extends Newtype[Int]
+// TODO: Non zero prices only(refined)
+opaque type Price = Int
+object Price extends Newtype[Price, Int]
 
-type ProductImageUrl = ProductImageUrl.Type
-object ProductImageUrl extends Newtype[String]
+opaque type ProductImageUrl = String
+object ProductImageUrl extends Newtype[ProductImageUrl, String]
 
-type ProductDescription = ProductDescription.Type
-object ProductDescription extends Newtype[String]
+opaque type ProductDescription = String
+object ProductDescription extends Newtype[ProductDescription, String]
 
-type Quantity = Quantity.Type
-object Quantity extends Newtype[Int]
-
-extension (quantity: Quantity)
-  def +(other: Quantity): Quantity = {
-    Quantity(quantity.unwrap + other.unwrap)
-  }
+// TODO: Positive values only(refined)
+opaque type Quantity = Int
+object Quantity extends Newtype[Quantity, Int] {
+  extension (quantity: Quantity)
+    def +(other: Quantity): Quantity = {
+      Quantity(quantity.unwrap + other.unwrap)
+    }
+}
 
 enum SaleUnit {
   case Kg

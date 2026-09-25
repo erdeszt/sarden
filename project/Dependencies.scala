@@ -4,8 +4,8 @@ object Dependencies {
 
   lazy val core: Seq[ModuleID] = Seq(
     bcrypt,
-    neotype,
     ulid,
+    upickle,
     scalatest,
   )
 
@@ -14,8 +14,6 @@ object Dependencies {
     handlebars,
     logbackCore,
     logbackClassic,
-    neotype,
-    neotypePureconfig,
     pureconfig,
     scalatest,
     slf4j,
@@ -34,11 +32,6 @@ object Dependencies {
 
   val logbackCore = "ch.qos.logback" % "logback-core" % Versions.logback
   val logbackClassic = "ch.qos.logback" % "logback-classic" % Versions.logback
-
-  val neotype = "io.github.kitlangton" %% "neotype" % Versions.neotype
-
-  val neotypePureconfig =
-    "io.github.kitlangton" %% "neotype-pureconfig" % Versions.neotype
 
   val pureconfig = "com.github.pureconfig" %% "pureconfig-core" % "0.17.10"
 
@@ -59,7 +52,6 @@ object Dependencies {
 object Versions {
 
   val logback = "1.6.3"
-  val neotype = "0.7.0"
   val vertx = "5.1.6"
 
 }

@@ -126,7 +126,7 @@ class AuthUseCase extends AnyFunSpec {
             Option(signupSuccessResponse.getHeader("set-cookie")).getOrElse(""),
           )
           .flatMap(headerValue => Option(headerValue.group(1))) match {
-          case None => testContext.assert[String](false, "No session cookie(6)")
+          case None              => testContext.assert[String](false, "No session cookie(6)")
           case Some(cookieValue) => Future.succeededFuture(cookieValue)
         }
 

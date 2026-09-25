@@ -7,9 +7,9 @@ trait Clock {
 }
 
 class JavaTimeClock extends Clock {
-  
+
   override def now(): Instant = {
     Instant.now()
   }
-  
+
 }

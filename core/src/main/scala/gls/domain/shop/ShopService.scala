@@ -41,9 +41,8 @@ class LiveShopService(
 
   override def listProducts(query: ProductQuery): ProductList = {
     val totalByCategory =
-      ProductCategory.all.foldLeft(Map.empty[ProductCategory, Int]) {
-        (stats, category) =>
-          stats + (category -> products.filter(_.category == category).size)
+      ProductCategory.all.foldLeft(Map.empty[ProductCategory, Int]) { (stats, category) =>
+        stats + (category -> products.filter(_.category == category).size)
       }
 
     ProductList(

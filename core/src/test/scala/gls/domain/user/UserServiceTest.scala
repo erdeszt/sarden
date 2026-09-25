@@ -22,7 +22,7 @@ class UserServiceTest extends AnyFunSpec {
 
       it("should login after creating a user") {
         val service = createUserService()
-        val email = Email("ok@ok")
+        val email = Email("ok@ok").get
         val password = PlainPassword("validpassword")
         val user = yolo(service.createUser(email, password))
 
@@ -36,7 +36,7 @@ class UserServiceTest extends AnyFunSpec {
       it("should prevent login for non existing accounts") {
         val service = createUserService()
         val user = service.getByCredentials(
-          Email("non@existing.email"),
+          Email("non@existing.email").get,
           PlainPassword("irrelevant"),
         )
 
@@ -47,7 +47,7 @@ class UserServiceTest extends AnyFunSpec {
         val service = createUserService()
         val user = yolo(
           service.createUser(
-            Email("test@test.test"),
+            Email("test@test.test").get,
             PlainPassword("validpassword"),
           ),
         )
@@ -65,7 +65,7 @@ class UserServiceTest extends AnyFunSpec {
         val service = createUserService()
 
         expect[EmailFormatError] {
-          service.createUser(Email("no_at"), PlainPassword("validpassword"))
+          service.createUser(Email("no_at").get, PlainPassword("validpassword"))
         }
       }
 
@@ -73,7 +73,7 @@ class UserServiceTest extends AnyFunSpec {
         val service = createUserService()
 
         expect[WeakPasswordError] {
-          service.createUser(Email("test@test.test"), PlainPassword("short"))
+          service.createUser(Email("test@test.test").get, PlainPassword("short"))
         }
       }
 

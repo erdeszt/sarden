@@ -4,7 +4,6 @@ import com.github.f4b6a3.ulid.Ulid
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
-import neotype.unwrap
 import gls.Templates
 import gls.domain.shop.*
 import gls.domain.user.UserRole

@@ -7,7 +7,6 @@ import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.{LoggerHandler, SessionHandler, StaticHandler}
 import io.vertx.ext.web.sstore.LocalSessionStore
-import neotype.unwrap
 import org.slf4j.LoggerFactory
 
 import gls.controllers.*
@@ -72,7 +71,10 @@ class AppVerticle(config: AppConfig) extends VerticleBase {
     if (config.env == "dev") {
       try {
         val _ =
-          services.user.createUser(Email("asd@asd"), PlainPassword("12345678"))
+          services.user.createUser(
+            Email("asd@asd").getOrElse(throw RuntimeException("Invalid email")),
+            PlainPassword("12345678"),
+          )
       } catch {
         case error: Exception =>
           logger.error("Failed to create demo user", error)

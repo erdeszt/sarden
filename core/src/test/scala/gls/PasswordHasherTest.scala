@@ -1,12 +1,9 @@
 package gls
 
-import neotype.*
 import org.scalatest.funspec.AnyFunSpec
 
-class BCryptPasswordHasherTest
-    extends PasswordHasherTest(BCryptPasswordHasher())
-class IdentityPasswordHasherTest
-    extends PasswordHasherTest(IdentityPasswordHasher())
+class BCryptPasswordHasherTest extends PasswordHasherTest(BCryptPasswordHasher())
+class IdentityPasswordHasherTest extends PasswordHasherTest(IdentityPasswordHasher())
 
 abstract class PasswordHasherTest(hasher: PasswordHasher) extends AnyFunSpec {
 

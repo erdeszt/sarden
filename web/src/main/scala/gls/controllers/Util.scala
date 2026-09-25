@@ -5,7 +5,6 @@ import scala.reflect.ClassTag
 import com.github.f4b6a3.ulid.Ulid
 import io.vertx.core.Handler
 import io.vertx.ext.web.{Route, Router, RoutingContext}
-import neotype.unwrap
 import org.slf4j.LoggerFactory
 
 import gls.domain.user.{UserCtx, UserId, UserRole, UserService}

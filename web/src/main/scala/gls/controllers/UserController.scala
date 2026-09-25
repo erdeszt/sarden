@@ -5,7 +5,6 @@ import scala.language.experimental.saferExceptions
 import io.vertx.core.{Handler, Vertx}
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
-import neotype.*
 
 import gls.*
 import gls.domain.user.*
@@ -35,21 +34,27 @@ class UserController(private val routePrefix: String)
         val rawEmail = context.request().getFormAttribute("email")
         val rawPassword = context.request().getFormAttribute("password")
 
-        val user = userService.getByCredentials(
-          Email(rawEmail),
-          PlainPassword(rawPassword),
-        )
-
-        user match {
-          case None =>
-            respond(
-              templates
-                .render("user/login", LoginVM(Array("Invalid credentials"))),
-              statusCode = 400,
+        Email(rawEmail) match {
+          case None => respond(
+            templates.render("user/login", LoginVM(Array("Invalid email")))
+            , statusCode = 400)
+          case Some(email) =>
+            val user = userService.getByCredentials(
+              email,
+              PlainPassword(rawPassword),
             )
-          case Some(loggedInUser) =>
-            auth.login(loggedInUser.id)
-            redirect(route("me"))
+
+            user match {
+              case None =>
+                respond(
+                  templates
+                    .render("user/login", LoginVM(Array("Invalid credentials"))),
+                  statusCode = 400,
+                )
+              case Some(loggedInUser) =>
+                auth.login(loggedInUser.id)
+                redirect(route("me"))
+            }
         }
       }
 
@@ -82,32 +87,42 @@ class UserController(private val routePrefix: String)
             statusCode = 400,
           )
         } else {
-          try {
-            val user = userService.createUser(
-              Email(rawEmail),
-              PlainPassword(rawPassword),
-            )
-
-            auth.login(user.id)
-
-            redirect(route("me"))
-          } catch {
-            case _: EmailFormatError =>
+          Email(rawEmail) match {
+            case None =>
               respond(
                 templates.render(
                   "user/signup",
-                  SignupVM(Array("Email format invalid")),
-                ),
-                statusCode = 400,
+                  SignupVM(Array("Invalid email"))
+                )
               )
-            case _: WeakPasswordError =>
-              respond(
-                templates.render(
-                  "user/signup",
-                  SignupVM(Array("Password is too weak")),
-                ),
-                statusCode = 400,
-              )
+            case Some(email) =>
+              try {
+                val user = userService.createUser (
+                email,
+                PlainPassword (rawPassword),
+                )
+
+                auth.login (user.id)
+
+                redirect (route ("me") )
+              } catch {
+                case _: EmailFormatError =>
+                  respond (
+                    templates.render (
+                      "user/signup",
+                      SignupVM (Array ("Email format invalid") ),
+                    ),
+                    statusCode = 400,
+                  )
+                case _: WeakPasswordError =>
+                  respond (
+                    templates.render (
+                      "user/signup",
+                      SignupVM (Array ("Password is too weak") ),
+                    ),
+                    statusCode = 400,
+                  )
+              }
           }
         }
       }

@@ -2,8 +2,6 @@ package gls.domain.user
 
 import scala.collection.concurrent.TrieMap
 
-import gls.*
-
 private[user] trait UserRepo {
   def create(user: User): Unit
   def getByEmail(email: Email): Option[User]

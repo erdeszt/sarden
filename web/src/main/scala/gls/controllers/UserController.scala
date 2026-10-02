@@ -10,8 +10,7 @@ import gls.*
 import gls.domain.user.*
 
 // TODO: Localization
-class UserController(private val routePrefix: String)
-    extends BaseController(routePrefix) {
+class UserController(private val routePrefix: String) extends BaseController(routePrefix) {
 
   def createRoutes(
       vertx: Vertx,
@@ -21,9 +20,8 @@ class UserController(private val routePrefix: String)
   ): Router = {
     given router: Router = Router.router(vertx)
 
-    router.get("/login").handler(auth.loggedInRedirectHandler).handler {
-      implicit context =>
-        respond(templates.render("user/login"))
+    router.get("/login").handler(auth.loggedInRedirectHandler).handler { implicit context =>
+      respond(templates.render("user/login"))
     }
 
     router
@@ -35,9 +33,7 @@ class UserController(private val routePrefix: String)
         val rawPassword = context.request().getFormAttribute("password")
 
         Email(rawEmail) match {
-          case None => respond(
-            templates.render("user/login", LoginVM(Array("Invalid email")))
-            , statusCode = 400)
+          case None        => respond(templates.render("user/login", LoginVM(Array("Invalid email"))), statusCode = 400)
           case Some(email) =>
             val user = userService.getByCredentials(
               email,
@@ -63,9 +59,8 @@ class UserController(private val routePrefix: String)
       redirect(route("login"))
     }
 
-    router.get("/signup").handler(auth.loggedInRedirectHandler).handler {
-      implicit context =>
-        respond(templates.render("user/signup"))
+    router.get("/signup").handler(auth.loggedInRedirectHandler).handler { implicit context =>
+      respond(templates.render("user/signup"))
     }
 
     router
@@ -92,33 +87,33 @@ class UserController(private val routePrefix: String)
               respond(
                 templates.render(
                   "user/signup",
-                  SignupVM(Array("Invalid email"))
-                )
+                  SignupVM(Array("Invalid email")),
+                ),
               )
             case Some(email) =>
               try {
-                val user = userService.createUser (
-                email,
-                PlainPassword (rawPassword),
+                val user = userService.createUser(
+                  email,
+                  PlainPassword(rawPassword),
                 )
 
-                auth.login (user.id)
+                auth.login(user.id)
 
-                redirect (route ("me") )
+                redirect(route("me"))
               } catch {
                 case _: EmailFormatError =>
-                  respond (
-                    templates.render (
+                  respond(
+                    templates.render(
                       "user/signup",
-                      SignupVM (Array ("Email format invalid") ),
+                      SignupVM(Array("Email format invalid")),
                     ),
                     statusCode = 400,
                   )
                 case _: WeakPasswordError =>
-                  respond (
-                    templates.render (
+                  respond(
+                    templates.render(
                       "user/signup",
-                      SignupVM (Array ("Password is too weak") ),
+                      SignupVM(Array("Password is too weak")),
                     ),
                     statusCode = 400,
                   )
@@ -127,7 +122,7 @@ class UserController(private val routePrefix: String)
         }
       }
 
-    val _ = auth.route[UserRole.Basic](_.get("/me")) { implicit (_, userCtx) =>
+    val _ = auth.route[UserRole.Basic](_.get("/me")) { (_, userCtx) ?=>
       val me = userService.getSelf(using userCtx)
 
       respond(
@@ -138,7 +133,7 @@ class UserController(private val routePrefix: String)
       )
     }
 
-    val _ = auth.route[UserRole.Admin](_.get("/admin")) { implicit (_, userCtx) =>
+    val _ = auth.route[UserRole.Admin](_.get("/admin")) { (_, userCtx) ?=>
       val me = userService.getSelf(using userCtx)
 
       respond(

@@ -1,6 +1,7 @@
 package gls.domain.shop
 
 import com.github.f4b6a3.ulid.Ulid
+
 import gls.domain.*
 
 opaque type ProductId = Ulid

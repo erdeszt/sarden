@@ -19,18 +19,17 @@ class SessionAuthManager(
 
   private val userIdSessionTag = "user_id"
 
-  val loggedInRedirectHandler: Handler[RoutingContext] = {
-    (context: RoutingContext) =>
-      if (context.session().get(userIdSessionTag) != null) {
-        context.redirect(loggedInHomeRoute)
-        ()
-      } else {
-        context.next()
-      }
+  val loggedInRedirectHandler: Handler[RoutingContext] = { (context: RoutingContext) =>
+    if (context.session().get(userIdSessionTag) != null) {
+      context.redirect(loggedInHomeRoute)
+      ()
+    } else {
+      context.next()
+    }
   }
 
   def route[Role <: UserRole: ClassTag](routeBuilder: Router => Route)(
-      routeHandler: (RoutingContext, UserCtx[Role]) => Unit,
+      routeHandler: (RoutingContext, UserCtx[Role]) ?=> Unit,
   )(using router: Router): Route = {
     routeBuilder(router).handler { context =>
       val sessionUserId = Option(context.session().get[Ulid](userIdSessionTag))
@@ -51,7 +50,7 @@ class SessionAuthManager(
             logger.info(
               s"Unauthorized access attempt for: ${context.request().path()} by User(${userId})",
             )
-            routeHandler(context, UserCtx[Role](UserId(userId)))
+            routeHandler(using context, UserCtx[Role](UserId(userId)))
           } else {
             context.redirect(loggedInHomeRoute)
             ()

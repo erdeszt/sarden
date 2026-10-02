@@ -4,12 +4,12 @@ import com.github.f4b6a3.ulid.Ulid
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+
 import gls.Templates
 import gls.domain.shop.*
 import gls.domain.user.UserRole
 
-class ShopController(private val routePrefix: String)
-    extends BaseController(routePrefix) {
+class ShopController(private val routePrefix: String) extends BaseController(routePrefix) {
 
   def createRoutes(
       vertx: Vertx,
@@ -47,7 +47,7 @@ class ShopController(private val routePrefix: String)
             respond(
               templates.render(
                 "shop/product",
-                product.toVM()
+                product.toVM(),
               ),
             )
         }
@@ -56,7 +56,7 @@ class ShopController(private val routePrefix: String)
       }
     }
 
-    val _ = auth.route[UserRole.Basic](_.post("/cart").handler(BodyHandler.create())) { implicit (routingCtx, _) =>
+    val _ = auth.route[UserRole.Basic](_.post("/cart").handler(BodyHandler.create())) { (routingCtx, _) ?=>
       val rawProductId = routingCtx.request().getFormAttribute("productId")
       val rawQuantity = routingCtx.request().getFormAttribute("quantity")
 
@@ -73,12 +73,17 @@ class ShopController(private val routePrefix: String)
       }
     }
 
-    val _ = auth.route[UserRole.Basic](_.get("/cart")) { implicit (_, _) =>
+    val _ = auth.route[UserRole.Basic](_.get("/cart")) { (_, _) ?=>
       val cart = shopService.getCart()
 
-      respond(templates.render("shop/cart", CartVM(cart.items.map { item =>
-        CartItemVM(item.product.toVM(), item.quantity.unwrap)
-      }.toArray)))
+      respond(
+        templates.render(
+          "shop/cart",
+          CartVM(cart.items.map { item =>
+            CartItemVM(item.product.toVM(), item.quantity.unwrap)
+          }.toArray),
+        ),
+      )
     }
 
     router
